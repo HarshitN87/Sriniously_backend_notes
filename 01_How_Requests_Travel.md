@@ -60,15 +60,62 @@ In 1983, **Paul Mockapetris** published RFCs 882 and 883, which defined the **Do
 When your device needs to resolve `api.instagram.com`, it follows a chain of lookups that cascades through this hierarchy. First, it checks its own **browser cache** — if you've visited Instagram recently, the answer might already be stored locally. If not, it checks the **operating system's DNS cache**. If that also misses, the request goes to your **ISP's recursive DNS resolver**, which is a server whose entire job is to resolve domain names on behalf of its customers. If the ISP's resolver doesn't have the answer cached either, it walks down the DNS hierarchy: asking a root server where `.com` lives, then asking the `.com` TLD server where `instagram.com` lives, and finally asking Instagram's authoritative DNS server for the actual IP address.
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#e3f2fd',
+    'primaryTextColor': '#0d47a1',
+    'primaryBorderColor': '#1976d2',
+    'lineColor': '#455a64',
+    'secondaryColor': '#f1f8e9',
+    'tertiaryColor': '#fff3e0',
+    'fontSize': '14px',
+    'fontFamily': 'verdana'
+  }
+} }%%
+
 flowchart LR
-    A["🖥️ Your Device"] -->|"Where is api.instagram.com?"| B["📁 Browser Cache"]
-    B -->|"Not found"| C["📁 OS Cache"]
-    C -->|"Not found"| D["🏢 ISP's DNS Resolver"]
-    D -->|"Not found"| E["🌍 Root DNS Server"]
-    E -->|".com lives here"| F["🌐 TLD DNS Server (.com)"]
-    F -->|"instagram.com lives here"| G["🏠 Authoritative DNS"]
-    G -->|"157.240.1.35"| D
-    D -->|"157.240.1.35"| A
+    %% Logical Grouping for Environmental Context
+    subgraph Client ["💻 Local Client Environment"]
+        direction LR
+        A["🖥️ Your Device"]
+        B[("📁 Browser Cache")]
+        C[("📁 OS Cache")]
+    end
+
+    subgraph ISP_Layer ["🏢 Service Provider"]
+        D{"🔍 ISP DNS Resolver"}
+    end
+
+    subgraph Global_DNS ["🌍 Global DNS Hierarchy"]
+        direction TB
+        E["👑 Root DNS Server"]
+        F["🌐 TLD DNS Server (.com)"]
+        G["🏠 Authoritative DNS"]
+    end
+
+    %% Step-by-Step Resolution Path
+    A -->|"1. api.instagram.com?"| B
+    B -->|"2. Cache Miss"| C
+    C -->|"3. Cache Miss"| D
+
+    %% Recursive Query Logic
+    D -.->|"4. Query Root"| E
+    E -.->|"5. Referral: .com"| F
+    F -.->|"6. Referral: Instagram"| G
+
+    %% Final Resolution Path
+    G ==>|"7. A Record Found"| D
+    D ==>|"8. IP: 157.240.1.35"| A
+
+    %% Professional Styling Classes
+    classDef clientNode fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#0d47a1;
+    classDef ispNode fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#33691e;
+    classDef globalNode fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100;
+
+    class A,B,C clientNode;
+    class D ispNode;
+    class E,F,G globalNode;
 ```
 
 The beauty of this system is caching. Each layer caches the answer for a configurable duration called the **TTL (Time To Live)**, set by the domain owner. This means the full recursive lookup only happens on the first request — subsequent requests hit the cache and resolve almost instantly. On a cache miss, DNS resolution typically takes 20 to 120 milliseconds. On a cache hit, it's nearly instantaneous.
@@ -86,15 +133,23 @@ The setup process is called the **three-way handshake**. Your device sends a **S
 
 ```mermaid
 sequenceDiagram
-    participant C as 🖥️ Your Device
-    participant S as 🖧 Instagram Server
+    autonumber
 
-    C->>S: SYN (Hey, I want to talk!)
-    Note right of S: Server receives SYN
-    S->>C: SYN-ACK (Sure, I'm ready too!)
-    Note left of C: Client receives SYN-ACK
-    C->>S: ACK (Great, let's go!)
-    Note over C,S: ✅ Connection Established!
+    participant C as Your Device
+    participant S as Instagram Server
+
+    Note over C, S: TCP 3-Way Handshake Initialization
+
+    C->>+S: SYN (Synchronize)
+    Note right of S: Server allocates resources\nInitial Seq No: X
+
+    S-->>-C: SYN-ACK (Sync-Acknowledge)
+    Note left of C: Client verifies response\nAck No: X + 1 | Seq No: Y
+
+    C->>S: ACK (Acknowledge)
+    Note right of S: Handshake verified\nAck No: Y + 1
+
+    Note over C, S: Connection State: ESTABLISHED
 ```
 
 > [!IMPORTANT]

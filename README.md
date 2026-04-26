@@ -57,4 +57,3 @@ flowchart TD
 
 ---
 
-*Notes by Harshit — Built with ❤️ while learning backend development*
