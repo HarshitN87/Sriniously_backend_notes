@@ -2,7 +2,7 @@
 
 > **"Backend can be compressed into one sentence — the process we use to deal with data."**
 
-Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layered architecture, request lifecycles, cookies, authentication protocols, database management systems, caching paradigms, and REST API design.
+Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layered architecture, request lifecycles, cookies, authentication protocols, database management systems, caching paradigms, REST API design, background jobs, full-text search engines, and fault-tolerant error boundaries.
 
 ---
 
@@ -22,6 +22,9 @@ Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layer
 | 10 | [🏛️ The REST Covenant](./10_REST_APIs.md) | Roy Fielding's PhD constraints, plural nouns, custom CRUD operations, cursor pagination |
 | 11 | [💾 The Great Ledger: DBMS & Persistence](./11_Database_Management_Systems.md) | WAL logs, SQL vs NoSQL, Postgres supremacy, Up/Down migrations, parameterized queries, triggers, indexes |
 | 12 | [⚡ The Echo Chamber: Caching & Redis](./12_Caching_and_In_Memory_Databases.md) | Latency spectrum, CDN caching, Redis in-memory storage, cache strategies, LRU/LFU/TTL eviction |
+| 13 | [🧵 The Silent Loom: Asynchronous Task Queues](./13_Background_Jobs.md) | Producers, brokers, worker scaling, visibility timeouts, at-least-once delivery, idempotency rules |
+| 14 | [🔍 The Inverted Library: Full-Text Search](./14_Full_Text_Search.md) | Relational LIKE bottlenecks, inverted indices, BM25 scoring algorithm, Distributed Lucene sharding |
+| 15 | [🛡️ The Resilient Bastion: Error Handling](./15_Error_Handling.md) | Logic/DB/API failures, readiness/liveness health checks, OWASP secure authentication bounds, global middleware handlers |
 
 ---
 
@@ -42,6 +45,9 @@ flowchart TD
     K --> L["🏛️ REST API Design Covenant"]
     L --> M["💾 Database Systems & Indexes"]
     M --> N["⚡ In-Memory Cache (Redis)"]
+    N --> O["🧵 Asynchronous Queues"]
+    O --> P["🔍 Full-Text Search (Lucene)"]
+    P --> Q["🛡️ Fault-Tolerant Error Boundaries"]
 ```
 
 ---
@@ -67,4 +73,4 @@ flowchart TD
 
 ---
 
-Curated & Written by the Antigravity Engine in the Year of 2026.
+Curated & Written by harshit and some llms in the Year of 2026.
