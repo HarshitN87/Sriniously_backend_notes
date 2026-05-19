@@ -2,7 +2,7 @@
 
 > **"Backend can be compressed into one sentence — the process we use to deal with data."**
 
-Comprehensive notes on backend fundamentals, HTTP, routing, serialization, and more.
+Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layered architecture, request lifecycles, cookies, authentication protocols, database management systems, caching paradigms, and REST API design.
 
 ---
 
@@ -17,6 +17,11 @@ Comprehensive notes on backend fundamentals, HTTP, routing, serialization, and m
 | 5 | [📤 HTTP Responses, Status Codes & More](./05_HTTP_Responses.md) | Status codes (1xx-5xx), caching, content negotiation, compression, keep-alive, TLS/SSL |
 | 6 | [🛤️ Routing](./06_Routing.md) | Static/dynamic routes, query vs route params, nested routes, versioning, catch-all |
 | 7 | [🔄 Serialization & Deserialization](./07_Serialization.md) | The language barrier problem, JSON, XML, Protobuf, MessagePack, security |
+| 8 | [⚙️ Server-Side Architecture & Middleware](./08_Architecture_and_Middleware.md) | MVC, Controller-Service-Repository separation, validations, request lifecycle, middleware ordering |
+| 9 | [🔒 Authentication, Authorization & Identity](./09_Authentication_and_Authorization.md) | Stateful sessions, stateless JWT, cookies, hybrid authentication, OAuth 2.0 delegation, OIDC |
+| 10 | [🏛️ The REST Covenant](./10_REST_APIs.md) | Roy Fielding's PhD constraints, plural nouns, custom CRUD operations, cursor pagination |
+| 11 | [💾 The Great Ledger: DBMS & Persistence](./11_Database_Management_Systems.md) | WAL logs, SQL vs NoSQL, Postgres supremacy, Up/Down migrations, parameterized queries, triggers, indexes |
+| 12 | [⚡ The Echo Chamber: Caching & Redis](./12_Caching_and_In_Memory_Databases.md) | Latency spectrum, CDN caching, Redis in-memory storage, cache strategies, LRU/LFU/TTL eviction |
 
 ---
 
@@ -32,6 +37,11 @@ flowchart TD
     C --> G["🔒 SSL / TLS / HTTPS"]
     D --> H["🛤️ Routing"]
     H --> I["🔄 Serialization"]
+    I --> J["⚙️ Server Architecture & Middleware"]
+    J --> K["🔒 Authentication & Security Clearance"]
+    K --> L["🏛️ REST API Design Covenant"]
+    L --> M["💾 Database Systems & Indexes"]
+    M --> N["⚡ In-Memory Cache (Redis)"]
 ```
 
 ---
@@ -39,13 +49,13 @@ flowchart TD
 ## ⚡ Quick Reference
 
 ### HTTP Methods Cheat Sheet
-| Method | Action | Idempotent? | Has Body? |
-|---|---|---|---|
-| `GET` | Read | ✅ | ❌ |
-| `POST` | Create | ❌ | ✅ |
-| `PUT` | Replace | ✅ | ✅ |
-| `PATCH` | Partial Update | ❌ | ✅ |
-| `DELETE` | Remove | ✅ | ❌ |
+| Method | Action | Idempotent? | Has Body? | Safe? |
+|---|---|---|---|---|
+| `GET` | Read | ✅ | ❌ | ✅ |
+| `POST` | Create | ❌ | ✅ | ❌ |
+| `PUT` | Replace | ✅ | ✅ | ❌ |
+| `PATCH` | Partial Update | ❌ | ✅ | ❌ |
+| `DELETE` | Remove | ✅ | ❌ | ❌ |
 
 ### Status Codes Cheat Sheet
 | Range | Category | Common Codes |
@@ -57,3 +67,4 @@ flowchart TD
 
 ---
 
+Curated & Written by the Antigravity Engine in the Year of 2026.
