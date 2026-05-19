@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter IV: HTTP Methods & CORS — Sriniously Backend</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Side Navigation for Quick Jumps -->
+  <div class="archivist-nav">
+    <a href="index.html" class="archivist-dot" data-title="The Archives"></a>
+    <a href="01_how_requests_travel.html" class="archivist-dot" data-title="Chapter I: Request Travel"></a>
+    <a href="02_what_is_backend.html" class="archivist-dot" data-title="Chapter II: The Unseen Machinery"></a>
+    <a href="03_http_deep_dive.html" class="archivist-dot" data-title="Chapter III: The Digital Grammar"></a>
+    <a href="04_http_methods.html" class="archivist-dot active" data-title="Chapter IV: The Seven Verbs"></a>
+    <a href="05_http_responses.html" class="archivist-dot" data-title="Chapter V: The Royal Decrees"></a>
+    <a href="06_routing.html" class="archivist-dot" data-title="Chapter VI: The Grand Switchboard"></a>
+    <a href="07_serialization.html" class="archivist-dot" data-title="Chapter VII: The Babel Fish"></a>
+  </div>
+
+  <div class="container">
+    <header class="chapter-header">
+      <div class="chapter-number">Chapter the Fourth</div>
+      <h1>HTTP Methods & The CORS Protocol</h1>
+      <div class="chapter-epigraph">"An examination of the active verbs of the digital tongue—GET, POST, PUT, and DELETE—coupled with a breakdown of idempotency and the security boundary of CORS."</div>
+      
+      <div class="divider-symmetrical">
+        <span class="divider-symbol">♦ ✦ ♦</span>
+      </div>
+    </header>
+
+    <main>
+      <p class="intro-paragraph">
+        Consider the physical act of holding a pen and dragging its graphite tip across a piece of paper to write your signature. On a purely mechanical level, the action is identical. It is the application of friction to wood pulp, guided by the neural circuits of your hand. But the <strong>semantic verb</strong> attached to this act determines the legal and material structure of the universe.
+      </p>
+
+      <p>
+        If you drag the pen across a guest book at a wedding, you are performing a passive, non-binding record of attendance. It has no side effects. It alters no rights. (This is a <strong>GET</strong>). If you drag the pen across a bank check for ten thousand dollars, you are creating a brand-new financial instrument, generating a debit token that will cascade through the clearing houses. (This is a <strong>POST</strong>). If you drag the pen across your previous last will and testament to replace it with a brand-new document containing entirely new beneficiaries, you are executing a complete, destructive overwrite of state. (This is a <strong>PUT</strong>). If you drag the pen through a single clause of an existing contract to scratch out a spelling error while leaving the other thirty pages intact, you are performing a localized, partial mutation of state. (This is a <strong>PATCH</strong>). If you drag the pen across a deed of release, declaring that a debt is cancelled and the record is formally expunged from the archives, you are executing a deletion. (This is a <strong>DELETE</strong>).
+      </p>
+
+      <p>
+        The physical universe is indifferent to these differences. To the paper, it is all just ink and friction. But to the human coordination systems that stand behind the paper, the verb is everything. If you treat a bank check as a guest book—signing it twenty times because you like the feeling—you will bankrupt yourself. If you treat a will as a minor scratch-out, you will trigger decades of litigation.
+      </p>
+
+      <p>
+        Let us look at a second, more everyday analogy: the <strong>Elevator Button</strong> vs. the <strong>Slot Machine Lever</strong>. When you enter an elevator and press the button for the fifth floor, you are executing an <strong>idempotent operation</strong>. You press the "5" button once, and the elevator moves to the fifth floor. If you get impatient and hammer the "5" button ten more times, the elevator does not take you to the fiftieth floor. It does not double its speed. It does not charge you ten times. It simply registers that you wish to be on the fifth floor, a destination it has already committed to. Pressing the button one time or one hundred times produces the <strong>exact same final state</strong>.
+      </p>
+
+      <p>
+        Now, contrast this with the lever of a slot machine at a casino in Las Vegas. Each pull of the lever is a <strong>non-idempotent operation</strong>. Pull it once, and you spend one coin and roll the gears. Pull it three times, and you spend three coins and roll the gears three times. The state of your wallet, the state of the machine's memory, and the state of the casino's revenue matches the exact number of times you pulled the lever. If a network glitch pauses the universe and replay-attacks your lever pulls, you will be ruined.
+      </p>
+
+      <p>
+        These two concepts—<strong>Semantic Verbs</strong> and <strong>Idempotency</strong>—are the twin pillars of <strong>HTTP Methods</strong>. When we build backends, we are not merely receiving bytes; we are executing human intentions. If a client sends an HTTP request, the URL (`/v1/posts/928374`) acts as the noun—identifying the target resource. But the HTTP method acts as the verb, declaring the semantic rules, the caching boundaries, and the mathematical safety profiles of the transaction.
+      </p>
+
+      <h2>1. The Grammar of REST vs the Imperative of RPC</h2>
+      <p>
+        To understand the semantic design of HTTP verbs, we must first contrast two competing philosophies of API design: <strong>RPC (Remote Procedure Call)</strong> and <strong>REST (Representational State Transfer)</strong>.
+      </p>
+      <p>
+        In an RPC design, the URL represents an *action* or a *command*. The API paths look like verbs: <code>POST /api/deleteUser</code> or <code>POST /api/updateAddress</code>. In this imperative design, we rely almost exclusively on the <code>POST</code> method, using the URL to specify what action to run. It is simple, but as your system grows to thousands of endpoints, maintaining a unique verb path for every single operation becomes a chaotic naming puzzle.
+      </p>
+      <p>
+        <strong>REST</strong> (formalized by Roy Fielding in 2000) flips this paradigm. In a RESTful API, the URL must strictly represent a <strong>noun</strong>—a unique physical resource. The URL path is clean and stable: <code>/api/users/42</code> or <code>/api/posts/928374</code>. To dictate what action to perform on that noun, we do not edit the URL. Instead, we change the <strong>HTTP method verb</strong> at the protocol level.
+      </p>
+      <p>
+        If we want to read the user, we send <code>GET /api/users/42</code>. If we want to replace the user, we send <code>PUT /api/users/42</code>. If we want to delete them, we send <code>DELETE /api/users/42</code>. This decoupling creates a clean, elegant, self-describing API structure where the URL maps stable nouns, and the HTTP methods define the active verbs of your system.
+      </p>
+
+      <h2>2. Taxonomy of the Active Verbs</h2>
+      <p>
+        Let us dissect the primary verbs of the digital tongue:
+      </p>
+      <ul>
+        <li><strong>GET</strong>: Requests a representation of the specified resource. GET is strictly a <strong>Safe Method</strong>—it is legally forbidden from mutating the server’s state. A GET request must only retrieve data; if a developer makes a GET request increment a counter in their database, they are violating the protocol contract, leading to search engine bots accidentally deleting databases when crawling site links.</li>
+        <li><strong>HEAD</strong>: Identical to a GET request, but with a critical optimization: the server must <strong>only return the headers</strong>, completely omitting the response body. Why is this useful? Imagine you want to download a massive 5GB zip file. Before wasting your bandwidth, you send a HEAD request. You inspect the <code>Content-Length</code> header to check the size, or the <code>Last-Modified</code> header to verify if your local cached copy is out of date. It is a highly efficient way to inspect a resource without downloading the cargo.</li>
+        <li><strong>POST</strong>: Submits an entity to the specified resource, often causing a change in state or side effects on the server (like creating a new record in a database or charging a credit card). POST is neither safe nor idempotent.</li>
+        <li><strong>PUT</strong>: Replaces all current representations of the target resource with the request payload. PUT is a <strong>total replacement</strong>. If a user resource has ten columns, and you send a PUT request containing only a new name, the other nine columns must be set to null or default values. PUT is mathematically idempotent.</li>
+        <li><strong>PATCH</strong>: Applies partial modifications to a resource. Unlike PUT, PATCH is a <strong>differential update</strong>. If you send a PATCH request containing only a new name, the server updates only the name column, leaving the other nine columns completely untouched. PATCH can be implemented in a non-idempotent manner.</li>
+        <li><strong>DELETE</strong>: Deletes the specified resource. It is mathematically idempotent.</li>
+        <li><strong>OPTIONS</strong>: Retrieves the communication options supported by the target server. It acts as the diplomatic scout, which we will inspect during our CORS audit.</li>
+      </ul>
+
+      <p>
+        Let us look at the deep engineering differences between <strong>PUT and PATCH</strong>. Novice developers often use them interchangeably, but their logical differences inside the database layer are immense. When you run a <strong>PUT</strong> query, the server expects a complete resource object. It compiles an insert-or-replace statement: <code>UPDATE users SET name = $1, age = $2, email = $3 WHERE id = $4;</code>.
+      </p>
+      <p>
+        If the client omitted the <code>email</code> variable in the PUT payload, the server binds <code>null</code> to $3, wiping out the user's email address from the database!
+      </p>
+      <p>
+        To run a <strong>PATCH</strong> query, the server must construct a <strong>dynamic update query</strong> at runtime, updating only the columns that were explicitly sent:
+      </p>
+      <pre><code>// Dynamic compilation in Node.js
+const fields = Object.keys(req.body).map((key, i) => `${key} = $${i + 1}`).join(', ');
+const query = `UPDATE users SET ${fields} WHERE id = $${fields.length + 1}`;</code></pre>
+      <p>
+        This <strong>Dynamic SQL compilation</strong> requires additional processing overhead on the server, but it protects your database columns against accidental wipes, making PATCH the ideal choice for partial forms and settings pages.
+      </p>
+
+      <!-- Symmetrical Taxonomy SVG Grid -->
+      <div class="svg-diagram-container">
+        <div class="svg-diagram-title">Plate IX: The Taxonomy of HTTP Verbs</div>
+        <svg class="svg-diagram" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+          <!-- Frame -->
+          <rect x="10" y="10" width="580" height="220" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+
+          <!-- GET Card -->
+          <rect x="30" y="30" width="160" height="80" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="110" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">GET</text>
+          <text x="110" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#5D8E87">SAFE & IDEMPOTENT</text>
+          <text x="110" y="90" font-size="7.5" text-anchor="middle">Retrieves resource only</text>
+
+          <!-- POST Card -->
+          <rect x="220" y="30" width="160" height="80" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="300" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">POST</text>
+          <text x="300" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#E38676">NOT IDEMPOTENT</text>
+          <text x="300" y="90" font-size="7.5" text-anchor="middle">Creates new resources</text>
+
+          <!-- PUT Card -->
+          <rect x="410" y="30" width="160" height="80" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="490" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">PUT</text>
+          <text x="490" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#5D8E87">IDEMPOTENT</text>
+          <text x="490" y="90" font-size="7.5" text-anchor="middle">Replaces entire resource</text>
+
+          <!-- DELETE Card -->
+          <rect x="120" y="130" width="160" height="80" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="200" y="155" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">DELETE</text>
+          <text x="200" y="175" class="mono" font-size="8.5" text-anchor="middle" fill="#5D8E87">IDEMPOTENT</text>
+          <text x="200" y="190" font-size="7.5" text-anchor="middle">Deletes target resource</text>
+
+          <!-- PATCH Card -->
+          <rect x="320" y="130" width="160" height="80" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="400" y="155" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">PATCH</text>
+          <text x="400" y="175" class="mono" font-size="8.5" text-anchor="middle" fill="#E29E3C">PARTIAL UPDATE</text>
+          <text x="400" y="190" font-size="7.5" text-anchor="middle">Updates specific fields</text>
+        </svg>
+      </div>
+
+      <h2>3. The Laws of Idempotency: The Elevator and the Vending Machine</h2>
+      <p>
+        Let us formalize the law of <strong>Idempotency</strong>. In mathematics, an operation is idempotent if applying it multiple times yields the exact same outcome as applying it once:
+        $$f(f(x)) = f(x)$$
+      </p>
+      <p>
+        In HTTP, a method is idempotent if making multiple identical requests results in the <strong>exact same server state</strong> as making a single request. To understand this, let us explore two physical analogies: the <strong>Elevator Button</strong> and the <strong>Vending Machine Coin Slot</strong>.
+      </p>
+      <p>
+        Imagine you are standing on the ground floor of a hotel, wishing to go to floor 3. You press the "Up" button once. The elevator light turns on, and the car begins to descend. While waiting, you get bored and press the "Up" button 50 more times. Does the elevator car descend 50 times faster? Does it arrive at floor 3 fifty times? No. The state of the system is binary: either the elevator is called or it is not. Pressing the button 50 times results in the exact same physical outcome as pressing it once. The elevator button is <strong>Idempotent</strong> (representing <code>GET</code>, <code>PUT</code>, or <code>DELETE</code>).
+      </p>
+      <p>
+        Now imagine you are standing in front of a soft drink vending machine. You slide a coin into the slot and press the "Cola" button once. The machine clinks, and one cold can of cola drops into the tray. Now, you slide another coin in and press the button nine more times. Does the machine dispense only one can? No. It dispenses ten separate cans, emptying your pocket and the machine’s shelves. Every press of the button mutates the state, altering your balance and the stock count. The coin slot is <strong>Non-Idempotent</strong> (representing <code>POST</code>).
+      </p>
+      <p>
+        Let us analyze a common point of confusion: why is <code>DELETE</code> idempotent? If you send <code>DELETE /api/posts/42</code>, the server deletes post 42 and returns a `200 OK` or `204 No Content` status. If you send the exact same delete request a second time, post 42 is already gone. The server looks at the database, finds nothing, and returns a `404 Not Found` response.
+      </p>
+      <p>
+        The *response code* is different (200 vs 404), but the <strong>state of the server's database is identical</strong>. In both cases, post 42 does not exist. Because the final state of the database remains unchanged between request #1 and request #100, DELETE is completely idempotent.
+      </p>
+      <p>
+        Do not forget that we must handle non-idempotent operations carefully in high-reliability networks. Imagine a customer clicking "Buy Now" on a Stripe checkout page. The browser fires a non-idempotent `POST` request to charge their credit card. The server receives the request, charges the card, and fires back a success packet. But in mid-ocean, a fiber repeater drops the returning success packet.
+      </p>
+      <p>
+        To the browser, the request timed out. The user, seeing no confirmation, clicks the "Buy Now" button again. Without guards, the server would charge their card a second time. To prevent this, Stripe utilizes <strong>Idempotency Keys</strong>. Before firing the request, the client generates a unique UUID (e.g., <code>Idempotency-Key: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d</code>) and attaches it to the HTTP headers.
+      </p>
+      <p>
+        When the server receives the request, it checks a fast Redis cache. If the key does not exist, the server executes the transaction and stores the result against that key. If a second request arrives with the *exact same idempotency key*, the server does not run the billing code again. It simply reads the cached result from Redis and hands it back, ensuring the customer is only billed once, even if they hit submit fifty times.
+      </p>
+
+      <h2>4. Same-Origin Policy (SOP) and CORS: The Cautious Diplomats</h2>
+      <p>
+        Let us shift our focus to the browser's security boundaries. The browser is a shared arena where you run multiple tabs simultaneously: your bank portal in one tab, and a sketchy movie site in another. In 1995, engineers at Netscape realized that this shared arena was highly dangerous. If the movie site could run a script that queried your bank portal in the background, it could read your bank's cookies, steal your private balances, or transfer funds.
+      </p>
+      <p>
+        To prevent this, Netscape Navigator 2.0 introduced the <strong>Same-Origin Policy (SOP)</strong>. SOP dictates that a script running on one origin is strictly forbidden from reading or writing resources loaded from a different origin. An <strong>Origin</strong> is defined as a strict <strong>3-tuple</strong>:
+        $$\text{Origin} = (\text{Protocol}, \text{Host}, \text{Port})$$
+      </p>
+      <p>
+        If any of these three variables differ, the resources are cross-origin:
+      </p>
+      <ul>
+        <li><code>https://my-bank.com</code> and <code>http://my-bank.com</code> are cross-origin (different Protocol).</li>
+        <li><code>https://my-bank.com</code> and <code>https://api.my-bank.com</code> are cross-origin (different Host).</li>
+        <li><code>https://my-bank.com:443</code> and <code>https://my-bank.com:8080</code> are cross-origin (different Port).</li>
+      </ul>
+      <p>
+        While SOP protected users, it created massive headaches for early developers. If your frontend was hosted on <code>https://my-app.com</code> and your API lived on <code>https://api.my-app.com</code>, the browser blocked your frontend from making AJAX calls to your own backend!
+      </p>
+      <p>
+        To bypass this boundary, developers used a clever smuggling route called <strong>JSONP (JSON with Padding)</strong>. While SOP blocked AJAX requests, it made an explicit exception for the <strong><code>&lt;script&gt;</code> tag</strong>, because sites needed to load libraries from external CDNs.
+      </p>
+      <p>
+        A developer would inject a script tag dynamically into their page: <code>&lt;script src="https://api.my-app.com/users?callback=handleUserData"&gt;&lt;/script&gt;</code>. The backend, seeing the callback query, would return the JSON data wrapped inside a JavaScript function call: <code>handleUserData({"username": "harshit"});</code>.
+      </p>
+      <p>
+        When the browser finished downloading the script, it executed the callback function, allowing the frontend to read the data. While JSONP worked, it was <strong>extremely insecure</strong>. It was strictly limited to GET requests, and it meant allowing third-party servers to execute arbitrary JavaScript code inside your page, exposing you to massive Cross-Site Scripting (XSS) risks.
+      </p>
+      <p>
+        To replace this smuggling, the W3C formalized <strong>CORS (Cross-Origin Resource Sharing)</strong>. CORS is a protocol that allows servers to explicitly declare who is allowed to visit them. Under CORS, requests are divided into two categories:
+      </p>
+      <ol>
+        <li><strong>Simple Requests</strong>: Safe methods (like GET or POST with standard form types) that do not carry custom headers. The browser sends the request directly, adding an <code>Origin</code> header. The server replies. The browser inspects the response headers: if it does not find <code>Access-Control-Allow-Origin: *</code> or a matching origin, the browser blocks the JavaScript code from reading the response.</li>
+        <li><strong>Preflighted Requests</strong>: Any request that uses non-standard methods (like PUT, DELETE, PATCH) or custom headers (like <code>Authorization</code>). The browser is terrified that these requests might perform destructive mutations on the server. Before sending the actual request, the browser dispatches a OPTIONS Preflight Request.</li>
+      </ol>
+
+      <!-- CORS Preflight sequence SVG -->
+      <div class="svg-diagram-container">
+        <div class="svg-diagram-title">Plate X: The CORS Preflight OPTIONS Handshake</div>
+        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Timelines -->
+          <line x1="100" y1="30" x2="100" y2="180" stroke="#1B2A47" stroke-width="3"/>
+          <line x1="400" y1="30" x2="400" y2="180" stroke="#1B2A47" stroke-width="3"/>
+ 
+          <text x="100" y="20" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">Browser</text>
+          <text x="400" y="20" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">Server</text>
+ 
+          <!-- Preflight OPTIONS -->
+          <path d="M 100,50 L 400,80" stroke="#E38676" stroke-width="1.5" fill="none"/>
+          <polygon points="393,76 400,80 392,83" fill="#E38676"/>
+          <rect x="150" y="45" width="200" height="20" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1" rx="2"/>
+          <text x="250" y="58" class="mono" font-size="8" text-anchor="middle">OPTIONS (Preflight Check)</text>
+ 
+          <!-- Preflight Response -->
+          <path d="M 400,80 L 100,110" stroke="#5D8E87" stroke-width="1.5" fill="none"/>
+          <polygon points="108,107 100,110 107,115" fill="#5D8E87"/>
+          <rect x="150" y="85" width="200" height="20" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1" rx="2"/>
+          <text x="250" y="98" class="mono" font-size="8" text-anchor="middle" fill="#5D8E87">Access-Control-Allow-Origin: *</text>
+ 
+          <!-- Actual Request -->
+          <path d="M 100,130 L 400,160" stroke="#E29E3C" stroke-width="2" fill="none"/>
+          <polygon points="393,156 400,160 392,163" fill="#E29E3C"/>
+          <rect x="150" y="125" width="200" height="20" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1" rx="2"/>
+          <text x="250" y="138" class="mono" font-size="8" text-anchor="middle">PUT /api/posts/42</text>
+        </svg>
+      </div>
+
+      <p>
+        The preflight scout carries three administrative query headers:
+      </p>
+      <ul>
+        <li><code>Origin: https://my-app.com</code></li>
+        <li><code>Access-Control-Request-Method: PUT</code></li>
+        <li><code>Access-Control-Request-Headers: Authorization</code></li>
+      </ul>
+      <p>
+        The server receives this OPTIONS scout, evaluates whether <code>https://my-app.com</code> is a trusted origin, and replies with standard CORS allow headers:
+      </p>
+      <ul>
+        <li><code>Access-Control-Allow-Origin: https://my-app.com</code></li>
+        <li><code>Access-Control-Allow-Methods: GET, POST, PUT, DELETE</code></li>
+        <li><code>Access-Control-Allow-Headers: Authorization</code></li>
+        <li><code>Access-Control-Max-Age: 86400</code> (caches the preflight decision for 24 hours)</li>
+      </ul>
+      <p>
+        Only after this preflight check succeeds does the browser launch the actual <code>PUT</code> request containing your critical data payload.
+      </p>
+      <p>
+        Let us clarify a fundamental security concept: <strong>CORS is strictly a browser-enforced boundary.</strong> CORS is *not* a firewall on the server that blocks incoming requests. If you make a request to a server using a terminal tool like `curl` or a backend python script, the server does not perform any CORS checks. The server processes the query and returns the bytes normally.
+      </p>
+      <p>
+        CORS only exists inside the browser sandbox, where the browser checks the headers *after* receiving the reply to decide whether to expose the data to your JavaScript. Therefore, CORS does not protect your server's endpoints from being scraped or hammered by bots; it only protects your users from having their browser sessions hijacked by malicious sites.
+      </p>
+
+      <h2>5. Key Takeaways</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>HTTP Method</th>
+              <th>Safe?</th>
+              <th>Idempotent?</th>
+              <th>Semantics (REST)</th>
+              <th>Preflight Trigger?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>GET</strong></td>
+              <td>✅ Yes</td>
+              <td>✅ Yes</td>
+              <td>Retrieves representation of resource</td>
+              <td>❌ No (Simple request)</td>
+            </tr>
+            <tr>
+              <td><strong>POST</strong></td>
+              <td>❌ No</td>
+              <td>❌ No</td>
+              <td>Creates new resource / charges cards</td>
+              <td>❌ No (if standard content type)</td>
+            </tr>
+            <tr>
+              <td><strong>PUT</strong></td>
+              <td>❌ No</td>
+              <td>✅ Yes</td>
+              <td>Completely replaces target resource</td>
+              <td>✅ Yes</td>
+            </tr>
+            <tr>
+              <td><strong>PATCH</strong></td>
+              <td>❌ No</td>
+              <td>❌ No (usually)</td>
+              <td>Partially modifies target resource</td>
+              <td>✅ Yes</td>
+            </tr>
+            <tr>
+              <td><strong>DELETE</strong></td>
+              <td>❌ No</td>
+              <td>✅ Yes</td>
+              <td>Deletes target resource</td>
+              <td>✅ Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+
+    <footer class="chapter-footer">
+      <div class="nav-buttons-container">
+        <a href="03_http_deep_dive.html" class="vintage-button"><- Chapter III</a>
+        <a href="05_http_responses.html" class="vintage-button mint">Chapter V -></a>
+      </div>
+      <div class="divider-symmetrical">
+        <span class="divider-symbol">♦ ✦ ♦</span>
+      </div>
+      <div class="curator-credits">Curated & Written by Antigravity in the Year of 2026</div>
+    </footer>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter III: HTTP: The Language of the Web — Sriniously Backend</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Side Navigation for Quick Jumps -->
+  <div class="archivist-nav">
+    <a href="index.html" class="archivist-dot" data-title="The Archives"></a>
+    <a href="01_how_requests_travel.html" class="archivist-dot" data-title="Chapter I: Request Travel"></a>
+    <a href="02_what_is_backend.html" class="archivist-dot" data-title="Chapter II: The Unseen Machinery"></a>
+    <a href="03_http_deep_dive.html" class="archivist-dot active" data-title="Chapter III: The Digital Grammar"></a>
+    <a href="04_http_methods.html" class="archivist-dot" data-title="Chapter IV: The Seven Verbs"></a>
+    <a href="05_http_responses.html" class="archivist-dot" data-title="Chapter V: The Royal Decrees"></a>
+    <a href="06_routing.html" class="archivist-dot" data-title="Chapter VI: The Grand Switchboard"></a>
+    <a href="07_serialization.html" class="archivist-dot" data-title="Chapter VII: The Babel Fish"></a>
+  </div>
+
+  <div class="container">
+    <header class="chapter-header">
+      <div class="chapter-number">Chapter the Third</div>
+      <h1>HTTP: The Language of the Web</h1>
+      <div class="chapter-epigraph">"A deep dive into the grammatical rules of the web, exploring client-server dynamics, HTTP headers, the evolution of message formats, and the extensible metadata system."</div>
+      
+      <div class="divider-symmetrical">
+        <span class="divider-symbol">♦ ✦ ♦</span>
+      </div>
+    </header>
+
+    <main>
+      <p class="intro-paragraph">
+        In September of 1793, the <strong>Earl of Macartney</strong> arrived at the summer palace of the <strong>Qianlong Emperor</strong> in Rehe, bearing hot-air balloons, pocket watches, and a letter from King George III. His mission was simple: open trade between the British Empire and the Qing Dynasty. But before he could even present his balloons, the negotiation ground to a screeching halt over a single, highly contested question of physical grammar: the <strong>Kowtow</strong>.
+      </p>
+
+      <p>
+        In the diplomatic grammar of the Qing court, the kowtow—kneeling three times and touching one's forehead to the floor nine times—was an absolute prerequisite. It was the physical serialization format of respect, proving that the visitor acknowledged the Emperor as the Son of Heaven. But to Macartney, kneeling was a sign of religious worship reserved strictly for God. In British diplomatic grammar, one bowed, and perhaps kissed the hand of the sovereign. Macartney offered to kowtow only if a Chinese official of equal rank did the same before a portrait of King George III. The Qing court refused, viewing this as an absurd, syntax-breaking demand. Macartney eventually performed a modified British bow; the Emperor, insulted by what he saw as incomplete, corrupted syntax, rejected the trade treaty.
+      </p>
+
+      <p>
+        Let us look at a second, more immediate tragedy of corrupted grammar: the <strong>Charge of the Light Brigade</strong> in 1854. During the Battle of Balaclava, Lord Raglan saw Russian soldiers preparing to carry off captured Turkish guns on the heights. He scribbled a brief, urgent order to Lord Lucan: <em>"Lord Raglan wishes the cavalry to advance rapidly to the front, and try to prevent the enemy carrying away the guns."</em> When the messenger, Captain Nolan, delivered the note to Lucan, they were standing in a valley. Lucan could not see the heights; the only guns visible to him were a battery of Russian artillery at the far end of the valley, flanked by cavalry and infantry.
+      </p>
+
+      <p>
+        Lucan, confused by the note, asked Nolan which guns Raglan meant. Nolan, impatient and arrogant, gestured vaguely toward the end of the valley and snapped: <em>"There, my Lord, is your enemy! There are your guns!"</em> Lucan interpreted Raglan's verb "advance" through Nolan's physical gesture. He ordered the Light Brigade to charge straight down the throat of the Russian valley. Of the six hundred and seven cavalrymen who rode out, only half returned. The disaster occurred not because the horses were slow, or because the soldiers were cowards, but because the <strong>grammatical envelope of the message</strong> lacked a shared, deterministic dictionary. The word "guns" mapped to one coordinate in Raglan's mind and a completely different coordinate in Lucan's mind, and the protocol had no header fields to resolve the ambiguity.
+      </p>
+
+      <p>
+        These are not isolated historical curiosities. They are examples of the <strong>Grammatical Coordination Problem</strong>—a mathematical truth that applies to all communicating agents: <strong>If two independent systems try to exchange state without a rigid, deterministic, and universally agreed-upon protocol, their interactions will inevitably slide into corruption, misunderstanding, and systemic failure.</strong> When a web browser in Mumbai tries to communicate with a server in San Francisco, it is facing the exact same problem that broke Macartney at Rehe. The browser and the server are separated by miles of noisy wire, different operating systems, and different programming languages. If the browser sends a raw stream of characters, the server will look at it with absolute amnesia. To solve this, we rely on the <strong>HyperText Transfer Protocol (HTTP)</strong>. Formalized by <strong>Tim Berners-Lee</strong> at CERN in 1989, HTTP is the diplomatic grammar of the web.
+      </p>
+
+      <h2>1. The Epistemology of Statelessness</h2>
+      <p>
+        To appreciate the architectural design of HTTP, we must first understand its defining philosophical trait: <strong>statelessness</strong>. HTTP is a stateless protocol. This means that every single request is evaluated as a completely independent, sovereign transaction. The server does not hold any memory of past transactions. If a browser requests a page, and then requests a second page a millisecond later, the server looks at the second request with absolute amnesia. It has no idea that both requests came from the same human finger.
+      </p>
+      <p>
+        To a novice developer, statelessness seems like an absurd limitation. If the server cannot remember who we are, how do we build dynamic shopping carts or log users into accounts? The answer is that we must explicitly attach identity documents (like Session IDs, Cookies, or JWTs) to *every single outgoing request*.
+      </p>
+      <p>
+        While this introduces a small amount of repetition, the architectural benefits of statelessness are <strong>monumental for horizontal scaling</strong>. If a server was "stateful"—holding the user's active session state in its own local memory—your system would be locked to a single physical machine. If you spun up a load balancer and routed a stateful user's second request to a different server, the new server would say: "I do not have your session file in my RAM; you must log in again."
+      </p>
+      <p>
+        To prevent this, you would have to build complex session replication systems across your entire server fleet, creating a massive performance bottleneck. In a stateless system, because every request carries its own authentication credentials, the load balancer can route requests to *any* server in the network. If Server A gets busy, we can route the user’s next click to Server B or Server C without any friction. This decoupling is what allows modern cloud platforms to scale to billions of concurrent visitors instantly, simply by spinning up identical, stateless servers in response to traffic surges.
+      </p>
+
+      <h2>2. The Chronological Tapestry: The Five Eras of HTTP</h2>
+      <p>
+        The protocol we use today did not spring forth fully formed; it was carved out over three decades of engineering struggles to cope with the explosive growth of the web. Let us trace this fascinating history.
+      </p>
+
+      <h3>Era I: HTTP/0.9 (1991) — The Rude Villager</h3>
+      <p>
+        The initial version of HTTP was incredibly primitive. It was a single-line text protocol designed strictly to read documents. A request consisted of exactly one line of text: <code>GET /about.html</code>. There were no headers, no status codes, no POST methods, and no dynamic content types.
+      </p>
+      <p>
+        The server read the path, loaded the raw HTML file from disk, sent the HTML text bytes back over the TCP connection, and immediately closed the socket. If the file was found, it was sent. If the file did not exist, the server did not return a `404` error; it simply returned an HTML page that textually said "File Not Found." It was a rude, stateless villager: it accepted your ticket, handed you a book, and slammed the door.
+      </p>
+
+      <h3>Era II: HTTP/1.0 (1996) — The Polite Merchant (RFC 1945)</h3>
+      <p>
+        By 1996, the web had grown beyond simple text pages. Sites wanted to serve rich media: images, sounds, and styles. HTTP/1.0 formalized the request and response format into a highly structured exchange, introducing status codes formally declaring success (`200 OK`) or error (`404 Not Found`) at the protocol level, headers as extensible key-value metadata fields attached to requests and responses, and the Content-Type header letting the server declare exactly what kind of data was being returned.
+      </p>
+      <p>
+        However, HTTP/1.0 had a devastating performance bottleneck: <strong>short-lived connections</strong>. Every single HTTP request required spawning a *brand new TCP connection*. If a web page contained one HTML document, ten images, and two stylesheets, the browser was forced to execute <strong>thirteen sequential TCP handshakes</strong> to fetch the page. As we saw in Chapter I, a TCP handshake requires a round trip across the globe. The latency overhead was excruciating, making the early web feel slow and sluggish.
+      </p>
+
+      <h3>Era III: HTTP/1.1 (1997) — The Patient Shopkeeper (RFC 2068 / RFC 2616)</h3>
+      <p>
+        Standardized in 1997, HTTP/1.1 solved the connection bottleneck by introducing <strong>Persistent Connections</strong> as the default behavior. Under HTTP/1.1, when the browser opens a TCP connection to a server, it keeps the socket open: <code>Connection: keep-alive</code>. The browser fetches the HTML, and then immediately recycles the *same open socket* to fetch the images, styles, and scripts sequentially. This completely eliminated the round-trip latency of twelve TCP handshakes, dramatically accelerating page load times.
+      </p>
+      <p>
+        Furthermore, HTTP/1.1 introduced:
+      </p>
+      <ul>
+        <li><strong>The Host Header</strong>: This is one of the most critical headers ever designed. With the <code>Host</code> header, the client explicitly states which domain it is visiting (e.g., <code>Host: my-bank.com</code>). This allowed administrators to host thousands of independent websites on a single physical server with a single IP address, unlocking the modern era of cheap virtual hosting.</li>
+        <li><strong>Chunked Transfer Encoding</strong>: Allowed servers to stream dynamic content in chunks without knowing the final size of the document beforehand.</li>
+      </ul>
+
+      <!-- Symmetrical Timeline SVG -->
+      <div class="svg-diagram-container">
+        <div class="svg-diagram-title">Plate VII: The Symmetrical Evolution of HTTP Protocols</div>
+        <svg class="svg-diagram" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background frame -->
+          <rect x="10" y="10" width="580" height="200" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+          <line x1="30" y1="110" x2="570" y2="110" stroke="#1B2A47" stroke-width="2"/>
+ 
+          <!-- HTTP 0.9 -->
+          <circle cx="90" cy="110" r="8" fill="#F3C6C4" stroke="#1B2A47" stroke-width="2"/>
+          <rect x="40" y="30" width="100" height="60" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1.5" rx="3"/>
+          <text x="90" y="48" font-weight="bold" font-size="9" text-anchor="middle" dominant-baseline="central">HTTP/0.9</text>
+          <text x="90" y="62" font-size="7.5" text-anchor="middle">1991: Text Only</text>
+          <text x="90" y="74" font-size="7" class="mono" text-anchor="middle">GET /about</text>
+ 
+          <!-- HTTP 1.0 -->
+          <circle cx="210" cy="110" r="8" fill="#E29E3C" stroke="#1B2A47" stroke-width="2"/>
+          <rect x="160" y="130" width="100" height="60" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1.5" rx="3"/>
+          <text x="210" y="148" font-weight="bold" font-size="9" text-anchor="middle" dominant-baseline="central">HTTP/1.0</text>
+          <text x="210" y="162" font-size="7.5" text-anchor="middle">1996: Headers</text>
+          <text x="210" y="174" font-size="7" class="mono" text-anchor="middle">1 TCP per request</text>
+ 
+          <!-- HTTP 1.1 -->
+          <circle cx="330" cy="110" r="8" fill="#5D8E87" stroke="#1B2A47" stroke-width="2"/>
+          <rect x="280" y="30" width="100" height="60" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1.5" rx="3"/>
+          <text x="330" y="48" font-weight="bold" font-size="9" text-anchor="middle" dominant-baseline="central">HTTP/1.1</text>
+          <text x="330" y="62" font-size="7.5" text-anchor="middle">1997: Keep-Alive</text>
+          <text x="330" y="74" font-size="7" class="mono" text-anchor="middle">Virtual Hosting</text>
+ 
+          <!-- HTTP/2 -->
+          <circle cx="450" cy="110" r="8" fill="#E38676" stroke="#1B2A47" stroke-width="2"/>
+          <rect x="400" y="130" width="100" height="60" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1.5" rx="3"/>
+          <text x="450" y="148" font-weight="bold" font-size="9" text-anchor="middle" dominant-baseline="central">HTTP/2</text>
+          <text x="450" y="162" font-size="7.5" text-anchor="middle">2015: Multiplex</text>
+          <text x="450" y="174" font-size="7" class="mono" text-anchor="middle">Binary HPACK</text>
+        </svg>
+      </div>
+
+      <h3>Era IV: HTTP/2 (2015) — The Multiplexed Binary Tube (RFC 7540)</h3>
+      <p>
+        While HTTP/1.1 keep-alive was a massive upgrade, it suffered from a fundamental logical bottleneck: <strong>Application-Level Head-of-Line (HOL) Blocking</strong>. Although the TCP connection remained open, the requests still had to travel in a strict, single-file line. If the browser requested a large, slow-to-generate PDF file, and then requested a small CSS stylesheet, the CSS stylesheet was blocked waiting for the PDF file to finish generating.
+      </p>
+      <p>
+        HTTP/2 completely redesigned the wire-format of HTTP, moving away from plain text documents to <strong>Binary Frames</strong>. In HTTP/2, a single TCP connection is split into multiple independent, virtual channels called <strong>Streams</strong>. Every message is chopped up into small binary frames, labeled with a stream ID, and sent in parallel down the same TCP pipe. The frames are interleaved on the fly. At the receiving end, the browser inspects the stream IDs and perfectly reconstructs the separate documents. This is <strong>Multiplexing</strong>. It completely resolved application-level Head-of-Line blocking, allowing hundreds of assets to download in parallel over a single connection.
+      </p>
+      <p>
+        Furthermore, HTTP/2 introduced <strong>HPACK Header Compression</strong>. HTTP headers are highly repetitive; every request carries the exact same `User-Agent` and `Accept` strings. HPACK maintains a shared index table on both the client and server. Instead of transmitting the full 200-character User-Agent string, the client simply transmits a single integer index (e.g., index `2`), slashing header overhead by up to 90%.
+      </p>
+
+      <h3>Era V: HTTP/3 (2022) — The Self-Healing Hovercraft (RFC 9114)</h3>
+      <p>
+        Despite the brilliance of HTTP/2, it carried a deep structural vulnerability. By routing all multiplexed streams through a single TCP socket, it introduced <strong>Transport-Layer Head-of-Line Blocking</strong>. TCP guarantees that packets will be delivered in absolute order. If you are downloading 50 parallel assets over one TCP connection, and a single TCP packet containing a slice of an image is dropped by a router, <strong>TCP pauses everything</strong>. The operating system blocks all other 49 streams from reaching the browser application, even though all their packets arrived safely, until the dropped packet is retransmitted. Under poor network conditions (like Wi-Fi interference), HTTP/2 can actually perform *worse* than HTTP/1.1.
+      </p>
+      <p>
+        HTTP/3 solves this by discarding TCP entirely. Instead, it operates on top of <strong>QUIC (Quick UDP Internet Connections)</strong>, running over <strong>UDP</strong>. QUIC implements its own connection reliability layer directly in user-space. In HTTP/3, every stream is completely independent at the transport layer. If a packet belonging to Stream 12 is dropped, only Stream 12 pauses. The other 49 streams continue to deliver their bytes to the browser without a millisecond of delay.
+      </p>
+      <p>
+        Furthermore, HTTP/3 introduces <strong>Connection Migration</strong>. TCP identifies a connection using a 4-tuple: (Source IP, Source Port, Destination IP, Destination Port). If you leave your house, your phone switches from your home Wi-Fi IP to your cellular data IP. Instantly, the 4-tuple is broken, and your TCP connection dies, forcing you to reload the video you were watching. QUIC uses a unique <strong>Connection ID</strong> independent of your physical IP. When you switch networks, QUIC simply fires a migration packet containing the same Connection ID from your new IP, and the session continues without interruption.
+      </p>
+
+      <h2>3. Anatomical Dissection of the Request Envelope</h2>
+      <p>
+        Regardless of the era, the logical structure of an HTTP request remains consistent. Let us examine the exact anatomy of the request we constructed in Chapter I.
+      </p>
+
+      <!-- Request anatomy SVG -->
+      <div class="svg-diagram-container">
+        <div class="svg-diagram-title">Plate VIII: The Anatomy of an HTTP Request</div>
+        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+ 
+          <!-- Request Line -->
+          <rect x="30" y="30" width="540" height="35" fill="#F3C6C4" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <text x="45" y="52" font-weight="bold" font-size="10" dominant-baseline="central">REQUEST LINE:</text>
+          <text x="160" y="52" class="mono" font-size="9">POST /v1/posts/928374/like HTTP/1.1</text>
+ 
+          <!-- Headers -->
+          <rect x="30" y="75" width="540" height="65" fill="#EFE9DB" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <text x="45" y="95" font-weight="bold" font-size="10" dominant-baseline="central">METADATA HEADERS:</text>
+          <text x="160" y="95" class="mono" font-size="8.5">Host: api.instagram.com</text>
+          <text x="160" y="110" class="mono" font-size="8.5">Authorization: Bearer eyJhbGciOiJIUzI1NiIs...</text>
+          <text x="160" y="125" class="mono" font-size="8.5">Content-Length: 42</text>
+ 
+          <!-- Body -->
+          <rect x="30" y="150" width="540" height="35" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <text x="45" y="172" font-weight="bold" font-size="10" dominant-baseline="central">PAYLOAD BODY:</text>
+          <text x="160" y="172" class="mono" font-size="9">{"user_id": "harshit_87", "action": "like"}</text>
+        </svg>
+      </div>
+
+      <p>
+        The request consists of three structural zones:
+      </p>
+      <ol>
+        <li><strong>The Request Line</strong>: The very first line of the message. It consists of three parts separated by spaces: the Verb (<code>POST</code>), the path target (<code>/v1/posts/928374/like</code>), and the protocol version (<code>HTTP/1.1</code>).</li>
+        <li><strong>Metadata Headers</strong>: A series of key-value lines separated by colons. These represent the envelope markings of our package, letting the server know who is sending it, what formatting they support, and how to read the payload.</li>
+        <li><strong>Payload Body</strong>: The actual cargo. In our case, a JSON text string containing variables. The body is separated from the headers by a <strong>single empty line</strong> (consisting of exactly one CRLF sequence).</li>
+      </ol>
+      <p>
+        Let us analyze why the <strong>Content-Length Header</strong> is a critical security and protocol boundary. On a persistent TCP connection (`Connection: keep-alive`), multiple HTTP requests are sent down the same physical pipe one after the other. When the server reads the stream, it sees a continuous flow of characters. How does the server know where Request A ends and Request B begins?
+      </p>
+      <p>
+        The answer is <strong>Content-Length</strong>. This header specifies the exact number of bytes contained inside the request body. The server parses the headers, reads the Content-Length (e.g., `42`), and then reads exactly 42 bytes from the TCP socket buffer. Once it has parsed exactly 42 bytes, it stops. It knows that any subsequent bytes belong to the next incoming request.
+      </p>
+      <p>
+        If the client sends an <strong>incorrect Content-Length value</strong>, catastrophic bugs occur. If Content-Length is declared as `50` but the body is only 42 bytes long, the server will read the 42 bytes, freeze, and wait on the socket forever, expecting 8 more bytes that will never arrive. The socket will remain hanging until a timeout triggers.
+      </p>
+      <p>
+        If the Content-Length is declared as `30` but the body is 42 bytes long, the server will read only 30 bytes, process the half-finished payload (corrupting your JSON), and then treat the remaining 12 bytes (`"action":"like"}`) as the start of a new HTTP request, leading to immediate syntax errors.
+      </p>
+
+      <h2>4. The Extensible Label: Custom Headers and Metadata</h2>
+      <p>
+        HTTP’s greatest structural design feature is its extensibility. You are not limited to standard headers; you can append any custom metadata key-value pairs you wish. In the early eras of web development, developers prefixed all custom headers with the letter <strong>`X-`</strong> (e.g., <code>X-Request-ID</code> or <code>X-User-Language</code>). This convention was formalized to prevent custom headers from colliding with future official headers added to the HTTP specification.
+      </p>
+      <p>
+        However, by <strong>2012</strong>, this convention was officially deprecated by <strong>RFC 6648</strong>. The IETF realized that when a custom header became popular (like <code>X-Forwarded-For</code>), it was widely adopted by browsers and load balancers. If the IETF later tried to standardize the header by removing the `X-` prefix, changing the name to <code>Forwarded</code>, it broke billions of active clients that expected the old name. Today, developers are encouraged to write clean, semantic custom headers *without* the `X-` prefix, using descriptive namespaces instead (e.g., <code>Sriniously-Trace-ID</code>).
+      </p>
+      <p>
+        Let us look at some essential security headers that every modern backend must append to protect its clients:
+      </p>
+      <ul>
+        <li><strong>HSTS (HTTP Strict Transport Security)</strong>: <code>Strict-Transport-Security: max-age=63072000; includeSubDomains</code>. This header instructs the browser to never, under any circumstances, connect to your site over unencrypted HTTP. Even if the user types <code>http://my-bank.com</code>, the browser automatically translates the request to <code>https://</code> locally before the packet hits the wire, completely neutralizing SSL Stripping attacks.</li>
+        <li><strong>CSP (Content Security Policy)</strong>: <code>Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com</code>. This header tells the browser exactly which domains are allowed to load scripts, images, and styles inside the page. If a hacker manages to inject a malicious script (Cross-Site Scripting, XSS) into your page, the browser reads the CSP, registers that the script does not belong to a trusted domain, and blocks it from executing.</li>
+        <li><strong>X-Frame-Options</strong>: <code>X-Frame-Options: DENY</code>. Prevents other sites from embedding your page inside an invisible iframe. This completely neutralizes clickjacking attacks.</li>
+      </ul>
+
+      <h2>5. Key Takeaways</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>HTTP/1.1</th>
+              <th>HTTP/2</th>
+              <th>HTTP/3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Transport Layer</strong></td>
+              <td>TCP</td>
+              <td>TCP</td>
+              <td>QUIC (over UDP)</td>
+            </tr>
+            <tr>
+              <td><strong>Wire Format</strong></td>
+              <td>Plain Text</td>
+              <td>Binary Frames</td>
+              <td>Binary Frames</td>
+            </tr>
+            <tr>
+              <td><strong>Multiplexing</strong></td>
+              <td>❌ (Pipeline failed)</td>
+              <td>✅ (HOL blocking in TCP)</td>
+              <td>✅ (Completely independent streams)</td>
+            </tr>
+            <tr>
+              <td><strong>Header Compression</strong></td>
+              <td>❌ Plain text</td>
+              <td>✅ HPACK (Dynamic Table)</td>
+              <td>✅ QPACK (Dynamic Table)</td>
+            </tr>
+            <tr>
+              <td><strong>Connection Migration</strong></td>
+              <td>❌ (Tied to IP)</td>
+              <td>❌ (Tied to IP)</td>
+              <td>✅ (Tied to Connection ID)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+
+    <footer class="chapter-footer">
+      <div class="nav-buttons-container">
+        <a href="02_what_is_backend.html" class="vintage-button"><- Chapter II</a>
+        <a href="04_http_methods.html" class="vintage-button mustard">Chapter IV -></a>
+      </div>
+      <div class="divider-symmetrical">
+        <span class="divider-symbol">♦ ✦ ♦</span>
+      </div>
+      <div class="curator-credits">Curated & Written by Antigravity in the Year of 2026</div>
+    </footer>
+  </div>
+
+</body>
+</html>

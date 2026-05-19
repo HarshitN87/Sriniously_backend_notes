@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter V: HTTP Responses & Status Codes — Sriniously Backend</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Side Navigation for Quick Jumps -->
+  <div class="archivist-nav">
+    <a href="index.html" class="archivist-dot" data-title="The Archives"></a>
+    <a href="01_how_requests_travel.html" class="archivist-dot" data-title="Chapter I: Request Travel"></a>
+    <a href="02_what_is_backend.html" class="archivist-dot" data-title="Chapter II: The Unseen Machinery"></a>
+    <a href="03_http_deep_dive.html" class="archivist-dot" data-title="Chapter III: The Digital Grammar"></a>
+    <a href="04_http_methods.html" class="archivist-dot" data-title="Chapter IV: The Seven Verbs"></a>
+    <a href="05_http_responses.html" class="archivist-dot active" data-title="Chapter V: The Royal Decrees"></a>
+    <a href="06_routing.html" class="archivist-dot" data-title="Chapter VI: The Grand Switchboard"></a>
+    <a href="07_serialization.html" class="archivist-dot" data-title="Chapter VII: The Babel Fish"></a>
+  </div>
+
+  <div class="container">
+    <header class="chapter-header">
+      <div class="chapter-number">Chapter the Fifth</div>
+      <h1>HTTP Responses & Status Codes</h1>
+      <div class="chapter-epigraph">"A classification of the server's numeric decrees, from the triumphant 2xx to the client's tragic 4xx and the server's catastrophic 5xx, along with caching and compression."</div>
+      
+      <div class="divider-symmetrical">
+        <span class="divider-symbol">♦ ✦ ♦</span>
+      </div>
+    </header>
+
+    <main>
+      <p class="intro-paragraph">
+        In the year 1342, the Abbot of Saint-Denis in France faced an administrative crisis. He was compiling a library of theological manuscripts, but his scribes were working from older, potentially corrupted translations. He wanted to verify if his copy of the <em>City of God</em> by Saint Augustine matched the authoritative, papal manuscript preserved in the vaults of the Vatican.
+      </p>
+
+      <p>
+        The Abbot had two choices. He could pack the entire twenty-two books of the manuscript onto a mule, assign a team of armed monks to guard it, and spend four months traveling across the Alps to Rome to compare the texts line by line. This was slow, incredibly expensive, and carried a high probability of the monks being robbed or the manuscript being ruined by mountain rain. This is the <strong>Unconditional Transfer Problem</strong>—sending the entire mass of your state down a high-latency, high-risk transport line.
+      </p>
+
+      <p>
+        Instead, the Abbot used a primitive <strong>monastic validation protocol</strong>. He ordered his head scribe to read the French manuscript and compile a short, unique administrative summary of its characters—a signature. They took the first letter of every paragraph, combined them, and stamped the summary onto a small piece of parchment with the abbey’s private wax seal. They placed the parchment into a tiny leather envelope, tied it to the leg of a homing pigeon, and released it toward Rome.
+      </p>
+
+      <p>
+        When the pigeon landed in the Vatican courtyard, the papal librarian took the parchment. He did not load a mule. He simply walked to the shelf, pulled down the authoritative papal manuscript, ran the exact same mathematical extraction on its characters, and compared his wax seal with the Abbot’s seal. If the two seals were identical, the Vatican librarian did not copy the thousand-page manuscript. He took a tiny scrap of sheepskin, stamped it with a single blue mark: <em>"Not Modified,"</em> tied it to the pigeon, and sent it back to Saint-Denis.
+      </p>
+
+      <p>
+        When the pigeon returned to France, the Abbot looked at the blue mark. He knew instantly, with mathematical certainty, that his local manuscript was perfectly synchronous with the sovereign copy in Rome. He had verified the state of a massive dataset across a thousand miles of hostile territory in a matter of days, using nothing more than a pigeon, a wax seal, and a three-digit equivalence protocol. This is the exact logical blueprint of <strong>HTTP Validation Caching</strong> using <strong>ETags (Entity Tags)</strong>.
+      </p>
+
+      <p>
+        Let us look at a second, more political analogy: the <strong>Heraldic Calls</strong> of the Holy Roman Empire. When the Emperor’s herald rode into a provincial town square to deliver a decree, he did not engage in a fluid, conversational debate. He blew a silver trumpet and announced a standardized numeric decree:
+      </p>
+      <ul>
+        <li>If he announced a <strong>1xx Decree</strong>, it meant: <em>"Hold on, the court is currently deliberating. Stand by for further instructions."</em></li>
+        <li>If he announced a <strong>2xx Decree</strong>, it meant: <em>"Your petition to build a mill has been formally granted. Here is your permit."</em></li>
+        <li>If he announced a <strong>3xx Decree</strong>, it meant: <em>"The registry office has moved to Nuremberg. Pack your bags and go there."</em></li>
+        <li>If he announced a <strong>4xx Decree</strong>, it meant: <em>"You filled out the wrong tax form, or you are trying to enter the royal treasury without a seal. Go home and fix it."</em></li>
+        <li>If he announced a <strong>5xx Decree</strong>, it meant: <em>"The castle walls have collapsed, the treasury is on fire, and the registry clerk has fled. We cannot process your request."</em></li>
+      </ul>
+
+      <p>
+        The townspeople did not need to read the entire scroll to understand what to do. The first digit of the herald's call determined their entire behavioral path. In the digital world, <strong>HTTP Responses</strong> are these formal heraldic calls. When a server replies to a client, it does not just dump raw bytes. It wraps the response in a strict, triple-part administrative envelope: the <strong>Status Line</strong>, the <strong>Metadata Headers</strong>, and the optional <strong>Payload Body</strong>. And the most critical marker on that envelope is the three-digit <strong>Status Code</strong>—the universal grammar of server-side outcome.
+      </p>
+
+      <h2>1. The Epistemology of Server Decrees</h2>
+      <p>
+        The HTTP response format mirrors the request envelope we inspected in Chapter III. It consists of three structural zones:
+      </p>
+      <ol>
+        <li><strong>The Status Line</strong>: The very first line of the reply. It consists of the protocol version (<code>HTTP/1.1</code>), the numeric Status Code (<code>200</code>), and a human-readable Reason Phrase (<code>OK</code>).</li>
+        <li><strong>Metadata Headers</strong>: Key-value fields that dictate caching options, resource length, server software identities, and compression algorithms.</li>
+        <li><strong>Payload Body</strong>: The cargo—whether it is raw HTML text, a JPEG image, or a JSON data structure.</li>
+      </ol>
+      <p>
+        The three-digit status code at the beginning of the reply is the definitive command of the transaction. These codes are divided into five clean, symmetrical classes based on their leading digit:
+      </p>
+      <ul>
+        <li><strong>1xx (Informational)</strong>: The server is processing the request, and the conversation is ongoing.</li>
+        <li><strong>2xx (Success)</strong>: The request was successfully received, understood, and accepted.</li>
+        <li><strong>3xx (Redirection)</strong>: Further action must be taken by the browser to complete the transaction.</li>
+        <li><strong>4xx (Client Error)</strong>: The client made a mistake—the request carries syntax errors, lacks authentication, or targets a non-existent path.</li>
+        <li><strong>5xx (Server Error)</strong>: The server failed—the logic crashed, the database timed out, or an upstream gateway collapsed.</li>
+      </ul>
+
+      <h2>2. Symmetrical Hierarchy of the Status Codes</h2>
+      <p>
+        Let us examine the primary status codes inside each class in excruciating detail:
+      </p>
+
+      <h3>1xx: The Informational Protocols</h3>
+      <p>
+        The informational class represents half-finished transactions. The most critical status code in this class is <strong><code>101 Switching Protocols</code></strong>. HTTP is fundamentally a request-response protocol: the client asks, the server replies, and the transaction is finished.
+      </p>
+      <p>
+        But what if you are building a real-time multiplayer game or a live chat dashboard? If you rely on standard HTTP, you would have to spam the server with thousands of parallel requests per second (polling) to check for new messages, saturating your network.
+      </p>
+      <p>
+        To solve this, the client sends a standard HTTP request carrying two upgrade headers: <code>Upgrade: websocket</code> and <code>Connection: Upgrade</code>. If the server supports WebSockets, it replies with <code>HTTP/1.1 101 Switching Protocols</code>. Instantly, the standard stateless HTTP request-response cycle is dissolved. The underlying TCP socket remains open, transforming into a <strong>full-duplex persistent channel</strong>.
+      </p>
+      <p>
+        Both client and server can push binary or text frames across the open socket at any millisecond without the overhead of HTTP handshakes or headers, unlocking the modern era of real-time web interactivity.
+      </p>
+
+      <h3>2xx: The Royal Chancellor Successes</h3>
+      <p>
+        The 2xx class represents triumphant outcomes:
+      </p>
+      <ul>
+        <li><strong><code>200 OK</code></strong>: The universal standard. The resource was found, processed, and is attached inside the response body.</li>
+        <li><strong><code>201 Created</code></strong>: The request successfully created a new resource. The server returns this after a POST or PUT transaction, and it is legally required to append a <strong><code>Location</code> header</strong> pointing to the exact URL of the newly created resource (e.g., <code>Location: /api/users/9283</code>) so the client knows where to access it.</li>
+        <li><strong><code>202 Accepted</code></strong>: The request is valid, but the processing is not finished. The server has queued the action for background execution. This is the foundation of <strong>Asynchronous Task Architectures</strong>. When a user requests a heavy operation (like generating a massive PDF report or transcoding a video file), a synchronous wait would freeze the connection. The server instead accepts the request, delegates it to a message queue (like <strong>RabbitMQ or Apache Kafka</strong>), returns a <code>202 Accepted</code>, and hands back a tracking URL so the client can periodically poll to check on the progress in the background.</li>
+        <li><strong><code>204 No Content</code></strong>: The request succeeded, but the server is returning exactly zero bytes inside the body. This is commonly returned after a successful `DELETE` operation: the resource is gone, so there is nothing left to say.</li>
+      </ul>
+
+      <h3>3xx: Redirection Protocols</h3>
+      <p>
+        Redirection is the process of moving visitors between URL addresses:
+      </p>
+      <ul>
+        <li><strong><code>301 Moved Permanently</code></strong>: The target resource has been assigned a brand new permanent address. The response contains a <code>Location</code> header pointing to the new URL. Crucially, <strong>the browser caches this redirect forever</strong>. The next time the user types the old URL, the browser remembers the 301, bypasses the network completely, and automatically rewrites the destination to the new address. If an administrator permanently redirects an address by mistake, reverting the change is extremely difficult, as there is no protocol mechanism to clear the local redirect cache.</li>
+        <li><strong><code>302 Found</code></strong>: A temporary redirect. The resource currently lives at another address, but the browser should continue to query the original URL for future visits. The browser <strong>never caches a 302</strong>, protecting your system against redirect-loop caching bugs.</li>
+        <li><strong><code>307 Temporary Redirect</code> and <code>308 Permanent Redirect</code></strong>: Formulated to fix a flaw in 301/302. Under the old 301/302 specs, browsers frequently took a POST request that got redirected and mutated the method to a GET request at the new URL, dropping the body payload. The 307 and 308 statuses strictly forbid method mutation: the browser *must* use the exact same HTTP verb and body to query the redirected address.</li>
+      </ul>
+
+      <!-- Symmetrical SVG Status Code Cabinet -->
+      <div class="svg-diagram-container">
+        <div class="svg-diagram-title">Plate XI: The Symmetrical Hierarchy of Royal Decrees</div>
+        <svg class="svg-diagram" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Frame -->
+          <rect x="10" y="10" width="580" height="200" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+
+          <!-- 1xx Cabinet -->
+          <rect x="30" y="30" width="100" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="80" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">1xx</text>
+          <text x="80" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#E29E3C">INFO</text>
+          <line x1="30" y1="90" x2="130" y2="90" stroke="#1B2A47" stroke-width="1.5"/>
+          <text x="80" y="115" font-size="7.5" text-anchor="middle">101 Switch</text>
+
+          <!-- 2xx Cabinet -->
+          <rect x="140" y="30" width="100" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="190" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">2xx</text>
+          <text x="190" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#5D8E87">SUCCESS</text>
+          <line x1="140" y1="90" x2="240" y2="90" stroke="#1B2A47" stroke-width="1.5"/>
+          <text x="190" y="115" font-size="7.5" text-anchor="middle">200 OK</text>
+          <text x="190" y="130" font-size="7.5" text-anchor="middle">201 Created</text>
+
+          <!-- 3xx Cabinet -->
+          <rect x="250" y="30" width="100" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="300" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">3xx</text>
+          <text x="300" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#E38676">REDIRECT</text>
+          <line x1="250" y1="90" x2="350" y2="90" stroke="#1B2A47" stroke-width="1.5"/>
+          <text x="300" y="115" font-size="7.5" text-anchor="middle">301 Perm</text>
+          <text x="300" y="130" font-size="7.5" text-anchor="middle">304 Cache</text>
+
+          <!-- 4xx Cabinet -->
+          <rect x="360" y="30" width="100" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="410" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">4xx</text>
+          <text x="410" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#E38676">CLIENT ERR</text>
+          <line x1="360" y1="90" x2="460" y2="90" stroke="#1B2A47" stroke-width="1.5"/>
+          <text x="410" y="115" font-size="7.5" text-anchor="middle">401 Auth</text>
+          <text x="410" y="130" font-size="7.5" text-anchor="middle">404 Lost</text>
+
+          <!-- 5xx Cabinet -->
+          <rect x="470" y="30" width="100" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <text x="520" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">5xx</text>
+          <text x="520" y="75" class="mono" font-size="8.5" text-anchor="middle" fill="#1B2A47">SERVER ERR</text>
+          <line x1="470" y1="90" x2="570" y2="90" stroke="#1B2A47" stroke-width="1.5"/>
+          <text x="520" y="115" font-size="7.5" text-anchor="middle">500 Crash</text>
+          <text x="520" y="130" font-size="7.5" text-anchor="middle">502 Gateway</text>
+        </svg>
+      </div>
+
+      <h3>4xx: Tragic Client Errors</h3>
+      <p>
+        The 4xx class represents errors triggered by the sender’s packet assembly. Let us trace the strict structural difference between <strong><code>401 Unauthorized</code> and <code>403 Forbidden</code></strong> using the <strong>Nightclub Bouncer Analogy</strong>.
+      </p>
+      <p>
+        Imagine you are approaching the velvet rope of an exclusive nightclub. The bouncer blocks your path and demands: "Show me your ID." If you have forgotten your wallet at home, you cannot prove your identity. The bouncer turns you away, saying: "I do not know who you are. Go home, get your ID, and present it to me." This is a <strong><code>401 Unauthorized</code></strong> response (authentication failure).
+      </p>
+      <p>
+        Now imagine you go home, fetch your driver's license, return to the club, and hand it to the bouncer. The bouncer inspects the license, matches your face, and says: "Excellent, I successfully verify that you are Harshit. However, this is an exclusive VIP lounge, and your name is not on the VIP guest list. I know exactly who you are, but you do not have permission to cross this rope." This is a <strong><code>403 Forbidden</code></strong> response (authorization failure).
+      </p>
+      <p>
+        In web APIs, a server returns a `401` when the client fails to send a valid authentication token (e.g., a missing JWT). It returns a `403` when the token is valid, but the user's role does not carry sufficient clearance to access that specific endpoint.
+      </p>
+      <p>
+        Let us also analyze <strong><code>429 Too Many Requests</code></strong>. This status indicates that the client has saturated their rate limits, making too many calls in a short window. To enforce these limits, backend developers implement algorithms like <strong>Token Bucket</strong> or <strong>Leaky Bucket</strong>.
+      </p>
+      <p>
+        In a <strong>Token Bucket</strong> algorithm, a bucket is assigned to each IP address, capable of holding up to $B$ tokens. The bucket is refilled at a linear rate of $R$ tokens per second. Every incoming request must consume one token from the bucket. If the client sends a sudden burst of requests, they can consume all $B$ tokens instantly. Once the bucket is empty, any subsequent request is blocked, throwing a <code>429</code> status, until the bucket gathers more tokens from the steady refill rate. This allows the system to accommodate minor bursts of traffic while firmly blocking massive scanning bots.
+      </p>
+
+      <h3>5xx: Catastrophic Server Errors</h3>
+      <p>
+        The 5xx class indicates that the fault lives entirely inside your data center:
+      </p>
+      <ul>
+        <li><strong><code>500 Internal Server Error</code></strong>: The universal catch-all crash. The application code encountered an unhandled exception—such as a null-pointer crash or a database timeout—and died. High-security backends must catch these errors dynamically, log the raw trace in internal audit ledgers, and return a clean, generic 500 error to the client, strictly hiding internal code pathways or database structure to prevent hackers from reverse-engineering the codebase.</li>
+        <li><strong><code>502 Bad Gateway</code></strong>: The gateway server (like NGINX or AWS ALB) acted as a proxy but received an invalid or empty response from the upstream application server (like Node.js or Python). This commonly indicates that your Node.js process crashed under a memory leak, or fell offline, leaving NGINX shouting down a dead Unix socket.</li>
+        <li><strong><code>504 Gateway Timeout</code></strong>: The upstream application server did not reply within the gateway's timeout window (e.g., 30 seconds). This indicates that the backend is executing a slow query that has locked the server, or the database is choked under high CPU load.</li>
+      </ul>
+
+      <h2>3. The Caching Treaty: ETags, Conditional Requests, and the Monk's Pigeon</h2>
+      <p>
+        Web traffic is highly repetitive. If you open a social feed, you are downloading the exact same stylesheets, images, and user avatars over and over. To avoid saturating network lines and wasting CPU processing, we rely on <strong>HTTP Caching</strong>. The server dictates caching rules using the <strong><code>Cache-Control</code> header</strong>:
+      </p>
+      <ul>
+        <li><code>Cache-Control: public, max-age=31536000</code>: Allows any entity—the browser, home routers, and intermediary CDNs—to save the asset in their local caches for up to exactly one year ($31,536,000$ seconds). Used for immutable assets like hashed CSS or JS files.</li>
+        <li><code>Cache-Control: private, no-cache</code>: The browser is allowed to cache the asset, but <strong>must validate the cache with the origin server</strong> before serving it to the user.</li>
+        <li><code>Cache-Control: no-store</code>: Strict safety instruction. The browser is forbidden from saving any trace of the response to disk, used for bank balances and transaction records.</li>
+      </ul>
+      <p>
+        How does the browser validate its cache? It uses <strong>ETags (Entity Tags) and Conditional Requests</strong>. Let us recall the Swiss monk's pigeon.
+      </p>
+      <p>
+        The monk hashes his massive, 1,000-page religious manuscript using a special wax seal system (ETag)—let us say the wax seal reads <code>"seal9283"</code>. He attaches a tiny message to the leg of a homing pigeon and sends it to Rome. The message says: <strong>If-None-Match: "seal9283"</strong>. The pigeon flies over the Alps, lands at the Vatican, and the cardinal reads the slip.
+      </p>
+      <p>
+        The cardinal walks to the Vatican library, looks at the master copy, and checks its current seal. It reads <code>"seal9283"</code>. The cardinal does not write out a copy of the manuscript and tie it to the pigeon. Instead, he ties a simple, tiny slip of paper that says: <strong>304 Not Modified</strong>. The pigeon flies back to Switzerland. The monk opens the message, sees the 304, and confidently reads his local copy, saving weeks of transit and massive manual copying labor.
+      </p>
+
+      <!-- Caching sequence SVG -->
+      <div class="svg-diagram-container">
+        <div class="svg-diagram-title">Plate XII: ETag Validation & Conditional Requests</div>
+        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Timelines -->
+          <line x1="100" y1="30" x2="100" y2="180" stroke="#1B2A47" stroke-width="3"/>
+          <line x1="400" y1="30" x2="400" y2="180" stroke="#1B2A47" stroke-width="3"/>
+ 
+          <text x="100" y="20" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">Client (Monk)</text>
+          <text x="400" y="20" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">Server (Vatican)</text>
+ 
+          <!-- Request 1: Warm cache -->
+          <path d="M 100,50 L 400,80" stroke="#1B2A47" stroke-width="1.5" fill="none"/>
+          <polygon points="393,76 400,80 392,83" fill="#1B2A47"/>
+          <rect x="180" y="45" width="140" height="20" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1" rx="2"/>
+          <text x="250" y="58" class="mono" font-size="8" text-anchor="middle">GET /api/avatar</text>
+ 
+          <!-- Response 1: Hash returned -->
+          <path d="M 400,80 L 100,110" stroke="#1B2A47" stroke-width="1.5" fill="none"/>
+          <polygon points="108,107 100,110 107,115" fill="#1B2A47"/>
+          <rect x="150" y="85" width="200" height="20" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1" rx="2"/>
+          <text x="250" y="98" class="mono" font-size="8" text-anchor="middle">ETag: "hash123" + Body</text>
+ 
+          <!-- Request 2: Conditional -->
+          <path d="M 100,130 L 400,160" stroke="#E29E3C" stroke-width="2" fill="none"/>
+          <polygon points="393,156 400,160 392,163" fill="#E29E3C"/>
+          <rect x="130" y="125" width="240" height="20" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1" rx="2"/>
+          <text x="250" y="138" class="mono" font-size="8" text-anchor="middle">GET /api/avatar [If-None-Match: "hash123"]</text>
+ 
+          <!-- Response 2: 304 -->
+          <path d="M 400,160 L 100,180" stroke="#5D8E87" stroke-width="2" fill="none"/>
+          <polygon points="108,177 100,180 107,185" fill="#5D8E87"/>
+          <text x="250" y="175" class="mono" font-size="9" font-weight="bold" fill="#5D8E87" text-anchor="middle">304 Not Modified (0 Body Bytes!)</text>
+        </svg>
+      </div>
+
+      <p>
+        In modern web servers, the server automatically computes an <strong>ETag</strong>—which is typically a cryptographic hash (like MD5) of the asset's content—and appends it to the headers: <code>ETag: "hash123"</code>. The browser saves the ETag alongside the cached file.
+      </p>
+      <p>
+        When the user refreshes, the browser sends a <strong>Conditional Request</strong>, placing the hash inside the <strong><code>If-None-Match</code> header</strong>: <code>If-None-Match: "hash123"</code>. The backend receives the request, loads the current database record, computes its hash, and registers that the hashes match. It immediately returns <code>HTTP/1.1 304 Not Modified</code> with <strong>no body payload</strong>. The transoceanic optical lines are completely spared from carrying redundant bytes, and your application renders the local cached copy instantly.
+      </p>
+
+      <h2>4. Data Compression: Brotli vs Gzip</h2>
+      <p>
+        Even with caching, we must transmit raw bytes when a resource changes. To minimize the transit time across undersea fibers, we must shrink the size of our payloads. This is the science of <strong>Data Compression</strong>. Web servers primarily rely on two algorithms: <strong>Gzip</strong> and <strong>Brotli</strong>.
+      </p>
+      <p>
+        Both algorithms are lossless, combining <strong>LZ77 sliding window compression</strong> (which replaces duplicate sequences of characters with small reference pointers) and <strong>Huffman Coding</strong>. However, <strong>Brotli</strong> (open-sourced by Google in 2015) introduced a massive optimization specifically designed for the web.
+      </p>
+      <p>
+        Unlike Gzip, which starts with a completely blank canvas, Brotli comes with a <strong>pre-shared static dictionary</strong> containing over 13,000 common web words, HTML tags, and CSS patterns (like <code>&lt;div&gt;</code>, <code>display: block</code>, or common English words). Because both the browser's Brotli engine and the server's Brotli compressor share this dictionary, the server does not have to transmit these words at all; it simply transmits a small index reference to the pre-shared book.
+      </p>
+      <p>
+        This allows Brotli to shrink HTML, CSS, and JS assets by <strong>20% to 30% more than Gzip</strong>, dramatically reducing transoceanic packet counts and accelerating page render times. This negotiation is managed at the protocol level: the client sends <code>Accept-Encoding: gzip, br</code>, and the server, seeing that the browser supports Brotli (`br`), compresses the payload using Brotli, and returns the header <code>Content-Encoding: br</code>.
+      </p>
+
+      <h2>5. Key Takeaways</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Status Code</th>
+              <th>Category</th>
+              <th>Meaning</th>
+              <th>Action Required by Client</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>101</strong></td>
+              <td>Informational</td>
+              <td>Switching Protocols</td>
+              <td>Upgrade TCP socket to WebSockets</td>
+            </tr>
+            <tr>
+              <td><strong>201</strong></td>
+              <td>Success</td>
+              <td>Created</td>
+              <td>Read newly created URI from `Location` header</td>
+            </tr>
+            <tr>
+              <td><strong>301</strong></td>
+              <td>Redirection</td>
+              <td>Moved Permanently</td>
+              <td>Cache redirect locally; rewrite future queries</td>
+            </tr>
+            <tr>
+              <td><strong>304</strong></td>
+              <td>Redirection</td>
+              <td>Not Modified</td>
+              <td>Load local asset from cache (save network bytes)</td>
+            </tr>
+            <tr>
+              <td><strong>401</strong></td>
+              <td>Client Error</td>
+              <td>Unauthorized</td>
+              <td>Present authentication credentials (JWT/Session)</td>
+            </tr>
+            <tr>
+              <td><strong>403</strong></td>
+              <td>Client Error</td>
+              <td>Forbidden</td>
+              <td>Do not retry; client lacks sufficient clearance</td>
+            </tr>
+            <tr>
+              <td><strong>502</strong></td>
+              <td>Server Error</td>
+              <td>Bad Gateway</td>
+              <td>Notify administrator; server crashed or offline</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+
+    <footer class="chapter-footer">
+      <div class="nav-buttons-container">
+        <a href="04_http_methods.html" class="vintage-button"><- Chapter IV</a>
+        <a href="06_routing.html" class="vintage-button mustard">Chapter VI -></a>
+      </div>
+      <div class="divider-symmetrical">
+        <span class="divider-symbol">♦ ✦ ♦</span>
+      </div>
+      <div class="curator-credits">Curated & Written by Antigravity in the Year of 2026</div>
+    </footer>
+  </div>
+
+</body>
+</html>
