@@ -2,44 +2,108 @@
    WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
-
-/* --- Custom Properties: The Editorial Color Palette --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,300;1,14..32,400&display=swap');/* --- Custom Properties: Editorial palette + diagram tokens --- */
 :root {
-  --bg-cream: #FAF6EF;
-  --color-charcoal: #2C2416;
-  
-  --accent-rose: #D4A5A0;
-  --accent-sage: #8FAF8A;
-  --accent-mustard: #C9A84C;
-  --accent-blue: #A8BFD0;
-  
-  --bg-code: #F5F0E8;
+  --bg-cream: #faf6ef;
+  --color-charcoal: #2c2416;
+
+  --accent-rose: #d4a5a0;
+  --accent-sage: #8faf8a;
+  --accent-mustard: #c9a84c;
+  --accent-blue: #a8bfd0;
+
+  --bg-code: #f5f0e8;
   --border-color: rgba(44, 36, 22, 0.15);
 
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', Courier, monospace;
+  /* SVG / diagram aliases (legacy markup) */
+  --color-navy: var(--color-charcoal);
+  --color-pink: var(--accent-rose);
+  --color-mint: var(--accent-sage);
+  --color-coral: var(--accent-rose);
+
+  /* Node geometry (WCAG-friendly pairs) */
+  --bg-node: #ffffff;
+  --text-node: #2c2416;
+  --stroke-node: #8a7f6e;
+  --text-on-accent: #faf6ef;
+  --diagram-plate-bg: var(--bg-code);
+  --diagram-arrow: var(--accent-mustard);
+
+--font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+--font-serif: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --space-block: 2rem;
+  --space-section: 2.5rem;
+  --gap-pair-max: 1.5rem;
+  --gap-nav: 1.25rem;
 
   --border-double: 4px double var(--color-charcoal);
   --border-single: 2px solid var(--color-charcoal);
-  --shadow-flat: 4px 4px 0px var(--color-charcoal);
-  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+  --shadow-flat: 4px 4px 0 var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0 var(--color-charcoal);
+
+  --line-height-body: 1.85;
+  --line-height-prose: 1.9;
+  --measure-prose: 65ch;
+  --measure-wide: min(1100px, 100%);
+  --margin-card-width: 300px;
 }
 
-/* --- Base Resets & Layout --- */
-* {
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-cream: #1a1814;
+    --color-charcoal: #d4cfc8;
+
+    --accent-rose: #c4908b;
+    --accent-sage: #7a9a75;
+    --accent-mustard: #d4b85a;
+    --accent-blue: #8fa8bc;
+
+    --bg-code: #242018;
+    --border-color: rgba(240, 235, 227, 0.18);
+
+    --bg-node: #2a2620;
+    --text-node: #f5f0e8;
+    --stroke-node: #6b6358;
+    --text-on-accent: #1a1814;
+    --diagram-plate-bg: #2a2620;
+    --diagram-arrow: var(--accent-mustard);
+
+    --shadow-flat: 4px 4px 0 rgba(0, 0, 0, 0.45);
+    --shadow-flat-hover: 7px 7px 0 rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* --- Base reset & containment --- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+blockquote,
+figure,
+pre,
+dl,
+dd {
   margin: 0;
-  padding: 0;
 }
 
 body {
   background-color: var(--bg-cream);
   color: var(--color-charcoal);
   font-family: var(--font-serif);
-  font-size: 18px;
-  line-height: 1.85;
+  font-size: 21px;
+  line-height: var(--line-height-body);
   padding: 60px 20px;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -47,21 +111,21 @@ body {
   overflow-x: hidden;
 }
 
-/* --- Decorative Camera Frame --- */
 body::before {
   content: none;
 }
 
-/* --- The Central Column Layout using CSS Grid --- */
+/* --- Central column --- */
 .container {
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px 0;
   animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  
+
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 72ch) minmax(0, 1fr);
-  column-gap: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure-wide)) minmax(0, 1fr);
+  column-gap: clamp(1rem, 3vw, 2rem);
 }
 
 @keyframes camera-pan {
@@ -75,7 +139,6 @@ body::before {
   }
 }
 
-/* All direct children of the container map to the center column by default */
 .container > * {
   grid-column: 2;
   min-width: 0;
@@ -83,28 +146,27 @@ body::before {
 
 main {
   grid-column: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
-  column-gap: 36px;
-  align-items: start;
+  display: block;
   min-width: 0;
-  max-width: 100%;
+  max-width: var(--measure-wide);
+  width: 100%;
 }
 
 main > * {
-  grid-column: 1;
+  min-width: 0;
 }
 
-main > figure,
-main > .svg-diagram-container,
-main > .table-container {
-  grid-column: 1 / -1;
+/* contain floated margin cards */
+main::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
-/* --- Symmetrical Title Cards --- */
+/* --- Chapter header --- */
 header.chapter-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: var(--space-section);
   padding: 20px 0;
 }
 
@@ -124,9 +186,9 @@ header.chapter-header {
 
 header.chapter-header h1 {
   font-family: var(--font-sans);
-  font-size: 2.8rem;
+  font-size: clamp(1.75rem, 4vw, 2.8rem);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
   margin-bottom: 25px;
   letter-spacing: 0.04em;
   color: var(--color-charcoal);
@@ -138,16 +200,17 @@ header.chapter-header h1 {
   font-style: italic;
   font-size: 1.2rem;
   color: var(--color-charcoal);
-  opacity: 0.85;
+  opacity: 0.9;
   max-width: 600px;
-  margin: 0 auto 30px auto;
-  line-height: 1.7;
+  margin: 0 auto 30px;
+  line-height: var(--line-height-prose);
 }
 
 .divider-symmetrical {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
   margin: 30px 0;
 }
 
@@ -156,7 +219,7 @@ header.chapter-header h1 {
   content: "";
   height: 1px;
   background-color: var(--accent-rose);
-  flex-grow: 1;
+  flex: 1 1 auto;
   max-width: 150px;
 }
 
@@ -164,44 +227,57 @@ header.chapter-header h1 {
   font-family: var(--font-sans);
   color: var(--accent-mustard);
   font-size: 1.1rem;
-  margin: 0 15px;
+  flex-shrink: 0;
   letter-spacing: 3px;
 }
 
-/* --- Typography --- */
+/* --- Typography & vertical rhythm --- */
 p {
-  margin-bottom: 28px;
+  margin-bottom: var(--space-block);
   text-align: left;
-  max-width: 72ch;
-  overflow-wrap: anywhere;
+  max-width: var(--measure-prose);
+  line-height: var(--line-height-prose);
+  overflow-wrap: normal;
+  word-wrap: normal;
+  hyphens: auto;
 }
 
-/* Drop-cap */
+main p,
+.math-passage p {
+  max-width: none;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
 p.intro-paragraph::first-letter {
   font-family: var(--font-serif);
-  font-size: 5rem;
+  font-size: clamp(3.5rem, 8vw, 5rem);
   float: left;
-  line-height: 0.8;
+  line-height: 0.85;
   padding-top: 8px;
   padding-right: 12px;
+  margin-bottom: 0.15em;
   color: var(--accent-rose);
   font-weight: 900;
 }
 
-h2, h3, h4 {
+h2,
+h3,
+h4 {
   font-family: var(--font-sans);
   color: var(--color-charcoal);
   letter-spacing: 0.04em;
-  margin-top: 50px;
-  margin-bottom: 20px;
-  line-height: 1.3;
+  margin-top: var(--space-section);
+  margin-bottom: var(--space-block);
+  line-height: 1.35;
 }
 
 h2 {
   font-size: 1.8rem;
   text-align: center;
   padding: 20px 0;
-  margin-bottom: 30px;
   border-top: 1px solid var(--accent-rose);
   border-bottom: 1px solid var(--accent-rose);
   text-transform: uppercase;
@@ -221,35 +297,125 @@ h4 {
   color: var(--accent-mustard);
 }
 
-/* --- Pull-quotes --- */
+/* MathJax may inject <dl> for assistive markup — keep it inline, not a 2-col grid */
+main dl,
+.math-passage dl,
+p dl {
+  display: block;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+main dt,
+main dd,
+.math-passage dt,
+.math-passage dd {
+  display: inline;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  max-width: none;
+}
+
+/* Intentional glossaries only */
+dl.glossary {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.5rem var(--gap-pair-max);
+  align-items: baseline;
+  max-width: var(--measure-prose);
+  margin: 0 0 var(--space-block);
+  line-height: var(--line-height-prose);
+}
+
+dl.glossary dt {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  max-width: 150px;
+  color: var(--accent-mustard);
+}
+
+dl.glossary dd {
+  margin: 0;
+  min-width: 0;
+}
+
+/* Block math grouped with its prose gloss */
+.math-passage {
+  margin-bottom: var(--space-block);
+  max-width: var(--measure-wide);
+}
+
+.math-passage .math-block {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.math-passage .math-block:last-child {
+  margin-bottom: 1.25rem;
+}
+
+.math-passage .math-lead {
+  margin-bottom: 1rem;
+}
+
+.math-passage .math-gloss {
+  margin-bottom: 0;
+  line-height: var(--line-height-prose);
+}
+
+/* MathJax: keep inline math in normal paragraph flow */
+mjx-container {
+  display: inline !important;
+  margin: 0 0.12em;
+  vertical-align: baseline;
+  max-width: 100%;
+}
+
+mjx-container[display="true"],
+.math-block mjx-container {
+  display: block !important;
+  margin: 0.75rem auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Pull quotes --- */
 blockquote {
-  grid-column: 2;
-  margin: 40px 0;
+  margin: var(--space-block) 0;
   padding: 10px 40px;
   border-left: 3px solid var(--accent-rose);
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.25rem;
-  color: #3d3322; /* Warmer charcoal for pull-quotes */
-  line-height: 1.75;
+  color: var(--color-charcoal);
+  line-height: var(--line-height-prose);
+  max-width: var(--measure-prose);
 }
 
-/* --- Margin Annotation Cards --- */
+/* --- Margin cards (paired with prose, bounded gap) --- */
 aside.margin-card {
-  grid-column: 2;
-  align-self: start;
-  justify-self: start;
-  width: 240px;
-  margin: 0 0 30px 0;
-  padding: 18px;
-  background-color: var(--bg-cream);
+  float: right;
+  clear: right;
+  width: min(var(--margin-card-width), 38%);
+  min-width: 260px;
+  max-width: var(--margin-card-width);
+  margin: 0 0 var(--space-block) 1.75rem;
+  padding: 20px 22px;
+  background-color: var(--bg-code);
   border-radius: 4px;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
-  font-size: 14px;
-  line-height: 1.6;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06);
+  font-size: 15px;
+  line-height: 1.7;
   position: relative;
   z-index: 10;
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 aside.margin-card.aside {
@@ -264,44 +430,47 @@ aside.margin-card.security {
   border: 1px solid var(--accent-rose);
 }
 
-aside.margin-card .card-label {
+aside.margin-card .card-label,
+aside.margin-card .margin-card-label {
   font-family: var(--font-sans);
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: block;
 }
 
-aside.margin-card.aside .card-label {
+aside.margin-card.aside .card-label,
+aside.margin-card.aside .margin-card-label {
   color: var(--accent-sage);
 }
 
-aside.margin-card.caution .card-label {
+aside.margin-card.caution .card-label,
+aside.margin-card.caution .margin-card-label {
   color: var(--accent-mustard);
 }
 
-aside.margin-card.security .card-label {
+aside.margin-card.security .card-label,
+aside.margin-card.security .margin-card-label {
   color: var(--accent-rose);
 }
 
 aside.margin-card p {
   font-family: var(--font-serif);
   margin-bottom: 0;
-  text-align: left;
-  overflow-wrap: normal;
+  max-width: none;
 }
 
-/* --- Code Blocks --- */
+/* --- Code --- */
 pre {
   background-color: var(--bg-code);
   border-left: 4px solid var(--accent-sage);
   padding: 24px;
-  margin: 35px 0;
+  margin: var(--space-block) 0;
   border-radius: 0 4px 4px 0;
   overflow-x: auto;
-  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+  max-width: 100%;
 }
 
 pre code {
@@ -320,6 +489,7 @@ code {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.85em;
+  overflow-wrap: break-word;
 }
 
 .concept-token {
@@ -328,12 +498,15 @@ code {
 }
 
 .math-block {
-  margin: 32px auto;
+  margin: var(--space-block) auto;
+  padding-bottom: 0;
   text-align: center;
   overflow-x: auto;
+  max-width: 100%;
+  line-height: var(--line-height-prose);
 }
 
-/* --- Symmetrical Table of Contents --- */
+/* --- Table of contents --- */
 .toc-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -360,6 +533,7 @@ code {
   display: flex;
   flex-direction: column;
   position: relative;
+  min-width: 0;
 }
 
 .toc-card:hover {
@@ -381,20 +555,20 @@ code {
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 12px;
-  line-height: 1.25;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 
 .toc-card-desc {
   font-family: var(--font-serif);
   font-size: 0.95rem;
-  line-height: 1.6;
-  opacity: 0.85;
+  line-height: var(--line-height-prose);
+  opacity: 0.9;
 }
 
 .toc-card-tag {
   align-self: flex-start;
-  margin-top: auto;
+  margin-top: 15px;
   font-family: var(--font-sans);
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -403,35 +577,39 @@ code {
   border-radius: 2px;
   border: 1px solid var(--color-charcoal);
   font-weight: bold;
-  margin-top: 15px;
 }
 
-/* --- Vintage Tables --- */
+/* --- Tables --- */
 .table-container {
   overflow-x: auto;
-  margin: 40px 0;
+  margin: var(--space-block) 0;
   border: 1px solid var(--color-charcoal);
   border-radius: 4px;
   box-shadow: var(--shadow-flat);
+  max-width: 100%;
 }
 
 table {
   width: 100%;
+  min-width: 280px;
   border-collapse: collapse;
   background-color: var(--bg-code);
   text-align: left;
 }
 
-th, td {
+th,
+td {
   padding: 14px 18px;
   border: 1px solid var(--border-color);
   font-family: var(--font-serif);
   font-size: 0.95rem;
+  line-height: var(--line-height-prose);
+  vertical-align: top;
 }
 
 th {
   background-color: var(--accent-sage);
-  color: var(--bg-cream);
+  color: var(--text-on-accent);
   font-family: var(--font-sans);
   text-transform: uppercase;
   font-size: 0.8rem;
@@ -444,14 +622,41 @@ tr:nth-child(even) {
   background-color: var(--bg-cream);
 }
 
-/* --- Diagram Plates --- */
+/* --- Diagram plates: fixed Wes Anderson light canvas (always legible) --- */
 figure,
 .svg-diagram-container {
-  grid-column: 2;
+  --diagram-canvas: #faf6ef;
+  --diagram-plate: #f5f0e8;
+  --diagram-node: #ffffff;
+  --diagram-sand: #f5f0e8;
+  --diagram-ink: #2c2416;
+  --diagram-rose: #d4a5a0;
+  --diagram-sage: #8faf8a;
+  --diagram-mustard: #c9a84c;
+  --diagram-coral: #d4a5a0;
+  --diagram-text-on-accent: #faf6ef;
+  --diagram-arrow: #c9a84c;
+
+  /* Remap legacy SVG variable names inside the plate */
+  --color-charcoal: var(--diagram-ink);
+  --color-navy: var(--diagram-ink);
+  --bg-cream: var(--diagram-node);
+  --bg-code: var(--diagram-plate);
+  --bg-node: var(--diagram-node);
+  --text-node: var(--diagram-ink);
+  --color-pink: var(--diagram-rose);
+  --color-mint: var(--diagram-sage);
+  --color-coral: var(--diagram-coral);
+  --accent-mustard: var(--diagram-mustard);
+  --accent-sage: var(--diagram-sage);
+  --accent-rose: var(--diagram-rose);
+  --diagram-plate-bg: var(--diagram-canvas);
+
   border: 1px solid var(--accent-blue);
-  background-color: var(--bg-code);
+  background-color: var(--diagram-canvas);
+  color: var(--diagram-ink);
   padding: 30px;
-  margin: 40px 0;
+  margin: var(--space-block) 0;
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -459,16 +664,14 @@ figure,
   position: relative;
   overflow-x: auto;
   max-width: 100%;
+  width: 100%;
 }
 
 figure::before,
 .svg-diagram-container::before {
   content: "";
   position: absolute;
-  top: 5px;
-  left: 5px;
-  right: 5px;
-  bottom: 5px;
+  inset: 5px;
   border: 1px dashed var(--accent-blue);
   opacity: 0.4;
   pointer-events: none;
@@ -480,56 +683,51 @@ figcaption {
   font-size: 0.85rem;
   margin-top: 20px;
   color: var(--color-charcoal);
-  opacity: 0.8;
+  opacity: 0.9;
   letter-spacing: 0.02em;
+  text-align: center;
+  line-height: var(--line-height-prose);
 }
 
-.svg-diagram-title {
+.svg-diagram-container .svg-diagram-title,
+figure .svg-diagram-title {
   font-family: var(--font-sans);
   font-style: italic;
   font-size: 0.85rem;
   margin-bottom: 20px;
-  color: var(--color-charcoal);
-  opacity: 0.85;
+  color: var(--diagram-ink);
+  opacity: 1;
   letter-spacing: 0.02em;
+  text-align: center;
 }
 
 .svg-diagram {
   width: 100%;
-  max-width: 760px;
+  max-width: 820px;
   height: auto;
   min-width: 0;
   display: block;
   background: transparent;
 }
 
-.svg-diagram rect[fill="#2C2416"],
-.svg-diagram circle[fill="#2C2416"],
-.svg-diagram ellipse[fill="#2C2416"],
-.svg-diagram path[fill="#2C2416"],
-.svg-diagram rect[fill="var(--color-navy)"],
-.svg-diagram circle[fill="var(--color-navy)"],
-.svg-diagram ellipse[fill="var(--color-navy)"],
-.svg-diagram path[fill="var(--color-navy)"],
-.svg-diagram rect[fill="var(--color-charcoal)"],
-.svg-diagram circle[fill="var(--color-charcoal)"],
-.svg-diagram ellipse[fill="var(--color-charcoal)"],
-.svg-diagram path[fill="var(--color-charcoal)"] {
-  fill: var(--bg-code);
-}
-
-.svg-diagram polygon[fill="#2C2416"],
-.svg-diagram polygon[fill="var(--color-navy)"],
-.svg-diagram polygon[fill="var(--color-charcoal)"] {
-  fill: var(--accent-mustard);
-}
-
-.svg-diagram text {
+.svg-diagram-container .svg-diagram text,
+figure .svg-diagram text {
   font-family: var(--font-sans);
-  fill: var(--color-charcoal);
-  paint-order: stroke;
-  stroke: transparent;
-  stroke-width: 0;
+}
+
+/* Default ink unless SVG specifies accent-on-color fills */
+.svg-diagram-container .svg-diagram text:not([fill]),
+.svg-diagram-container .svg-diagram text[fill="var(--color-navy)"],
+.svg-diagram-container .svg-diagram text[fill="var(--color-charcoal)"],
+.svg-diagram-container .svg-diagram text[fill="#2C2416"],
+.svg-diagram-container .svg-diagram text[fill="#2c2416"] {
+  fill: var(--diagram-ink);
+}
+
+.svg-diagram-container .svg-diagram text[fill="var(--bg-cream)"],
+.svg-diagram-container .svg-diagram text[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram text[fill="#faf6ef"] {
+  fill: var(--diagram-text-on-accent);
 }
 
 .svg-diagram text.mono {
@@ -537,8 +735,68 @@ figcaption {
   font-size: 11px;
 }
 
+/* Node fills on the light plate */
+.svg-diagram-container .svg-diagram rect[fill="var(--bg-cream)"],
+.svg-diagram-container .svg-diagram rect[fill="var(--bg-node)"],
+.svg-diagram-container .svg-diagram rect[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram rect[fill="#faf6ef"] {
+  fill: var(--diagram-node);
+}
 
-/* --- Side Navigation (The Archivist's Index) --- */
+.svg-diagram-container .svg-diagram rect[fill="var(--bg-sand)"],
+.svg-diagram-container .svg-diagram rect[fill="#F5F0E8"],
+.svg-diagram-container .svg-diagram rect[fill="#f5f0e8"] {
+  fill: var(--diagram-sand);
+}
+
+/* Strokes & arrows: always visible on cream canvas */
+.svg-diagram-container .svg-diagram line,
+.svg-diagram-container .svg-diagram path,
+.svg-diagram-container .svg-diagram polyline,
+.svg-diagram-container .svg-diagram polygon {
+  stroke-opacity: 1;
+}
+
+.svg-diagram-container .svg-diagram [stroke="var(--color-navy)"],
+.svg-diagram-container .svg-diagram [stroke="var(--color-charcoal)"] {
+  stroke: var(--diagram-ink);
+}
+
+.svg-diagram-container .svg-diagram [stroke="var(--color-mustard)"],
+.svg-diagram-container .svg-diagram [stroke="var(--accent-mustard)"] {
+  stroke: var(--diagram-mustard);
+}
+
+.svg-diagram-container .svg-diagram [stroke="var(--color-mint)"],
+.svg-diagram-container .svg-diagram [stroke="var(--color-coral)"],
+.svg-diagram-container .svg-diagram [stroke="var(--color-pink)"] {
+  stroke: var(--diagram-ink);
+}
+
+.svg-diagram-container .svg-diagram [fill="var(--color-mustard)"],
+.svg-diagram-container .svg-diagram [fill="var(--accent-mustard)"],
+.svg-diagram-container .svg-diagram [fill="var(--diagram-arrow)"] {
+  fill: var(--diagram-mustard);
+}
+
+/* Labels on Wes Anderson accent nodes (sage / rose / mustard) */
+.svg-diagram-container .svg-diagram rect[fill="#8FAF8A"] + text,
+.svg-diagram-container .svg-diagram rect[fill="#D4A5A0"] + text,
+.svg-diagram-container .svg-diagram rect[fill="var(--color-mint)"] + text,
+.svg-diagram-container .svg-diagram rect[fill="var(--color-pink)"] + text,
+.svg-diagram-container .svg-diagram rect[fill="var(--color-coral)"] + text,
+.svg-diagram-container .svg-diagram rect[fill="var(--color-mustard)"] + text {
+  fill: var(--diagram-text-on-accent) !important;
+}
+
+.svg-diagram-container .svg-diagram rect[fill="#FAF6EF"] + text,
+.svg-diagram-container .svg-diagram rect[fill="#F5F0E8"] + text,
+.svg-diagram-container .svg-diagram rect[fill="var(--bg-cream)"] + text,
+.svg-diagram-container .svg-diagram rect[fill="var(--bg-node)"] + text {
+  fill: var(--diagram-ink) !important;
+}
+
+/* --- Archivist nav --- */
 .archivist-nav {
   position: fixed;
   left: 30px;
@@ -563,7 +821,7 @@ figcaption {
   border-radius: 50%;
   border: 1px solid var(--color-charcoal);
   background-color: var(--bg-cream);
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease;
   position: relative;
   cursor: pointer;
 }
@@ -597,20 +855,22 @@ figcaption {
   opacity: 1;
 }
 
-/* --- Footer Symmetrical Navigation --- */
+/* --- Footer navigation (no viewport-wide void) --- */
 footer.chapter-footer {
   margin-top: 80px;
   border-top: var(--border-double);
   padding-top: 40px;
   text-align: center;
-  grid-column: 2;
 }
 
 .nav-buttons-container {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 40px;
+  gap: var(--gap-nav);
+  max-width: 42rem;
+  margin: 0 auto var(--space-block);
 }
 
 .vintage-button {
@@ -630,6 +890,7 @@ footer.chapter-footer {
   gap: 8px;
   box-shadow: var(--shadow-flat);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
 }
 
 .vintage-button:hover {
@@ -648,7 +909,7 @@ footer.chapter-footer {
 
 .vintage-button.mint {
   background-color: var(--accent-sage);
-  color: var(--bg-cream);
+  color: var(--text-on-accent);
 }
 
 .curator-credits {
@@ -656,8 +917,9 @@ footer.chapter-footer {
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   color: var(--color-charcoal);
-  opacity: 0.6;
+  opacity: 0.75;
   margin-top: 30px;
+  line-height: var(--line-height-prose);
 }
 
 .curator-credits a {
@@ -670,21 +932,40 @@ footer.chapter-footer {
   text-decoration: underline;
 }
 
-/* --- Responsive Reflow --- */
+/* --- Responsive reflow --- */
 @media (max-width: 1200px) {
   .container {
-    grid-template-columns: 20px minmax(0, 1fr) 20px;
+    grid-template-columns: 16px minmax(0, 1fr) 16px;
   }
+
   .container > * {
     grid-column: 2;
   }
-  main {
-    display: block;
-  }
+
   aside.margin-card {
-    grid-column: 1;
+    float: none;
     width: 100%;
-    margin: 20px 0;
-    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    margin: var(--space-block) 0;
+  }
+
+  :root {
+    --measure-wide: 100%;
+    --measure-prose: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 40px 12px;
+  }
+
+  blockquote {
+    padding: 10px 20px;
+  }
+
+  pre {
+    padding: 16px;
   }
 }
