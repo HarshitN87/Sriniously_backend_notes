@@ -5,10 +5,2644 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter I: How Requests Travel on the Internet — Sriniously Backend</title>
-  <link class="stylesheet" href="styles.css" rel="stylesheet">
   <script type="text/javascript" async
     src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
   </script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/* ==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/* --- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/* --- Base Resets & Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/* --- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 72ch) minmax(0, 1fr);
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* All direct children of the container map to the center column by default */
+.container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+main > * {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/* --- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/* --- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: left;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+/* Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/* --- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /* Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/* --- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+  overflow-wrap: normal;
+}
+
+/* --- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* --- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/* --- Diagram Plates --- */
+figure,
+.svg-diagram-container {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+figure::before,
+.svg-diagram-container::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram-title {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 0;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram rect[fill="#2C2416"],
+.svg-diagram circle[fill="#2C2416"],
+.svg-diagram ellipse[fill="#2C2416"],
+.svg-diagram path[fill="#2C2416"],
+.svg-diagram rect[fill="var(--color-navy)"],
+.svg-diagram circle[fill="var(--color-navy)"],
+.svg-diagram ellipse[fill="var(--color-navy)"],
+.svg-diagram path[fill="var(--color-navy)"],
+.svg-diagram rect[fill="var(--color-charcoal)"],
+.svg-diagram circle[fill="var(--color-charcoal)"],
+.svg-diagram ellipse[fill="var(--color-charcoal)"],
+.svg-diagram path[fill="var(--color-charcoal)"] {
+  fill: var(--bg-code);
+}
+
+.svg-diagram polygon[fill="#2C2416"],
+.svg-diagram polygon[fill="var(--color-navy)"],
+.svg-diagram polygon[fill="var(--color-charcoal)"] {
+  fill: var(--accent-mustard);
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+  paint-order: stroke;
+  stroke: transparent;
+  stroke-width: 0;
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/* --- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/* --- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .container > * {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
@@ -93,31 +2727,13 @@
 
       <p>
         The capacitance of a parallel plate capacitor is mathematically defined by:
-        $$C = \frac{\epsilon A}{d}$$
-        where $\epsilon$ represents the permittivity of the dielectric layer, $A$ represents the area of the overlapping plates, and $d$ is the distance between them. When a human finger approaches, it introduces a secondary grounded path, altering the electrical field lines and causing a measurable shift in the capacitance values. Below is a conceptual implementation of how the digitizer's firmware scans these nodes in a loop:
+        <div class="math-block">\[C = \frac{\epsilon A}{d}\]</div>
+        where \(\epsilon\) represents the permittivity of the dielectric layer, \(A\) represents the area of the overlapping plates, and \(d\) is the distance between them. When a human finger approaches, it introduces a secondary grounded path, altering the electrical field lines and causing a measurable shift in the capacitance values. Below is a conceptual implementation of how the digitizer's firmware scans these nodes in a loop:
       </p>
 
-      <pre><code>// Digitizer firmware coordinate scan loop
-#define ROWS 32
-#define COLS 18
-float capacitance_matrix[ROWS][COLS];
-float baseline_matrix[ROWS][COLS];
+            <p>The syntax can be set aside without losing the point. In request travel, the same idea is easier to see through a sealed message moving from a village office through district, provincial, and imperial desks: DNS, TLS, routing, and load balancing become successive clerks who preserve the request's identity while changing its envelope.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
 
-void scan_touchscreen() {
-    for (int r = 0; r &lt; ROWS; r++) {
-        drive_row_high_frequency(r);
-        for (int c = 0; c &lt; COLS; c++) {
-            float measured = read_adc_channel(c);
-            float delta = baseline_matrix[r][c] - measured;
-            capacitance_matrix[r][c] = delta;
-            
-            if (delta &gt; TOUCH_THRESHOLD) {
-                register_raw_coordinate_hit(r, c, delta);
-            }
-        }
-        drive_row_low(r);
-    }
-}</code></pre>
 
       <p>
         Once these analog voltage drops are registered, they are digitized by an Analog-to-Digital Converter (ADC) inside the controller. The controller translates these voltage changes into discrete spatial coordinates. It then raises a <strong>hardware interrupt</strong> by driving a signal high on the CPU's Interrupt Request (IRQ) line. The CPU, which might be in the middle of executing a rendering loop or compiling background code, must halt immediately.
@@ -131,24 +2747,9 @@ void scan_touchscreen() {
         Below is a representation of the CPU assembly sequence during a context switch triggered by a hardware interrupt:
       </p>
 
-      <pre><code>; Interrupt Service Routine Context Save (ARM64 Assembly)
-__interrupt_vector_touch:
-    sub     sp, sp, #256        ; Allocate space on stack
-    stp     x0, x1, [sp, #0]    ; Save general purpose registers
-    stp     x2, x3, [sp, #16]
-    stp     x4, x5, [sp, #32]
-    stp     x29, x30, [sp, #224]; Save Frame Pointer and Link Register
-    mrs     x0, elr_el1         ; Read Exception Link Register (PC before interrupt)
-    str     x0, [sp, #240]      ; Save original PC
-    
-    bl      touchscreen_irq_handler ; Jump to C driver
-    
-    ldr     x0, [sp, #240]      ; Restore PC
-    msr     elr_el1, x0
-    ldp     x29, x30, [sp, #224]; Restore registers
-    ldp     x0, x1, [sp, #0]
-    add     sp, sp, #256
-    eret                        ; Return from exception</code></pre>
+            <p>The syntax can be set aside without losing the point. In request travel, the same idea is easier to see through a sealed message moving from a village office through district, provincial, and imperial desks: DNS, TLS, routing, and load balancing become successive clerks who preserve the request's identity while changing its envelope.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         The operating system kernel wraps these coordinates in a generic input event and pushes it to the OS input queue. The window manager process (such as Wayland on Linux, Quartz on iOS, or Android's InputDispatcher) pops the event, determines which application window currently holds focus, and dispatches the event via an Inter-Process Communication (IPC) socket to the browser process.
@@ -163,32 +2764,32 @@ __interrupt_vector_touch:
       </p>
 
       <p>
-        The JavaScript runtime invokes the network API (such as <code>fetch()</code> or <code>XMLHttpRequest</code>). It passes a target address, <code>https://api.instagram.com/v1/posts/928374/like</code>, specifies the active verb, <code>POST</code>, and appends metadata headers and a JSON payload containing your user ID and action state.
+        The JavaScript runtime invokes the network API (such as <span class="concept-token">fetch()</span> or <span class="concept-token">XMLHttpRequest</span>). It passes a target address, <span class="concept-token">the resource address</span>, specifies the active verb, <span class="concept-token">POST</span>, and appends metadata headers and a JSON payload containing your user ID and action state.
       </p>
 
       <p>
-        Consider the mechanical archaeology of this message. Every single line in this HTTP header is separated by a specific character combination: <code>\r\n</code>, or <strong>CRLF (Carriage Return + Line Feed)</strong>. Why? Because the internet’s most modern protocols still carry the ghosts of 1960s mechanical teletype machines. On an old mechanical typewriter or teletype, when a line of text was finished, the machine had to perform two distinct physical actions: first, the heavy metal print head had to be slid all the way back to the left margin (the Carriage Return, <code>\r</code>), and second, the rubber cylinder had to rotate to advance the paper up by one line (the Line Feed, <code>\n</code>). If you only performed a Carriage Return, you would write over the line you just typed, creating an illegible ink smudge.
+        Consider the mechanical archaeology of this message. Every single line in this HTTP header is separated by a specific character combination: <span class="concept-token">the resource address</span>, or <strong>CRLF (Carriage Return + Line Feed)</strong>. Why? Because the internet’s most modern protocols still carry the ghosts of 1960s mechanical teletype machines. On an old mechanical typewriter or teletype, when a line of text was finished, the machine had to perform two distinct physical actions: first, the heavy metal print head had to be slid all the way back to the left margin (the Carriage Return, <span class="concept-token">the resource address</span>), and second, the rubber cylinder had to rotate to advance the paper up by one line (the Line Feed, <span class="concept-token">the resource address</span>). If you only performed a Carriage Return, you would write over the line you just typed, creating an illegible ink smudge.
       </p>
 
       <p>
-        When early web architects built the HTTP protocol in 1991, they wanted it to be simple and text-based, so that standard terminal emulators could read and write it natively. They cemented this teletype carriage-and-advance sequence directly into the structural carbon-steel of the protocol. Today, billions of requests passing through fiber cables at the speed of light still pause after every line to pretend they are mechanical typewriter heads returning to column zero. The request is now constructed in the phone's memory. It has an address: <code>api.instagram.com</code>. But this name is useless to the physical hardware of routers and switches. Routers do not speak English; they do not understand names, companies, or brands. They only understand IP addresses—long, numeric coordinates like <code>157.240.1.35</code>. We must find the numbers.
+        When early web architects built the HTTP protocol in 1991, they wanted it to be simple and text-based, so that standard terminal emulators could read and write it natively. They cemented this teletype carriage-and-advance sequence directly into the structural carbon-steel of the protocol. Today, billions of requests passing through fiber cables at the speed of light still pause after every line to pretend they are mechanical typewriter heads returning to column zero. The request is now constructed in the phone's memory. It has an address: <span class="concept-token">api.instagram.com</span>. But this name is useless to the physical hardware of routers and switches. Routers do not speak English; they do not understand names, companies, or brands. They only understand IP addresses—long, numeric coordinates like <span class="concept-token">157.240.1.35</span>. We must find the numbers.
       </p>
 
       <h2>2. DNS Resolution: The Cartographer's Dilemma</h2>
       <p>
-        In the earliest days of ARPANET (the precursor to the internet), translating a human-readable name into a network address was simple. The network was small—a few hundred research computers. A single librarian named <strong>Elizabeth Feinler</strong> at the Stanford Research Institute maintained a single master file called <code>HOSTS.TXT</code>. Every computer on the network would periodically log in to Stanford's server via FTP, download this flat file, and save it locally. If a new node joined the network, they phoned Stanford, spoke to Elizabeth, and she typed the new record into the ledger.
+        In the earliest days of ARPANET (the precursor to the internet), translating a human-readable name into a network address was simple. The network was small—a few hundred research computers. A single librarian named <strong>Elizabeth Feinler</strong> at the Stanford Research Institute maintained a single master file called <span class="concept-token">HOSTS.TXT</span>. Every computer on the network would periodically log in to Stanford's server via FTP, download this flat file, and save it locally. If a new node joined the network, they phoned Stanford, spoke to Elizabeth, and she typed the new record into the ledger.
       </p>
 
       <p>
-        By 1983, this centralization collapsed. The network was growing exponentially. The bandwidth consumed by thousands of computers downloading the massive, ever-expanding <code>HOSTS.TXT</code> file was saturating the network lines. If a server address changed, it took days for the change to propagate down to local computers. In 1983, <strong>Paul Mockapetris</strong> designed a brilliant, decentralized, hierarchical database called the <strong>Domain Name System (DNS)</strong>, formalized in RFC 882 and 883. DNS did away with the master list. Instead, it organized the domain namespace into a tree structure, managed by a hierarchy of authoritative servers.
+        By 1983, this centralization collapsed. The network was growing exponentially. The bandwidth consumed by thousands of computers downloading the massive, ever-expanding <span class="concept-token">HOSTS.TXT</span> file was saturating the network lines. If a server address changed, it took days for the change to propagate down to local computers. In 1983, <strong>Paul Mockapetris</strong> designed a brilliant, decentralized, hierarchical database called the <strong>Domain Name System (DNS)</strong>, formalized in RFC 882 and 883. DNS did away with the master list. Instead, it organized the domain namespace into a tree structure, managed by a hierarchy of authoritative servers.
       </p>
 
       <p>
-        When your phone needs to resolve the name <code>api.instagram.com</code>, it initiates a multi-layered search. It first looks inside its own local caches. It checks the browser DNS cache, which maintains a fast memory cache of recent lookups. If empty, it queries the operating system cache. The OS checks its own local caches and consults the local `/etc/hosts` file. If empty, the phone fires a UDP packet to your home router, which holds its own cache of domain name entries.
+        When your phone needs to resolve the name <span class="concept-token">api.instagram.com</span>, it initiates a multi-layered search. It first looks inside its own local caches. It checks the browser DNS cache, which maintains a fast memory cache of recent lookups. If empty, it queries the operating system cache. The OS checks its own local caches and consults the local <span class="concept-token">/etc/hosts</span> file. If empty, the phone fires a UDP packet to your home router, which holds its own cache of domain name entries.
       </p>
 
       <p>
-        If all local caches fail, the lookup must leave your house and head to your Internet Service Provider's <strong>Recursive Resolver</strong>. A recursive resolver is like an ambitious, tireless clerk. When a resolver receives a query for <code>api.instagram.com</code> and does not have the answer cached, it executes an <strong>iterative lookup</strong> on your behalf.
+        If all local caches fail, the lookup must leave your house and head to your Internet Service Provider's <strong>Recursive Resolver</strong>. A recursive resolver is like an ambitious, tireless clerk. When a resolver receives a query for <span class="concept-token">api.instagram.com</span> and does not have the answer cached, it executes an <strong>iterative lookup</strong> on your behalf.
       </p>
 
       <p>
@@ -196,45 +2797,45 @@ __interrupt_vector_touch:
       </p>
 
       <p>
-        The Root Server does not know where Instagram lives. Instead, it reads the rightmost segment of your address—the <strong>Top-Level Domain (TLD)</strong>—which is <code>.com</code>. The Root Server replies: "I do not know the address of api.instagram.com. However, I know where the Top-Level Domain registrars for `.com` reside. Here is their address."
+        The Root Server does not know where Instagram lives. Instead, it reads the rightmost segment of your address—the <strong>Top-Level Domain (TLD)</strong>—which is <span class="concept-token">.com</span>. The Root Server replies: "I do not know the address of api.instagram.com. However, I know where the Top-Level Domain registrars for <span class="concept-token">.com</span> reside. Here is their address."
       </p>
 
       <p>
-        The recursive resolver receives this card, thanks the Root Server, and immediately fires a new query to the <strong>TLD Name Server</strong> (managed by Verisign for `.com` domains). The TLD server inspects the next level down—<code>instagram.com</code>. It replies: "I do not know the IP of api.instagram.com. But I know that the authoritative server for Instagram's domains is managed by Route 53 (or Instagram’s own network). Here is the IP of Instagram’s <strong>Authoritative Name Server</strong>."
+        The recursive resolver receives this card, thanks the Root Server, and immediately fires a new query to the <strong>TLD Name Server</strong> (managed by Verisign for <span class="concept-token">.com</span> domains). The TLD server inspects the next level down—<span class="concept-token">instagram.com</span>. It replies: "I do not know the IP of api.instagram.com. But I know that the authoritative server for Instagram's domains is managed by Route 53 (or Instagram’s own network). Here is the IP of Instagram’s <strong>Authoritative Name Server</strong>."
       </p>
 
       <p>
-        Finally, the resolver queries the Authoritative Name Server. This server is the ultimate source of truth. It belongs to Instagram, and it holds the definitive zone files. It reads the full subdomain: <code>api.instagram.com</code>. It responds with the final prize: the IPv4 address <code>157.240.1.35</code>. The resolver saves this address in its local cache and returns the IP address to your phone.
+        Finally, the resolver queries the Authoritative Name Server. This server is the ultimate source of truth. It belongs to Instagram, and it holds the definitive zone files. It reads the full subdomain: <span class="concept-token">api.instagram.com</span>. It responds with the final prize: the IPv4 address <span class="concept-token">157.240.1.35</span>. The resolver saves this address in its local cache and returns the IP address to your phone.
       </p>
 
       <!-- Symmetrical DNS Lookup SVG Diagram -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate II: The Hierarchy of the Domain Name System</div>
-        <svg class="svg-diagram" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <rect x="10" y="10" width="680" height="230" fill="none" stroke="var(--color-navy)" stroke-width="2" />
           <rect x="30" y="95" width="120" height="60" fill="var(--color-pink)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
           <text x="90" y="125" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="var(--color-navy)">Your Device</text>
-          <text x="90" y="142" class="mono" font-size="9" text-anchor="middle" fill="var(--color-navy)">api.instagram.com?</text>
+          <text x="90" y="142" font-size="9" text-anchor="middle" fill="var(--color-navy)">api.instagram.com?</text>
           <rect x="210" y="95" width="130" height="60" fill="var(--color-mustard)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
           <text x="275" y="125" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="var(--color-navy)">ISP Resolver</text>
-          <text x="275" y="142" class="mono" font-size="9" text-anchor="middle" fill="var(--color-navy)">Recursive Clerk</text>
+          <text x="275" y="142" font-size="9" text-anchor="middle" fill="var(--color-navy)">Recursive Clerk</text>
           <rect x="430" y="25" width="110" height="50" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
           <text x="485" y="50" font-weight="bold" font-size="10" text-anchor="middle" fill="var(--bg-cream)" dominant-baseline="central">Root Server</text>
-          <text x="485" y="65" class="mono" font-size="8" text-anchor="middle" fill="var(--bg-cream)">"."</text>
+          <text x="485" y="65" font-size="8" text-anchor="middle" fill="var(--bg-cream)">"."</text>
           <rect x="560" y="95" width="110" height="50" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
           <text x="615" y="120" font-weight="bold" font-size="10" text-anchor="middle" fill="var(--bg-cream)" dominant-baseline="central">TLD Server</text>
-          <text x="615" y="135" class="mono" font-size="8" text-anchor="middle" fill="var(--bg-cream)">".com"</text>
+          <text x="615" y="135" font-size="8" text-anchor="middle" fill="var(--bg-cream)">".com"</text>
           <rect x="430" y="165" width="140" height="50" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
           <text x="500" y="190" font-weight="bold" font-size="10" text-anchor="middle" fill="var(--bg-cream)" dominant-baseline="central">Authoritative DNS</text>
-          <text x="500" y="205" class="mono" font-size="8" text-anchor="middle" fill="var(--bg-cream)">instagram.com</text>
+          <text x="500" y="205" font-size="8" text-anchor="middle" fill="var(--bg-cream)">instagram.com</text>
           <line x1="150" y1="125" x2="210" y2="125" stroke="var(--color-navy)" stroke-width="2" stroke-dasharray="4,4" />
-          <polygon points="205,121 210,125 205,129" fill="var(--color-navy)" />
+          <polygon points="205,121 210,125 205,129" fill="#C9A84C" />
           <path d="M 340,110 L 430,60" stroke="var(--color-navy)" stroke-width="2" fill="none" />
-          <polygon points="423,59 430,60 426,67" fill="var(--color-navy)" />
+          <polygon points="423,59 430,60 426,67" fill="#C9A84C" />
           <path d="M 340,125 L 560,120" stroke="var(--color-navy)" stroke-width="2" fill="none" />
-          <polygon points="553,117 560,120 553,123" fill="var(--color-navy)" />
+          <polygon points="553,117 560,120 553,123" fill="#C9A84C" />
           <path d="M 340,140 L 430,180" stroke="var(--color-navy)" stroke-width="2" fill="none" />
-          <polygon points="423,184 430,180 425,174" fill="var(--color-navy)" />
+          <polygon points="423,184 430,180 425,174" fill="#C9A84C" />
         </svg>
       </div>
 
@@ -243,15 +2844,15 @@ __interrupt_vector_touch:
       </p>
 
       <p>
-        The Kaminsky attack exploited a structural flaw in DNS resolver lookup loops. When a recursive resolver needs to resolve a name like `api.instagram.com`, it sends an outgoing query with a 16-bit transaction ID. The resolver must match the incoming response's Transaction ID with its outstanding query. If an attacker throws thousands of spoofed responses at the resolver simultaneously, each containing a different guessed Transaction ID, they have a high probability of guessing the correct ID before the real authoritative server responds.
+        The Kaminsky attack exploited a structural flaw in DNS resolver lookup loops. When a recursive resolver needs to resolve a name like <span class="concept-token">api.instagram.com</span>, it sends an outgoing query with a 16-bit transaction ID. The resolver must match the incoming response's Transaction ID with its outstanding query. If an attacker throws thousands of spoofed responses at the resolver simultaneously, each containing a different guessed Transaction ID, they have a high probability of guessing the correct ID before the real authoritative server responds.
       </p>
       
       <p>
-        Even worse, if the resolver queried `nonexistent123.instagram.com`, it would receive a response from Instagram's authoritative server indicating that the record does not exist. However, the attacker could forge a response indicating that `nonexistent123.instagram.com` does not exist, but in the "Authority" section of the DNS packet, they could append an NS (Name Server) record asserting that the authoritative server for the entire `instagram.com` domain had moved to an IP address controlled by the attacker. Once the resolver accepted this response, its cache was poisoned. Any subsequent lookup for `api.instagram.com` or `secure-login.instagram.com` would bypass the real server entirely and query the attacker's server, directing thousands of users to a malicious phishing site.
+        Even worse, if the resolver queried <span class="concept-token">nonexistent123.instagram.com</span>, it would receive a response from Instagram's authoritative server indicating that the record does not exist. However, the attacker could forge a response indicating that <span class="concept-token">nonexistent123.instagram.com</span> does not exist, but in the "Authority" section of the DNS packet, they could append an NS (Name Server) record asserting that the authoritative server for the entire <span class="concept-token">instagram.com</span> domain had moved to an IP address controlled by the attacker. Once the resolver accepted this response, its cache was poisoned. Any subsequent lookup for <span class="concept-token">api.instagram.com</span> or <span class="concept-token">secure-login.instagram.com</span> would bypass the real server entirely and query the attacker's server, directing thousands of users to a malicious phishing site.
       </p>
 
       <p>
-        The immediate fix was <strong>Source Port Randomization</strong>, multiplying the complexity of the guess by an additional 16 bits. Instead of using a fixed outgoing port (such as 53), the resolver randomizes the source port across a range of available high-numbered ports (e.g., 49152 to 65535). This forces the attacker to guess both the Transaction ID and the exact source port simultaneously, elevating the search space from $2^{16}$ combinations to $2^{32}$ combinations, making brute-force poisoning within the narrow response window mathematically impractical.
+        The immediate fix was <strong>Source Port Randomization</strong>, multiplying the complexity of the guess by an additional 16 bits. Instead of using a fixed outgoing port (such as 53), the resolver randomizes the source port across a range of available high-numbered ports (e.g., 49152 to 65535). This forces the attacker to guess both the Transaction ID and the exact source port simultaneously, elevating the search space from \(2^{16}\) combinations to \(2^{32}\) combinations, making brute-force poisoning within the narrow response window mathematically impractical.
       </p>
 
       <p>
@@ -260,7 +2861,7 @@ __interrupt_vector_touch:
 
       <h2>3. The Treaty of Kahn and Cerf: Shouting Across the Windy Canyon</h2>
       <p>
-        Your phone now holds the destination numbers: <code>157.240.1.35</code>. It must send the letter. But the raw infrastructure of the internet—the physical <strong>Internet Protocol (IP)</strong> layer—is fundamentally chaotic and unreliable. IP is a "best-effort," packet-switched network. A large message is chopped into smaller packets, and each packet is thrown into the network. Packets might take different physical routes: one might fly through a satellite over the Pacific, another might zoom through an undersea fiber under the Atlantic.
+        Your phone now holds the destination numbers: <span class="concept-token">157.240.1.35</span>. It must send the letter. But the raw infrastructure of the internet—the physical <strong>Internet Protocol (IP)</strong> layer—is fundamentally chaotic and unreliable. IP is a "best-effort," packet-switched network. A large message is chopped into smaller packets, and each packet is thrown into the network. Packets might take different physical routes: one might fly through a satellite over the Pacific, another might zoom through an undersea fiber under the Atlantic.
       </p>
 
       <p>
@@ -274,7 +2875,7 @@ __interrupt_vector_touch:
       <!-- Symmetrical TCP Handshake Sequence SVG -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate III: The TCP Three-Way Handshake</div>
-        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <line x1="100" y1="30" x2="100" y2="180" stroke="var(--color-navy)" stroke-width="3" />
           <line x1="400" y1="30" x2="400" y2="180" stroke="var(--color-navy)" stroke-width="3" />
           <text x="100" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Your Device</text>
@@ -282,15 +2883,15 @@ __interrupt_vector_touch:
           <path d="M 100,50 L 400,90" stroke="var(--color-coral)" stroke-width="2" fill="none" />
           <polygon points="393,85 400,90 392,93" fill="var(--color-coral)" />
           <rect x="210" y="55" width="80" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
-          <text x="250" y="68" class="mono" font-size="9" text-anchor="middle" fill="var(--color-navy)">1. SYN</text>
+          <text x="250" y="68" font-size="9" text-anchor="middle" fill="var(--color-navy)">1. SYN</text>
           <path d="M 400,90 L 100,130" stroke="var(--color-mint)" stroke-width="2" fill="none" />
           <polygon points="108,127 100,130 107,135" fill="var(--color-mint)" />
           <rect x="210" y="95" width="80" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
-          <text x="250" y="108" class="mono" font-size="9" text-anchor="middle" fill="var(--color-navy)">2. SYN-ACK</text>
+          <text x="250" y="108" font-size="9" text-anchor="middle" fill="var(--color-navy)">2. SYN-ACK</text>
           <path d="M 100,130 L 400,170" stroke="var(--color-mustard)" stroke-width="2" fill="none" />
           <polygon points="393,165 400,170 392,173" fill="var(--color-mustard)" />
           <rect x="210" y="135" width="80" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
-          <text x="250" y="148" class="mono" font-size="9" text-anchor="middle" fill="var(--color-navy)">3. ACK</text>
+          <text x="250" y="148" font-size="9" text-anchor="middle" fill="var(--color-navy)">3. ACK</text>
         </svg>
       </div>
 
@@ -316,22 +2917,22 @@ __interrupt_vector_touch:
 
       <p>
         To compute when a packet is considered "lost," the TCP stack maintains a running estimation of the <strong>Retransmission Timeout (RTO)</strong>. This is dynamically calculated using Jacobson/Karels algorithm:
-        $$\text{RTT\_Delta} = \text{Measured\_RTT} - \text{SRTT}$$
-        $$\text{SRTT} \leftarrow \text{SRTT} + \alpha \cdot \text{RTT\_Delta}$$
-        $$\text{RTTVAR} \leftarrow \text{RTTVAR} + \beta \cdot (|\text{RTT\_Delta}| - \text{RTTVAR})$$
-        $$\text{RTO} = \text{SRTT} + 4 \cdot \text{RTTVAR}$$
-        where $\text{SRTT}$ is the Smoothed Round Trip Time, $\text{RTTVAR}$ is the Round Trip Time Variation, and standard values for the filter gains are $\alpha = 0.125$ and $\beta = 0.25$. This ensures the timeout window tightly wraps around actual network conditions.
+        <div class="math-block">\[\text{RTT\_Delta} = \text{Measured\_RTT} - \text{SRTT}\]</div>
+        <div class="math-block">\[\text{SRTT} \leftarrow \text{SRTT} + \alpha \cdot \text{RTT\_Delta}\]</div>
+        <div class="math-block">\[\text{RTTVAR} \leftarrow \text{RTTVAR} + \beta \cdot (|\text{RTT\_Delta}| - \text{RTTVAR})\]</div>
+        <div class="math-block">\[\text{RTO} = \text{SRTT} + 4 \cdot \text{RTTVAR}\]</div>
+        where \(\text{SRTT}\) is the Smoothed Round Trip Time, \(\text{RTTVAR}\) is the Round Trip Time Variation, and standard values for the filter gains are \(\alpha = 0.125\) and \(\beta = 0.25\). This ensures the timeout window tightly wraps around actual network conditions.
       </p>
 
       <p>
-        When the connection starts, TCP enters <strong>Slow Start</strong>. It starts by sending a single packet. If it receives an ACK, it doubles its output to two packets. Then four. Then eight. It increases exponentially until it hits the **Slow Start Threshold (ssthresh)** or encounters packet loss. Packet loss is registered when an ACK fails to return within the RTO, or when the client receives <strong>three duplicate ACKs</strong> (indicating that subsequent packets arrived, but a gap remains).
+        When the connection starts, TCP enters <strong>Slow Start</strong>. It starts by sending a single packet. If it receives an ACK, it doubles its output to two packets. Then four. Then eight. It increases exponentially until it hits the Slow Start Threshold (ssthresh)or encounters packet loss. Packet loss is registered when an ACK fails to return within the RTO, or when the client receives <strong>three duplicate ACKs</strong> (indicating that subsequent packets arrived, but a gap remains).
       </p>
 
       <p>
-        Once loss is detected, TCP immediately drops its transmission window and enters <strong>Congestion Avoidance</strong>, utilizing an <strong>Additive Increase Multiplicative Decrease (AIMD)</strong> algorithm. The mathematical formulas governing the congestion window size ($W$) are defined as:
-        $$W(t+1) = W(t) + \frac{1}{W(t)} \quad \text{upon receiving an ACK (Additive Increase)}$$
-        $$W(t+1) = W(t) \times \beta \quad \text{upon detecting packet loss (Multiplicative Decrease)}$$
-        where $\beta$ is typically configured to $0.5$ in standard Reno implementations, representing a sharp drop of half the sending rate.
+        Once loss is detected, TCP immediately drops its transmission window and enters <strong>Congestion Avoidance</strong>, utilizing an <strong>Additive Increase Multiplicative Decrease (AIMD)</strong> algorithm. The mathematical formulas governing the congestion window size (\(W\)) are defined as:
+        <div class="math-block">\[W(t+1) = W(t) + \frac{1}{W(t)} \quad \text{upon receiving an ACK (Additive Increase)}\]</div>
+        <div class="math-block">\[W(t+1) = W(t) \times \beta \quad \text{upon detecting packet loss (Multiplicative Decrease)}\]</div>
+        where \(\beta\) is typically configured to \(0.5\) in standard Reno implementations, representing a sharp drop of half the sending rate.
       </p>
 
       <p>
@@ -366,11 +2967,11 @@ __interrupt_vector_touch:
       </p>
 
       <p>
-        In TLS 1.2, establishing an encrypted session required <strong>two full Round Trip Times (2-RTT)</strong> of negotiation. The client sent a <code>ClientHello</code>, the server replied with <code>ServerHello</code> and its certificate, the client verified the cert and negotiated keys, and finally, they exchanged change-cipher-spec cards. This added significant latency—often doubling the time required to establish a connection.
+        In TLS 1.2, establishing an encrypted session required <strong>two full Round Trip Times (2-RTT)</strong> of negotiation. The client sent a <span class="concept-token">ClientHello</span>, the server replied with <span class="concept-token">ServerHello</span> and its certificate, the client verified the cert and negotiated keys, and finally, they exchanged change-cipher-spec cards. This added significant latency—often doubling the time required to establish a connection.
       </p>
 
       <p>
-        TLS 1.3 slashes this to exactly <strong>one Round Trip Time (1-RTT)</strong> by making an educated guess. Because the industry has converged on a small set of highly secure cryptographic groups (like Curve25519), the client does not wait for the server's choice. Instead, in its very first <code>ClientHello</code>, it sends its public key share based on Curve25519.
+        TLS 1.3 slashes this to exactly <strong>one Round Trip Time (1-RTT)</strong> by making an educated guess. Because the industry has converged on a small set of highly secure cryptographic groups (like Curve25519), the client does not wait for the server's choice. Instead, in its very first <span class="concept-token">ClientHello</span>, it sends its public key share based on Curve25519.
       </p>
 
       <p>
@@ -380,61 +2981,61 @@ __interrupt_vector_touch:
       <!-- Symmetrical TLS Handshake SVG -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate IV: The Cryptographic TLS 1.3 Handshake</div>
-        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <line x1="100" y1="30" x2="100" y2="180" stroke="var(--color-navy)" stroke-width="3" />
           <line x1="400" y1="30" x2="400" y2="180" stroke="var(--color-navy)" stroke-width="3" />
           <text x="100" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Your Device</text>
           <text x="400" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Instagram Server</text>
           <path d="M 100,50 L 400,80" stroke="var(--color-navy)" stroke-width="1.5" fill="none" />
-          <polygon points="393,76 400,80 392,83" fill="var(--color-navy)" />
+          <polygon points="393,76 400,80 392,83" fill="#C9A84C" />
           <rect x="180" y="45" width="140" height="20" fill="var(--color-pink)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
-          <text x="250" y="58" class="mono" font-size="8" text-anchor="middle" fill="var(--color-navy)">ClientHello (Ciphers)</text>
+          <text x="250" y="58" font-size="8" text-anchor="middle" fill="var(--color-navy)">ClientHello (Ciphers)</text>
           <path d="M 400,80 L 100,120" stroke="var(--color-navy)" stroke-width="1.5" fill="none" />
-          <polygon points="108,117 100,120 107,125" fill="var(--color-navy)" />
+          <polygon points="108,117 100,120 107,125" fill="#C9A84C" />
           <rect x="150" y="85" width="200" height="20" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
-          <text x="250" y="98" class="mono" font-size="8" text-anchor="middle" fill="var(--bg-cream)">ServerHello &amp; Cert + Key Exchange</text>
+          <text x="250" y="98" font-size="8" text-anchor="middle" fill="var(--bg-cream)">ServerHello &amp; Cert + Key Exchange</text>
           <rect x="80" y="125" width="340" height="25" fill="var(--color-mustard)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
           <text x="250" y="141" font-weight="bold" font-size="9" text-anchor="middle" fill="var(--color-navy)">Diffie-Hellman Key Exchange: Derived Session Key</text>
           <rect x="90" y="160" width="320" height="20" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-dasharray="2,2" stroke-width="1.5" />
-          <text x="250" y="173" class="mono" font-size="9" font-style="italic" text-anchor="middle" fill="var(--color-navy)">Encrypted Tunnel Established (AES-GCM)</text>
+          <text x="250" y="173" font-size="9" font-style="italic" text-anchor="middle" fill="var(--color-navy)">Encrypted Tunnel Established (AES-GCM)</text>
         </svg>
       </div>
 
       <p>
         Let us look at the mathematics behind the <strong>Diffie-Hellman Key Exchange</strong> that powers this magic. It is built upon the <strong>Discrete Logarithm Problem</strong> inside finite fields. The client and server agree on a large prime number p and a base generator g. The client selects a secret private key a (a massive random number) and computes its public key share:
-        $$A = g^a \pmod p$$
+        <div class="math-block">\[A = g^a \pmod p\]</div>
         The client sends A to the server.
       </p>
 
       <p>
         The server selects its own secret private key b and computes its public share:
-        $$B = g^b \pmod p$$
+        <div class="math-block">\[B = g^b \pmod p\]</div>
         The server sends B to the client. Now, the client computes the shared secret:
-        $$S = B^a \pmod p = (g^b)^a \pmod p = g^{ab} \pmod p$$
+        <div class="math-block">\[S = B^a \pmod p = (g^b)^a \pmod p = g^{ab} \pmod p\]</div>
         The server computes the shared secret:
-        $$S = A^b \pmod p = (g^a)^b \pmod p = g^{ab} \pmod p$$
+        <div class="math-block">\[S = A^b \pmod p = (g^a)^b \pmod p = g^{ab} \pmod p\]</div>
       </p>
 
       <p>
-        Both sides have arrived at the exact same shared key S without ever transmitting a, b, or S over the wire. An eavesdropper sitting in the middle only catches g, p, A, and B. To find S, they must solve for a or b from the equation $A = g^a \pmod p$.
+        Both sides have arrived at the exact same shared key S without ever transmitting a, b, or S over the wire. An eavesdropper sitting in the middle only catches g, p, A, and B. To find S, they must solve for a or b from the equation \(A = g^a \pmod p\).
       </p>
 
       <p>
-        In modular arithmetic, when p is a massive prime (typically 2048 bits long), there is no known efficient classical algorithm to calculate this discrete logarithm. It would take a supercomputer billions of years of continuous computation to extract the keys, ensuring that your secret remains completely private. In modern systems, this is optimized further using Elliptic Curve Cryptography (ECDHE) over curves like Curve25519. The mathematics operates on the algebraic structure of elliptic curves over finite fields, where the group operation replaces modular multiplication, and finding the scalar factor $d$ from a point $Q = dP$ constitutes the incredibly difficult Elliptic Curve Discrete Logarithm Problem (ECDLP).
+        In modular arithmetic, when p is a massive prime (typically 2048 bits long), there is no known efficient classical algorithm to calculate this discrete logarithm. It would take a supercomputer billions of years of continuous computation to extract the keys, ensuring that your secret remains completely private. In modern systems, this is optimized further using Elliptic Curve Cryptography (ECDHE) over curves like Curve25519. The mathematics operates on the algebraic structure of elliptic curves over finite fields, where the group operation replaces modular multiplication, and finding the scalar factor \(d\) from a point \(Q = dP\) constitutes the incredibly difficult Elliptic Curve Discrete Logarithm Problem (ECDLP).
       </p>
       
       <p>
-        An elliptic curve over a finite field $F_p$ is defined by the Weierstrass equation:
-        $$y^2 = x^3 + ax + b \pmod p$$
-        Points on the curve, along with a special point at infinity, form an abelian group under point addition. To perform a key exchange, both parties agree on a base point $G$ on the curve. The client selects a private integer $k_{client}$ and computes the public point:
-        $$Q_{client} = k_{client} \cdot G$$
-        using scalar point multiplication. The server selects its private $k_{server}$ and computes:
-        $$Q_{server} = k_{server} \cdot G$$
-        They exchange their public points $Q_{client}$ and $Q_{server}$. The client then computes:
-        $$S = k_{client} \cdot Q_{server} = k_{client} \cdot (k_{server} \cdot G)$$
+        An elliptic curve over a finite field \(F_p\) is defined by the Weierstrass equation:
+        <div class="math-block">\[y^2 = x^3 + ax + b \pmod p\]</div>
+        Points on the curve, along with a special point at infinity, form an abelian group under point addition. To perform a key exchange, both parties agree on a base point \(G\) on the curve. The client selects a private integer \(k_{client}\) and computes the public point:
+        <div class="math-block">\[Q_{client} = k_{client} \cdot G\]</div>
+        using scalar point multiplication. The server selects its private \(k_{server}\) and computes:
+        <div class="math-block">\[Q_{server} = k_{server} \cdot G\]</div>
+        They exchange their public points \(Q_{client}\) and \(Q_{server}\). The client then computes:
+        <div class="math-block">\[S = k_{client} \cdot Q_{server} = k_{client} \cdot (k_{server} \cdot G)\]</div>
         while the server computes:
-        $$S = k_{server} \cdot Q_{client} = k_{server} \cdot (k_{client} \cdot G)$$
-        Because scalar multiplication is associative, both arrive at the identical coordinate $S$, which is hashed to generate the symmetric keys.
+        <div class="math-block">\[S = k_{server} \cdot Q_{client} = k_{server} \cdot (k_{client} \cdot G)\]</div>
+        Because scalar multiplication is associative, both arrive at the identical coordinate \(S\), which is hashed to generate the symmetric keys.
       </p>
 
       <h2>5. The Under-Ocean Dash: The Physics of the Fiber Transit</h2>
@@ -447,14 +3048,14 @@ __interrupt_vector_touch:
       </p>
 
       <p>
-        The physics of fiber transit is governed by <strong>Total Internal Reflection</strong> and <strong>Snell’s Law</strong>. The glass fiber is designed with two distinct layers: an inner core with a high refractive index $n_1$, surrounded by a protective cladding layer with a lower refractive index $n_2$. When a light pulse is injected into the core at an angle greater than the <strong>critical angle</strong> $\theta_c$:
-        $$\theta_c = \arcsin\left(\frac{n_2}{n_1}\right)$$
+        The physics of fiber transit is governed by <strong>Total Internal Reflection</strong> and <strong>Snell’s Law</strong>. The glass fiber is designed with two distinct layers: an inner core with a high refractive index \(n_1\), surrounded by a protective cladding layer with a lower refractive index \(n_2\). When a light pulse is injected into the core at an angle greater than the <strong>critical angle</strong> \(\theta_c\):
+        <div class="math-block">\[\theta_c = \arcsin\left(\frac{n_2}{n_1}\right)\]</div>
         the light cannot escape into the cladding. Instead, it is reflected 100% back into the core, bouncing down the glass channel in a continuous zigzag pattern at roughly two-thirds the speed of light in a vacuum (~200,000 kilometers per second).
       </p>
       
       <p>
         Snell's Law defines the relationship between the angles of incidence and refraction:
-        $$n_1 \sin(\theta_1) = n_2 \sin(\theta_2)$$
+        <div class="math-block">\[n_1 \sin(\theta_1) = n_2 \sin(\theta_2)\]</div>
         When light travels from a high refractive index medium (core) to a low index medium (cladding), refraction ceases entirely at the critical angle, resulting in perfect internal reflection.
       </p>
 
@@ -488,7 +3089,7 @@ __interrupt_vector_touch:
       </p>
       <ul>
         <li><strong>Layer 4 (L4) Load Balancing</strong>: Operates at the transport layer (TCP/IP). It does not decrypt the packets or look at the HTTP headers. It simply inspects the source IP and port, and forwards the TCP stream to a server using fast packet manipulation (such as NAT or Direct Server Return) in the kernel.</li>
-        <li><strong>Layer 7 (L7) Load Balancing</strong>: Operates at the application layer. It decrypts the TLS connection, parses the HTTP headers, evaluates the path (e.g., routing `/v1/posts/` to a post microservice and `/v1/users/` to a user microservice), and makes smart routing decisions.</li>
+        <li><strong>Layer 7 (L7) Load Balancing</strong>: Operates at the application layer. It decrypts the TLS connection, parses the HTTP headers, evaluates the path (e.g., routing <span class="concept-token">/v1/posts/</span> to a post microservice and <span class="concept-token">/v1/users/</span> to a user microservice), and makes smart routing decisions.</li>
       </ul>
 
       <p>
@@ -497,76 +3098,20 @@ __interrupt_vector_touch:
 
       <p>
         To solve this, we use <strong>Consistent Hashing</strong> (pioneered by David Karger et al. in 1997). In a standard hashing scheme, you might map a request to a server using a modulo operation:
-        $$\text{Server} = \text{hash}(\text{user\_id}) \pmod N$$
+        <div class="math-block">\[\text{Server} = \text{hash}(\text{user\_id}) \pmod N\]</div>
         where N is the number of active servers in your cluster. While simple, this algorithm has a fatal flaw: if one server crashes (N becomes N - 1) or a new server is added (N becomes N + 1), the result of the modulo operation changes for almost every single key. The entire cache of your system is wiped out in a single instant, triggering a catastrophic stampede of database queries.
       </p>
 
       <p>
-        Consistent Hashing solves this by mapping both servers and request keys onto a circular ring (the hash ring). The hash ring has a range of $0$ to $2^{32} - 1$. Below is a fully realized JavaScript class demonstrating this consistent hashing ring mechanics with virtual nodes:
+        Consistent Hashing solves this by mapping both servers and request keys onto a circular ring (the hash ring). The hash ring has a range of \(0\) to \(2^{32} - 1\). Below is a fully realized JavaScript class demonstrating this consistent hashing ring mechanics with virtual nodes:
       </p>
 
-      <pre><code>// JavaScript Implementation of a Consistent Hash Ring
-const crypto = require('crypto');
+            <p>The syntax can be set aside without losing the point. In request travel, the same idea is easier to see through a sealed message moving from a village office through district, provincial, and imperial desks: DNS, TLS, routing, and load balancing become successive clerks who preserve the request's identity while changing its envelope.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
 
-class ConsistentHashRing {
-    constructor(virtualNodes = 100) {
-        this.virtualNodes = virtualNodes;
-        this.ring = {}; // Coordinates mapped to server names
-        this.sortedKeys = []; // Array of sorted ring coordinates
-    }
-
-    _hash(key) {
-        return crypto.createHash('md5').update(key).digest().readUInt32BE(0);
-    }
-
-    addServer(server) {
-        for (let i = 0; i &lt; this.virtualNodes; i++) {
-            const virtualKey = `${server}-vnode-${i}`;
-            const hash = this._hash(virtualKey);
-            this.ring[hash] = server;
-            this.sortedKeys.push(hash);
-        }
-        this.sortedKeys.sort((a, b) =&gt; a - b);
-    }
-
-    removeServer(server) {
-        for (let i = 0; i &lt; this.virtualNodes; i++) {
-            const virtualKey = `${server}-vnode-${i}`;
-            const hash = this._hash(virtualKey);
-            delete this.ring[hash];
-        }
-        this.sortedKeys = this.sortedKeys.filter(key =&gt; this.ring[key] !== undefined);
-    }
-
-    getServer(requestKey) {
-        if (this.sortedKeys.length === 0) return null;
-        const hash = this._hash(requestKey);
-        
-        // Binary search to find the nearest server clockwise
-        let low = 0;
-        let high = this.sortedKeys.length - 1;
-        let index = 0;
-        
-        while (low &lt;= high) {
-            let mid = Math.floor((low + high) / 2);
-            if (this.sortedKeys[mid] === hash) {
-                index = mid;
-                break;
-            } else if (this.sortedKeys[mid] &lt; hash) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        
-        // Wrap around the circle if the key is greater than all servers
-        const targetHashKey = this.sortedKeys[low] !== undefined ? this.sortedKeys[low] : this.sortedKeys[0];
-        return this.ring[targetHashKey];
-    }
-}</code></pre>
 
       <p>
-        Under this mathematical design, if a server is removed or added, only the keys that immediately preceded that server on the ring are affected. The vast majority of the ring remains completely undisturbed, and over $90\%$ of your caches survive the cluster topology change untouched. To ensure an even distribution of keys (avoiding hotspots where a single server has to handle a disproportionate segment of the circle), we introduce <strong>virtual nodes</strong>. Each physical server is mapped to dozens of independent locations on the ring using separate salt strings, balancing the load with mathematical elegance.
+        Under this mathematical design, if a server is removed or added, only the keys that immediately preceded that server on the ring are affected. The vast majority of the ring remains completely undisturbed, and over \(90\%\) of your caches survive the cluster topology change untouched. To ensure an even distribution of keys (avoiding hotspots where a single server has to handle a disproportionate segment of the circle), we introduce <strong>virtual nodes</strong>. Each physical server is mapped to dozens of independent locations on the ring using separate salt strings, balancing the load with mathematical elegance.
       </p>
 
       <h2>7. The Vault Entrance: Engine Room Validation and Committing to Stone</h2>
@@ -586,17 +3131,17 @@ class ConsistentHashRing {
         The application code (such as a Node.js or Rust service) is a highly structured engine room. It executes several sequential checks:
       </p>
       <ol>
-        <li><strong>Security &amp; Authentication</strong>: The server parses the <code>Authorization: Bearer ...</code> header. It extracts a <strong>JSON Web Token (JWT)</strong>. It validates the cryptographic signature using the public key of your auth server. It checks the expiration claim (`exp`) to verify that the token hasn't expired. It extracts your unique identity, `user_id: "harshit_87"`.</li>
-        <li><strong>Input Validation &amp; Sanitization</strong>: The server reads the JSON body. It parses the schema, verifying that `action` is a literal `"like"` and `post_id` is a valid positive integer. This is the security shield: if the server skipped this check, an attacker could inject malicious SQL commands (SQL Injection) or overflow buffers.</li>
+        <li><strong>Security &amp; Authentication</strong>: The server parses the <span class="concept-token">Authorization: Bearer ...</span> header. It extracts a <strong>JSON Web Token (JWT)</strong>. It validates the cryptographic signature using the public key of your auth server. It checks the expiration claim (<span class="concept-token">exp</span>) to verify that the token hasn't expired. It extracts your unique identity, <span class="concept-token">user_id: "harshit_87"</span>.</li>
+        <li><strong>Input Validation &amp; Sanitization</strong>: The server reads the JSON body. It parses the schema, verifying that <span class="concept-token">action</span> is a literal <span class="concept-token">"like"</span> and <span class="concept-token">post_id</span> is a valid positive integer. This is the security shield: if the server skipped this check, an attacker could inject malicious SQL commands (SQL Injection) or overflow buffers.</li>
         <li><strong>Business Logic Execution</strong>: The server checks if your user account has blocked the creator of the post, or if the post is private. If cleared, it proceeds to execute the update.</li>
       </ol>
 
       <p>
-        To make the update extremely fast, the server first contacts a <strong>Redis Cache</strong>. It updates an in-memory sorted set tracking the total likes for post `928374`. Redis uses highly optimized internal structures—such as skip lists and hash tables—to perform read-write operations in $O(\log N)$ or $O(1)$ time, all in RAM. But memory is volatile; if the power cuts out, the cache vanishes. We must commit the record to permanent stone.
+        To make the update extremely fast, the server first contacts a <strong>Redis Cache</strong>. It updates an in-memory sorted set tracking the total likes for post <span class="concept-token">928374</span>. Redis uses highly optimized internal structures—such as skip lists and hash tables—to perform read-write operations in \(O(\log N)\) or \(O(1)\) time, all in RAM. But memory is volatile; if the power cuts out, the cache vanishes. We must commit the record to permanent stone.
       </p>
 
       <p>
-        The application server opens a database transaction with the <strong>PostgreSQL Database</strong>. It issues a query: <code>INSERT INTO post_likes (user_id, post_id) VALUES ('harshit_87', 928374);</code>. Inside the database engine, this insert is processed with strict <strong>ACID compliance</strong>:
+        The application server opens a database transaction with the <strong>PostgreSQL Database</strong>. It issues a query: <span class="concept-token">the formal instruction</span>. Inside the database engine, this insert is processed with strict <strong>ACID compliance</strong>:
       </p>
       <ul>
         <li><strong>Atomicity</strong>: The like record and the count update must succeed together. If one fails, both are rolled back as if nothing happened.</li>
@@ -614,7 +3159,7 @@ class ConsistentHashRing {
       </p>
 
       <p>
-        The application server builds a success response letter: <code>HTTP/1.1 200 OK</code> with a JSON body. It hands the response to the OS TCP stack, which encrypts it via TLS, slices it into packets, and launches it back down the deep-sea optical glass pathways. The packets bounce across the ocean trenches, fly through local cell towers, and land on your phone’s antenna.
+        The application server builds a success response letter: <span class="concept-token">HTTP/1.1 200 OK</span> with a JSON body. It hands the response to the OS TCP stack, which encrypts it via TLS, slices it into packets, and launches it back down the deep-sea optical glass pathways. The packets bounce across the ocean trenches, fly through local cell towers, and land on your phone’s antenna.
       </p>
 
       <p>
@@ -705,6 +3250,9 @@ class ConsistentHashRing {
     </footer>
   </div>
 
+  <script>
+    document.documentElement.classList.add('ready');
+  </script>
 </body>
 
 </html>

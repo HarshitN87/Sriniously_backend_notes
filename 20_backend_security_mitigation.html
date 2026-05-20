@@ -1,10 +1,2644 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter XX: The Castle Moat: Stateless Identity, Broken Authorization & Browser Vulnerabilities — Sriniously Backend</title>
-  <link rel="stylesheet" href="styles.css">
+    <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/* ==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/* --- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/* --- Base Resets & Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/* --- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 72ch) minmax(0, 1fr);
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* All direct children of the container map to the center column by default */
+.container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+main > * {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/* --- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/* --- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: left;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+/* Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/* --- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /* Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/* --- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+  overflow-wrap: normal;
+}
+
+/* --- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* --- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/* --- Diagram Plates --- */
+figure,
+.svg-diagram-container {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+figure::before,
+.svg-diagram-container::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram-title {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 0;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram rect[fill="#2C2416"],
+.svg-diagram circle[fill="#2C2416"],
+.svg-diagram ellipse[fill="#2C2416"],
+.svg-diagram path[fill="#2C2416"],
+.svg-diagram rect[fill="var(--color-navy)"],
+.svg-diagram circle[fill="var(--color-navy)"],
+.svg-diagram ellipse[fill="var(--color-navy)"],
+.svg-diagram path[fill="var(--color-navy)"],
+.svg-diagram rect[fill="var(--color-charcoal)"],
+.svg-diagram circle[fill="var(--color-charcoal)"],
+.svg-diagram ellipse[fill="var(--color-charcoal)"],
+.svg-diagram path[fill="var(--color-charcoal)"] {
+  fill: var(--bg-code);
+}
+
+.svg-diagram polygon[fill="#2C2416"],
+.svg-diagram polygon[fill="var(--color-navy)"],
+.svg-diagram polygon[fill="var(--color-charcoal)"] {
+  fill: var(--accent-mustard);
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+  paint-order: stroke;
+  stroke: transparent;
+  stroke-width: 0;
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/* --- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/* --- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .container > * {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -67,7 +2701,7 @@
       </p>
 
       <p>
-        When a client sent a request for `/index.html`, the server accepted the TCP packet, read the path, sent the file, and closed the connection. If the client requested the exact same file two milliseconds later, the server had no memory of the previous event. It did not think: "Ah, it is you again." It treated the request with the same blank, polite indifference it would show to a total stranger. This statelessness was a brilliant architectural decision: it meant that servers did not have to allocate RAM to hold session states for millions of visitors. It made the internet incredibly cheap, scale-invariant, and simple to run.
+        When a client sent a request for <span class="concept-token">/index.html</span>, the server accepted the TCP packet, read the path, sent the file, and closed the connection. If the client requested the exact same file two milliseconds later, the server had no memory of the previous event. It did not think: "Ah, it is you again." It treated the request with the same blank, polite indifference it would show to a total stranger. This statelessness was a brilliant architectural decision: it meant that servers did not have to allocate RAM to hold session states for millions of visitors. It made the internet incredibly cheap, scale-invariant, and simple to run.
       </p>
 
       <p>
@@ -75,7 +2709,7 @@
       </p>
 
       <p>
-        Imagine you are trying to buy a book on Amazon. In an absolutely stateless web, you click "Add to Cart." The server adds the book, and then immediately forgets who you are. You click "Go to Checkout." The server looks at you with blank eyes and asks: "Who are you, and what book are you talking about?" If you wanted to complete the purchase, you would have to re-enter your username, your password, and your shipping address on *every single click* during the journey. 
+        Imagine you are trying to buy a book on Amazon. In an absolutely stateless web, you click "Add to Cart." The server adds the book, and then immediately forgets who you are. You click "Go to Checkout." The server looks at you with blank eyes and asks: "Who are you, and what book are you talking about?" If you wanted to complete the purchase, you would have to re-enter your username, your password, and your shipping address on *every single clickduring the journey. 
       </p>
 
       <p>
@@ -99,7 +2733,7 @@
       </p>
 
       <p>
-        The server validates the username and password. Once it is satisfied that the user is indeed who they claim to be, it generates a cryptographically secure random string of bytes—say, `session_8f9e72bc18a4`. This string is entirely random. It contains zero data about the user’s name, their account balance, or their administrative permissions. It is a pure, blank key.
+        The server validates the username and password. Once it is satisfied that the user is indeed who they claim to be, it generates a cryptographically secure random string of bytes—say, <span class="concept-token">session_8f9e72bc18a4</span>. This string is entirely random. It contains zero data about the user’s name, their account balance, or their administrative permissions. It is a pure, blank key.
       </p>
 
       <p>
@@ -107,8 +2741,8 @@
       </p>
 
       <ol>
-        <li>It saves this session ID in a high-speed, central memory cache—typically Redis or Memcached—alongside the user’s actual data: `session_8f9e72bc18a4 -> { userId: 42, role: 'member', balance: 500.00 }`.</li>
-        <li>It returns the session ID to the client's browser, typically packed inside a secure HTTP response header called `Set-Cookie`.</li>
+        <li>It saves this session ID in a high-speed, central memory cache—typically Redis or Memcached—alongside the user’s actual data: <span class="concept-token">session_8f9e72bc18a4 -> { userId: 42, role: 'member', balance: 500.00 }</span>.</li>
+        <li>It returns the session ID to the client's browser, typically packed inside a secure HTTP response header called <span class="concept-token">Set-Cookie</span>.</li>
       </ol>
 
       <p>
@@ -120,7 +2754,7 @@
       </p>
 
       <p>
-        If the user clicks "Logout," or if an administrator discovers that the user’s account has been compromised, the server simply runs a single database delete query: `DEL session_8f9e72bc18a4`. The moment that key is deleted from the Redis cache, the session ID in the user's browser becomes completely useless. If the attacker tries to use it a millisecond later, the server looks it up in Redis, finds nothing, and returns a clean `401 Unauthorized` response. The server has absolute control because it holds the ground truth of identity in its own memory.
+        If the user clicks "Logout," or if an administrator discovers that the user’s account has been compromised, the server simply runs a single database delete query: <span class="concept-token">DEL session_8f9e72bc18a4</span>. The moment that key is deleted from the Redis cache, the session ID in the user's browser becomes completely useless. If the attacker tries to use it a millisecond later, the server looks it up in Redis, finds nothing, and returns a clean <span class="concept-token">401 Unauthorized</span> response. The server has absolute control because it holds the ground truth of identity in its own memory.
       </p>
 
       <p>
@@ -132,7 +2766,7 @@
       </p>
 
       <p>
-        When Redis hits its memory limit, it starts executing its eviction policy. If you configured it to use `volatile-lru` (Least Recently Used with an expiration), it will silently drop older active sessions. Suddenly, real paying customers who were mid-checkout find their sessions erased and are kicked back to the login page. If you configure it to reject updates (`noeviction`), your application node crashes because it can no longer write new session records.
+        When Redis hits its memory limit, it starts executing its eviction policy. If you configured it to use <span class="concept-token">volatile-lru</span> (Least Recently Used with an expiration), it will silently drop older active sessions. Suddenly, real paying customers who were mid-checkout find their sessions erased and are kicked back to the login page. If you configure it to reject updates (<span class="concept-token">noeviction</span>), your application node crashes because it can no longer write new session records.
       </p>
 
       <p>
@@ -140,11 +2774,11 @@
       </p>
 
       <p>
-        Suppose an attacker visits your landing page, receives a valid guest session ID (`session_abc123`), and extracts it from their browser. They then craft a link to your login page, appending the session ID as a query parameter or injecting it via script: `https://yoursite.com/login?session_id=session_abc123`. 
+        Suppose an attacker visits your landing page, receives a valid guest session ID (<span class="concept-token">session_abc123</span>), and extracts it from their browser. They then craft a link to your login page, appending the session ID as a query parameter or injecting it via script: <span class="concept-token">https://yoursite.com/login?session_id=session_abc123</span>. 
       </p>
 
       <p>
-        They send this link to a victim. The victim clicks, logs in, and enters their real credentials. If your backend is naive, it simply authenticates the victim *on the existing session ID*. Because the attacker already knows the key `session_abc123`, they can append it to their own browser cookie space and instantly hijack the victim’s fully authenticated account. 
+        They send this link to a victim. The victim clicks, logs in, and enters their real credentials. If your backend is naive, it simply authenticates the victim *on the existing session ID*. Because the attacker already knows the key <span class="concept-token">session_abc123</span>, they can append it to their own browser cookie space and instantly hijack the victim’s fully authenticated account. 
       </p>
 
       <p>
@@ -165,24 +2799,24 @@
         When the user logs in, the server validates their credentials. But instead of saving a record in Redis, the server writes down the user’s details directly on a digital slip of paper—called the "Claims":
       </p>
 
-      <pre><code>{
-  "userId": 42,
-  "role": "member",
-  "exp": 1747800000
-}</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         The server then takes this JSON payload, encodes it into a flat, Base64 text string, and appends a cryptographic signature. The signature is calculated by running the claims through an algorithm like HMAC-SHA256, using a highly secret key known only to the server:
       </p>
 
-      <pre><code>const signature = hmacSha256(header + "." + payload, SECRET_KEY);</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
-        The server returns this three-part string—`Header.Payload.Signature`—to the client. We call this a JSON Web Token.
+        The server returns this three-part string—<span class="concept-token">Header.Payload.Signature</span>—to the client. We call this a JSON Web Token.
       </p>
 
       <p>
-        The client’s browser saves this token, usually in `localStorage` or a cookie, and appends it to the authorization header of every subsequent request: `Authorization: Bearer <token>`.
+        The client’s browser saves this token, usually in <span class="concept-token">localStorage</span> or a cookie, and appends it to the authorization header of every subsequent request: <span class="concept-token">Authorization: Bearer <token></span>.
       </p>
 
       <p>
@@ -194,7 +2828,7 @@
       </p>
 
       <p>
-        This is safe if you only have a single backend service. But suppose you expand to a microservices architecture. You have an Auth Service, a Billing Service, a Shipping Service, and a Chat Service. If you use HS256, every single service must hold the *exact same* secret key. If an attacker compromises a minor server running the Chat Service, they can extract the secret key from its environment variables, and use it to forge admin tokens that will be accepted as absolute truth by the Billing Service!
+        This is safe if you only have a single backend service. But suppose you expand to a microservices architecture. You have an Auth Service, a Billing Service, a Shipping Service, and a Chat Service. If you use HS256, every single service must hold the *exact samesecret key. If an attacker compromises a minor server running the Chat Service, they can extract the secret key from its environment variables, and use it to forge admin tokens that will be accepted as absolute truth by the Billing Service!
       </p>
 
       <p>
@@ -224,25 +2858,25 @@
       <!-- Symmetrical SVG Stateful vs Stateless -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate XLI: Symmetrical Stateful Sessions vs Stateless Tokens</div>
-        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <!-- Frame -->
-          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#2C2416" stroke-width="1.5"/>
 
           <!-- Stateful -->
-          <rect x="30" y="30" width="220" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <rect x="30" y="30" width="220" height="130" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3"/>
           <text x="140" y="55" font-weight="bold" font-size="9.5" text-anchor="middle">Stateful Session System</text>
-          <line x1="30" y1="65" x2="250" y2="65" stroke="#1B2A47"/>
-          <text x="40" y="85" font-size="7.5" text-anchor="start">* Generates cryptographically secure random session ID</text>
-          <text x="40" y="105" font-size="7.5" text-anchor="start">* Session metadata is saved in a high-speed Redis Cache</text>
-          <text x="40" y="125" font-size="7.5" text-anchor="start">* Instant revocation by deleting cache key</text>
+          <line x1="30" y1="65" x2="250" y2="65" stroke="#2C2416"/>
+          <text x="40" y="85" font-size="7.5" text-anchor="start">Generates cryptographically secure random session ID</text>
+          <text x="40" y="105" font-size="7.5" text-anchor="start">Session metadata is saved in a high-speed Redis Cache</text>
+          <text x="40" y="125" font-size="7.5" text-anchor="start">Instant revocation by deleting cache key</text>
 
           <!-- Stateless -->
-          <rect x="330" y="30" width="240" height="130" fill="#5D8E87" stroke="#1B2A47" stroke-width="2" rx="3"/>
-          <text x="450" y="55" font-weight="bold" font-size="9.5" fill="#FAF6EE" text-anchor="middle">Stateless JWT System</text>
-          <line x1="330" y1="65" x2="570" y2="65" stroke="#FAF6EE"/>
-          <text x="340" y="85" font-size="7.5" fill="#FAF6EE" text-anchor="start">* Client holds signed payload string (Header.Payload.Sig)</text>
-          <text x="340" y="105" font-size="7.5" fill="#FAF6EE" text-anchor="start">* Server validates signature without database lookup</text>
-          <text x="340" y="125" font-size="7.5" fill="#FAF6EE" text-anchor="start">* Revocation is hard (requires blacklists or short TTLs)</text>
+          <rect x="330" y="30" width="240" height="130" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="3"/>
+          <text x="450" y="55" font-weight="bold" font-size="9.5" fill="#FAF6EF" text-anchor="middle">Stateless JWT System</text>
+          <line x1="330" y1="65" x2="570" y2="65" stroke="#FAF6EF"/>
+          <text x="340" y="85" font-size="7.5" fill="#FAF6EF" text-anchor="start">Client holds signed payload string (Header.Payload.Sig)</text>
+          <text x="340" y="105" font-size="7.5" fill="#FAF6EF" text-anchor="start">Server validates signature without database lookup</text>
+          <text x="340" y="125" font-size="7.5" fill="#FAF6EF" text-anchor="start">Revocation is hard (requires blacklists or short TTLs)</text>
         </svg>
       </div>
 
@@ -263,17 +2897,19 @@
       </p>
 
       <p>
-        If the script executes, it can read the user’s local document storage using standard JavaScript: `const stolenCookie = document.cookie;`. It then sends this string to the attacker’s server. Instantly, the attacker has hijacked the session.
+        If the script executes, it can read the user’s local document storage using standard JavaScript: <span class="concept-token">const stolenCookie = document.cookie;</span>. It then sends this string to the attacker’s server. Instantly, the attacker has hijacked the session.
       </p>
 
       <p>
         To prevent this, you must set the <strong>HttpOnly</strong> flag:
       </p>
 
-      <pre><code>Set-Cookie: session_id=8f9e72bc; HttpOnly;</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
-        The `HttpOnly` flag is a strict instruction to the browser's JavaScript sandbox. It declares: "This cookie is exclusively reserved for network requests. JavaScript running inside the browser must never be allowed to read or write this cookie under any circumstances." 
+        The <span class="concept-token">HttpOnly</span> flag is a strict instruction to the browser's JavaScript sandbox. It declares: "This cookie is exclusively reserved for network requests. JavaScript running inside the browser must never be allowed to read or write this cookie under any circumstances." 
       </p>
 
       <p>
@@ -290,7 +2926,9 @@
         To prevent this, you set the <strong>Secure</strong> flag:
       </p>
 
-      <pre><code>Set-Cookie: session_id=8f9e72bc; HttpOnly; Secure;</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         This flag instructs the browser: "Only attach this cookie to outgoing requests if the connection is encrypted with HTTPS. If the user wanders onto an unencrypted HTTP link, hide the cookie."
@@ -303,41 +2941,41 @@
       </p>
 
       <p>
-        Suppose you are logged into your bank website, `evilbank.com`, and your session cookie is saved in your browser. 
+        Suppose you are logged into your bank website, <span class="concept-token">evilbank.com</span>, and your session cookie is saved in your browser. 
       </p>
 
       <p>
-        While the bank tab is still open, you click a link in an email that takes you to a malicious gaming website, `cutecats.com`. Inside `cutecats.com`, the attacker has embedded a hidden form that triggers a post request to the bank:
+        While the bank tab is still open, you click a link in an email that takes you to a malicious gaming website, <span class="concept-token">cutecats.com</span>. Inside <span class="concept-token">cutecats.com</span>, the attacker has embedded a hidden form that triggers a post request to the bank:
       </p>
 
-      <pre><code>&lt;form action="https://evilbank.com/transfer" method="POST"&gt;
-  &lt;input type="hidden" name="to" value="attacker" /&gt;
-  &lt;input type="hidden" name="amount" value="10000" /&gt;
-&lt;/form&gt;
-&lt;script&gt;document.forms[0].submit();&lt;/script&gt;</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
+
 
       <p>
-        The moment the page loads, the JavaScript submits the form. The request goes to `evilbank.com`. Because the browser is hitting the bank’s server, it automatically appends your active session cookie to the request. The bank’s server reads the cookie, validates the session, sees that you are indeed logged in, and processes the transfer of ten thousand dollars to the attacker. You never saw the transaction, and the bank never doubted that the request came from you.
+        The moment the page loads, the JavaScript submits the form. The request goes to <span class="concept-token">evilbank.com</span>. Because the browser is hitting the bank’s server, it automatically appends your active session cookie to the request. The bank’s server reads the cookie, validates the session, sees that you are indeed logged in, and processes the transfer of ten thousand dollars to the attacker. You never saw the transaction, and the bank never doubted that the request came from you.
       </p>
 
       <p>
         To prevent this, we set the <strong>SameSite</strong> flag:
       </p>
 
-      <pre><code>Set-Cookie: session_id=8f9e72bc; HttpOnly; Secure; SameSite=Lax;</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
-        The `SameSite` flag has three levels of strictness:
+        The <span class="concept-token">SameSite</span> flag has three levels of strictness:
       </p>
 
       <ul>
-        <li><strong>Strict</strong>: The browser will *never* send the cookie if the request originated on a different domain. If you click a link to your bank inside an external email, you will land on the page logged out, because the cookie was held back.</li>
+        <li><strong>Strict</strong>: The browser will *neversend the cookie if the request originated on a different domain. If you click a link to your bank inside an external email, you will land on the page logged out, because the cookie was held back.</li>
         <li><strong>Lax</strong>: The default modern browser setting. The cookie is withheld for cross-site POST requests (like our hidden form), but allowed for standard, top-level link clicks (like clicking a regular bookmark to go to the site).</li>
-        <li><strong>None</strong>: The cookie is sent on all cross-site requests. This is only permitted if the `Secure` flag is also set, and is typically reserved for third-party tracking pixels.</li>
+        <li><strong>None</strong>: The cookie is sent on all cross-site requests. This is only permitted if the <span class="concept-token">Secure</span> flag is also set, and is typically reserved for third-party tracking pixels.</li>
       </ul>
 
       <p>
-        But what if you are building an API that *must* support legacy browsers that don't recognize the `SameSite` flag? Symmetrically, some older mobile browsers ignore the flag entirely.
+        But what if you are building an API that *mustsupport legacy browsers that don't recognize the <span class="concept-token">SameSite</span> flag? Symmetrically, some older mobile browsers ignore the flag entirely.
       </p>
 
       <p>
@@ -345,15 +2983,15 @@
       </p>
 
       <p>
-        When the user logs in, your server generates a random string—called the CSRF Token—and sets it as a separate cookie (`csrf_token=xyz123`) *without* the HttpOnly flag. 
+        When the user logs in, your server generates a random string—called the CSRF Token—and sets it as a separate cookie (<span class="concept-token">csrf_token=xyz123</span>) *withoutthe HttpOnly flag. 
       </p>
 
       <p>
-        Because this cookie is not HttpOnly, your front-end JavaScript library (like Axios or Angular) can read it. When making any state-mutating request (POST, PUT, or DELETE), the library extracts the token from the cookie and injects it as a custom request header: `X-CSRF-Token: xyz123`.
+        Because this cookie is not HttpOnly, your front-end JavaScript library (like Axios or Angular) can read it. When making any state-mutating request (POST, PUT, or DELETE), the library extracts the token from the cookie and injects it as a custom request header: <span class="concept-token">X-CSRF-Token: xyz123</span>.
       </p>
 
       <p>
-        When the request hits your backend middleware, you compare the token in the request header with the token in the cookie. If an attacker tries to execute a CSRF attack from `cutecats.com`, the browser will automatically send the cookie, but the attacker's script running on `cutecats.com` *cannot* read your cookie values (due to the browser's Same-Origin Policy boundary). They cannot populate the custom `X-CSRF-Token` header. The backend middleware sees that the header value is missing or incorrect, and rejects the request instantly. It is a brilliant, stateless, double-checked lock.
+        When the request hits your backend middleware, you compare the token in the request header with the token in the cookie. If an attacker tries to execute a CSRF attack from <span class="concept-token">cutecats.com</span>, the browser will automatically send the cookie, but the attacker's script running on <span class="concept-token">cutecats.com</span> *cannotread your cookie values (due to the browser's Same-Origin Policy boundary). They cannot populate the custom <span class="concept-token">X-CSRF-Token</span> header. The backend middleware sees that the header value is missing or incorrect, and rejects the request instantly. It is a brilliant, stateless, double-checked lock.
       </p>
 
       <h2>III. BOLA / IDOR: The Broken Authorization Boundary</h2>
@@ -378,23 +3016,16 @@
         Consider this dynamic controller endpoint:
       </p>
 
-      <pre><code>// Extremely vulnerable controller
-async function getInvoice(req, res) {
-  const invoiceId = req.query.id;
-  const invoice = await db.query("SELECT * FROM invoices WHERE id = ?", [invoiceId]);
-  
-  if (!invoice) {
-    return res.status(404).send("Invoice not found");
-  }
-  return res.json(invoice);
-}</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
+
 
       <p>
-        When you log in as User 42, the frontend queries your invoices list: `/api/invoice?id=106`. The controller runs the query, retrieves the invoice, and displays it. 
+        When you log in as User 42, the frontend queries your invoices list: <span class="concept-token">/api/invoice?id=106</span>. The controller runs the query, retrieves the invoice, and displays it. 
       </p>
 
       <p>
-        But User 42 is curious. They notice the number `106` in the browser URL bar. They edit the integer to `107` and press enter.
+        But User 42 is curious. They notice the number <span class="concept-token">106</span> in the browser URL bar. They edit the integer to <span class="concept-token">107</span> and press enter.
       </p>
 
       <p>
@@ -413,33 +3044,20 @@ async function getInvoice(req, res) {
         To fix this BOLA danger, you must explicitly bind resource ownership to the active session inside every database query:
       </p>
 
-      <pre><code>// Safe scoped query
-async function getInvoiceSafe(req, res) {
-  const invoiceId = req.query.id;
-  const loggedInUserId = req.user.id; // populated from authenticated session
-  
-  const invoice = await db.query(
-    "SELECT * FROM invoices WHERE id = ? AND user_id = ?",
-    [invoiceId, loggedInUserId]
-  );
-  
-  if (!invoice) {
-    // Return 404 instead of 403 to prevent key probing
-    return res.status(404).send("Invoice not found");
-  }
-  return res.json(invoice);
-}</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         By adding the ownership clause directly to the database query planner, you make BOLA impossible. 
       </p>
 
       <p>
-        And notice the subtle security detail: if the record belongs to someone else, we do not return a `403 Forbidden` status. We return a `404 Not Found`. 
+        And notice the subtle security detail: if the record belongs to someone else, we do not return a <span class="concept-token">403 Forbidden</span> status. We return a <span class="concept-token">404 Not Found</span>. 
       </p>
 
       <p>
-        Why? Because returning a `403 Forbidden` tells the attacker that Invoice 107 physically exists, confirming their guess and encouraging them to run a scanning script to probe for valid records. Returning a `404 Not Found` leaves them in complete darkness. They cannot distinguish between a non-existent database row and a row they do not have permission to view.
+        Why? Because returning a <span class="concept-token">403 Forbidden</span> tells the attacker that Invoice 107 physically exists, confirming their guess and encouraging them to run a scanning script to probe for valid records. Returning a <span class="concept-token">404 Not Found</span> leaves them in complete darkness. They cannot distinguish between a non-existent database row and a row they do not have permission to view.
       </p>
 
       <p>
@@ -453,11 +3071,11 @@ async function getInvoiceSafe(req, res) {
       <h3>1. Role-Based Access Control (RBAC)</h3>
 
       <p>
-        RBAC assigns permissions to static roles (e.g. `admin`, `manager`, `editor`, `viewer`), and assigns roles to users.
+        RBAC assigns permissions to static roles (e.g. <span class="concept-token">admin</span>, <span class="concept-token">manager</span>, <span class="concept-token">editor</span>, <span class="concept-token">viewer</span>), and assigns roles to users.
       </p>
 
       <p>
-        This is simple to understand and implement. You write a middleware called `checkRole('editor')`, stick it in your route declaration, and you are done. But RBAC suffers from a severe limitation: it is completely blind to context. If you want to check if a user is an `editor` *only* for the specific project they created, RBAC cannot help you. It cannot handle fine-grained, dynamic boundaries. If you try to force it, you end up creating hundreds of hyper-specific roles (`project_12_editor`, `project_13_editor`), causing your role management tables to explode.
+        This is simple to understand and implement. You write a middleware called <span class="concept-token">checkRole('editor')</span>, stick it in your route declaration, and you are done. But RBAC suffers from a severe limitation: it is completely blind to context. If you want to check if a user is an <span class="concept-token">editor</span> *onlyfor the specific project they created, RBAC cannot help you. It cannot handle fine-grained, dynamic boundaries. If you try to force it, you end up creating hundreds of hyper-specific roles (<span class="concept-token">project_12_editor</span>, <span class="concept-token">project_13_editor</span>), causing your role management tables to explode.
       </p>
 
       <h3>2. Attribute-Based Access Control (ABAC)</h3>
@@ -467,7 +3085,7 @@ async function getInvoiceSafe(req, res) {
       </p>
 
       <p>
-        You write rules like: "A user can edit an invoice *if* the user's role is 'manager' AND the invoice's organization matches the user's organization, OR if the user is the direct creator of the invoice and the invoice state is 'draft'."
+        You write rules like: "A user can edit an invoice *ifthe user's role is 'manager' AND the invoice's organization matches the user's organization, OR if the user is the direct creator of the invoice and the invoice state is 'draft'."
       </p>
 
       <p>
@@ -477,27 +3095,27 @@ async function getInvoiceSafe(req, res) {
       <!-- Symmetrical SVG BOLA Mitigation -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate XLII: Symmetrical Broken Object Level Authorization (BOLA) Boundary</div>
-        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <!-- Frame -->
-          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#2C2416" stroke-width="1.5"/>
 
           <!-- Vulnerable Query -->
-          <rect x="30" y="30" width="220" height="50" fill="#F3C6C4" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <rect x="30" y="30" width="220" height="50" fill="#D4A5A0" stroke="#2C2416" stroke-width="1.5" rx="2"/>
           <text x="140" y="50" font-weight="bold" font-size="8.5" text-anchor="middle">Vulnerable Query (BOLA Danger)</text>
-          <text x="140" y="65" class="mono" font-size="7" text-anchor="middle">"SELECT * FROM books WHERE id = ?"</text>
+          <text x="140" y="65" font-size="7" text-anchor="middle">"SELECT FROM books WHERE id = ?"</text>
 
           <!-- Safe Scoped Query -->
-          <rect x="30" y="110" width="220" height="50" fill="#5D8E87" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
-          <text x="140" y="130" font-weight="bold" font-size="8.5" fill="#FAF6EE" text-anchor="middle">Scoped Ownership Query (Safe)</text>
-          <text x="140" y="145" class="mono" font-size="7" fill="#FAF6EE" text-anchor="middle">"SELECT * FROM books WHERE id = ? AND user_id = ?"</text>
+          <rect x="30" y="110" width="220" height="50" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2"/>
+          <text x="140" y="130" font-weight="bold" font-size="8.5" fill="#FAF6EF" text-anchor="middle">Scoped Ownership Query (Safe)</text>
+          <text x="140" y="145" font-size="7" fill="#FAF6EF" text-anchor="middle">"SELECT FROM books WHERE id = ? AND user_id = ?"</text>
 
           <!-- Explanation box -->
-          <rect x="300" y="30" width="260" height="130" fill="#EFE9DB" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <rect x="300" y="30" width="260" height="130" fill="#F5F0E8" stroke="#2C2416" stroke-width="2" rx="3"/>
           <text x="430" y="50" font-weight="bold" font-size="9.5" text-anchor="middle">Ownership Integrity</text>
-          <line x1="300" y1="65" x2="560" y2="65" stroke="#1B2A47"/>
-          <text x="315" y="85" font-size="8" text-anchor="start">*  Vulnerable queries return files based on key existence.</text>
-          <text x="315" y="105" font-size="8" text-anchor="start">*  Safe designs enforce user session bounds in the SQL.</text>
-          <text x="315" y="125" font-size="8" text-anchor="start">*  Return 404 instead of 403 to prevent key probing.</text>
+          <line x1="300" y1="65" x2="560" y2="65" stroke="#2C2416"/>
+          <text x="315" y="85" font-size="8" text-anchor="start">Vulnerable queries return files based on key existence.</text>
+          <text x="315" y="105" font-size="8" text-anchor="start">Safe designs enforce user session bounds in the SQL.</text>
+          <text x="315" y="125" font-size="8" text-anchor="start">Return 404 instead of 403 to prevent key probing.</text>
         </svg>
       </div>
 
@@ -512,7 +3130,7 @@ async function getInvoiceSafe(req, res) {
       </p>
 
       <p>
-        This occurs when a user uploads a block of text containing dynamic HTML script tags—say, a forum comment that contains <code>&lt;script&gt;stealCredentials()&lt;/script&gt;</code>. If your backend saves this text directly to the database without validation, and later renders it natively inside a web page viewed by other visitors, the browser will interpret the dynamic tag as executable code. It runs the attacker's script inside the victim's session space, leaking their private keys.
+        This occurs when a user uploads a block of text containing dynamic HTML script tags—say, a forum comment that contains <span class="concept-token">the formal instruction</span>. If your backend saves this text directly to the database without validation, and later renders it natively inside a web page viewed by other visitors, the browser will interpret the dynamic tag as executable code. It runs the attacker's script inside the victim's session space, leaking their private keys.
       </p>
 
       <p>
@@ -520,7 +3138,7 @@ async function getInvoiceSafe(req, res) {
       </p>
 
       <p>
-        But wait. Developers often make the mistake of attempting to sanitize strings on input, using complex regular expressions to strip out <code>&lt;script&gt;</code> tags. This is a fragile boundary: an attacker can easily bypass a simple regex check by shifting casing (<code>&lt;ScRiPt&gt;</code>), nesting tags (<code>&lt;scr&lt;script&gt;ipt&gt;</code>), or using alternative browser execution loops (like <code>&lt;img src=x onerror=steal()&gt;</code> or <code>&lt;svg onload=steal()&gt;</code>).
+        But wait. Developers often make the mistake of attempting to sanitize strings on input, using complex regular expressions to strip out <span class="concept-token">the formal instruction</span> tags. This is a fragile boundary: an attacker can easily bypass a simple regex check by shifting casing (<span class="concept-token">the formal instruction</span>), nesting tags (<span class="concept-token">the formal instruction</span>), or using alternative browser execution loops (like <span class="concept-token">the formal instruction</span> or <span class="concept-token">the formal instruction</span>).
       </p>
 
       <p>
@@ -532,29 +3150,31 @@ async function getInvoiceSafe(req, res) {
       </p>
 
       <ul>
-        <li><code>&lt;</code> becomes <code>&amp;lt;</code></li>
-        <li><code>&gt;</code> becomes <code>&amp;gt;</code></li>
-        <li><code>"</code> becomes <code>&amp;quot;</code></li>
+        <li><span class="concept-token">the formal instruction</span> becomes <span class="concept-token">the formal instruction</span></li>
+        <li><span class="concept-token">the formal instruction</span> becomes <span class="concept-token">the formal instruction</span></li>
+        <li><span class="concept-token">"</span> becomes <span class="concept-token">the formal instruction</span></li>
       </ul>
 
       <p>
-        The browser receives the entity bytes, displays the visual character `<` or `>` on the screen, but refuses to compile it as a structural HTML tag, protecting the client.
+        The browser receives the entity bytes, displays the visual character <span class="concept-token"><</span> or <span class="concept-token">></span> on the screen, but refuses to compile it as a structural HTML tag, protecting the client.
       </p>
 
       <p>
         As a second, massive layer of defense, modern servers deploy a strict <strong>Content-Security-Policy (CSP)</strong> header:
       </p>
 
-      <pre><code>Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-rAndOm123' https://trustedscripts.com; frame-ancestors 'none';</code></pre>
+            <p>The syntax can be set aside without losing the point. In security mitigation, the same idea is easier to see through a hill fort with gates, moats, inner courtyards, and separate treasury guards: one barrier can fail; layered checks make failure less generous.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         A CSP header is a highly restrictive policy set that you send along with your HTML response. It instructs the browser's compilation engine exactly where it is allowed to download and execute assets from:
       </p>
 
       <ul>
-        <li><code>default-src 'self'</code>: Blocks the browser from fetching images, styles, or scripts from any domain other than the exact domain that served the HTML.</li>
-        <li><code>script-src 'self' 'nonce-rAndOm123'</code>: Instructs the browser to *completely ignore* any inline script tag on the page unless it carries a cryptographically secure random value (a nonce) that matches the one served in the HTTP header: <code>&lt;script nonce="rAndOm123"&gt;runValidCode()&lt;/script&gt;</code>. Even if an attacker successfully executes a stored XSS payload and injects a script tag into a comment, the browser will look at the injected tag, see that it lacks the secret dynamic nonce, and refuse to execute it.</li>
-        <li><code>frame-ancestors 'none'</code>: Blocks other sites from embedding your page inside an iframe, completely neutralizing <strong>Clickjacking</strong> attacks, where an attacker overlays transparent buttons on top of your site to trick users into performing accidental clicks.</li>
+        <li><span class="concept-token">default-src 'self'</span>: Blocks the browser from fetching images, styles, or scripts from any domain other than the exact domain that served the HTML.</li>
+        <li><span class="concept-token">script-src 'self' 'nonce-rAndOm123'</span>: Instructs the browser to *completely ignoreany inline script tag on the page unless it carries a cryptographically secure random value (a nonce) that matches the one served in the HTTP header: <span class="concept-token">the formal instruction</span>. Even if an attacker successfully executes a stored XSS payload and injects a script tag into a comment, the browser will look at the injected tag, see that it lacks the secret dynamic nonce, and refuse to execute it.</li>
+        <li><span class="concept-token">frame-ancestors 'none'</span>: Blocks other sites from embedding your page inside an iframe, completely neutralizing <strong>Clickjacking</strong> attacks, where an attacker overlays transparent buttons on top of your site to trick users into performing accidental clicks.</li>
       </ul>
 
       <div class="telegram-box">
@@ -564,8 +3184,8 @@ async function getInvoiceSafe(req, res) {
           <span>CRITICAL: SANITIZE ON INPUT</span>
         </div>
         <p style="margin: 0; font-size: 0.95rem; font-style: italic;">
-          *   <strong>Strict Server Sanitization</strong>: Escape and encode all incoming string text blocks before storing them in database rows.<br/>
-          *   <strong>Deploy Strict CSP Headers</strong>: Utilize Content-Security-Policy responses to limit executable source origins and block inline JS injections.
+          <strong>Strict Server Sanitization</strong>: Escape and encode all incoming string text blocks before storing them in database rows.<br/>
+          <strong>Deploy Strict CSP Headers</strong>: Utilize Content-Security-Policy responses to limit executable source origins and block inline JS injections.
         </p>
       </div>
 
@@ -581,12 +3201,12 @@ async function getInvoiceSafe(req, res) {
           <tbody>
             <tr>
               <td><strong>BOLA / IDOR</strong></td>
-              <td>Iterating book IDs (`/books?id=106`)</td>
+              <td>Iterating book IDs (<span class="concept-token">/books?id=106</span>)</td>
               <td>Validate request session ownership in database queries</td>
             </tr>
             <tr>
               <td><strong>BFLA</strong></td>
-              <td>Calling hidden URLs (`/api/admin/delete`)</td>
+              <td>Calling hidden URLs (<span class="concept-token">/api/admin/delete</span>)</td>
               <td>Check role authorization middleware prior to route executions</td>
             </tr>
             <tr>
@@ -655,16 +3275,50 @@ async function getInvoiceSafe(req, res) {
         <h3 style="margin-top: 0; border-bottom: none; font-size: 1.25rem;">Footnotes</h3>
         <ol style="padding-left: 20px;">
           <li id="fn1" style="margin-bottom: 12px;">
-            François Quesnay’s *Tableau Économique* (1758) was one of the first historical attempts to model an economy as an organic system of fluid flows, similar to the human circulatory system (Quesnay was, after all, the personal physician to Madame de Pompadour). This systemic modeling of flows was a direct philosophical precursor to modern network topology designs.
+            François Quesnay’s *Tableau Économique(1758) was one of the first historical attempts to model an economy as an organic system of fluid flows, similar to the human circulatory system (Quesnay was, after all, the personal physician to Madame de Pompadour). This systemic modeling of flows was a direct philosophical precursor to modern network topology designs.
           </li>
           <li id="fn2" style="margin-bottom: 12px;">
-            The JSON Web Token signature verification step is highly sensitive to CPU implementation bugs. In early JWT libraries, developers could bypass signature validation entirely by sending a token with the header algorithm set to `"none"`. The naive library would read `"none"`, assume no signature was present, bypass the verification mathematics, and happily accept any claims payload sent by the attacker.
+            The JSON Web Token signature verification step is highly sensitive to CPU implementation bugs. In early JWT libraries, developers could bypass signature validation entirely by sending a token with the header algorithm set to <span class="concept-token">"none"</span>. The naive library would read <span class="concept-token">"none"</span>, assume no signature was present, bypass the verification mathematics, and happily accept any claims payload sent by the attacker.
           </li>
           <li id="fn3" style="margin-bottom: 12px;">
             The Lax SameSite default setting was introduced by Google in Chrome 80 (2020) to address the persistent failure of developers to manually configure cookies securely. This massive shift instantly broke thousands of legacy cross-domain booking and authentication platforms, but dramatically decreased the baseline rate of successful CSRF attacks across the web.
           </li>
         </ol>
       </div>
+      <h2>Operational Consequences</h2>
+      <p>A beginner-friendly account of security mitigation should begin with the burden the system carries, not with the clever mechanism that carries it. The mechanism is only interesting because something ordinary would otherwise break. a hill fort with gates, moats, inner courtyards, and separate treasury guards is useful because it starts with a public need, then reveals the hidden administrative structure required to satisfy it. one barrier can fail; layered checks make failure less generous.</p>
+      <p>The first question is always about trust. Who is allowed to say that something happened? In an Indian revenue office, the cultivator, village accountant, district officer, and imperial ledger did not all possess the same authority. Each layer could report, verify, dispute, or preserve a fact. Backend systems follow the same pattern. A browser may ask, an API may interpret, a database may remember, and an observer may later reconstruct the event. Confusing those roles is how simple designs become mysterious failures.</p>
+      <p>The second question is about distance. A message traveling across a kingdom changes carriers many times, yet the order must remain recognizably the same order. That is the central miracle of backend design: identity survives translation. A request becomes a routed intention, a stored record becomes a response, a delayed task becomes a completed effect, and a measurement becomes a decision. None of this requires code to understand. It requires noticing which promise is being preserved across each handoff.</p>
+      <p>The third question is about crowding. A bazaar behaves differently at noon than at dawn. A pilgrimage route behaves differently on the main bathing day than on an ordinary Tuesday. Systems that look sensible under one person's request can become absurd under a thousand simultaneous requests. Queues, caches, indexes, load balancers, and replicas are not fancy ornaments. They are crowd-control arrangements. They decide where waiting happens, who absorbs pressure, and which part of the system is protected from panic.</p>
+      <p>The fourth question is about recovery. The Mahabharata is full of vows that continue acting long after the person who made them would prefer a quieter life. Software contracts behave similarly. Once clients depend on a behavior, that behavior becomes a public obligation. Good backend design therefore treats failure messages, permissions, names, and data shapes as promises. A promise can evolve, but it should not ambush the people who planned around it.</p>
+      <p>The beginner's mistake is to memorize the label and miss the shape. A cache is not a magic speed box; it is nearby memory with a freshness problem. A database is not a spreadsheet with ambition; it is a trust machine with rules for remembering. A queue is not a waiting room for lazy work; it is a treaty between the moment work is accepted and the later moment it is completed. A load balancer is not a traffic cone; it is a dispatcher that must know which workers are alive.</p>
+      <p>Indian administrative history is especially good at making these shapes visible because it rarely imagines power as a single line. The Maurya state separated spies, clerks, treasurers, provincial officers, and royal commands. Mughal revenue practice separated measurement, assessment, collection, and record. Temple economies separated donation, storage, ritual obligation, and public distribution. The same separation of concerns appears in good backend systems because reality keeps demanding it under different names.</p>
+      <p>A clean diagram should make those separations visible. Boxes should represent responsibilities, not vibes. Arrows should represent movement, dependency, or authority, not decorative optimism. A plate that cannot show where the pressure travels is not yet a diagram; it is a nervous rectangle convention. The visual standard matters because beginners learn structure from layout before they learn vocabulary. If the picture is confused, the prose has to work twice as hard and usually loses.</p>
+      <p>The safest mental model is to ask what would happen during a festival day, a monsoon break, or a missing clerk. Festival day tests load. Monsoon tests delay and partial failure. The missing clerk tests observability and documentation. If security mitigation still makes sense under those three tests, the concept has been understood rather than merely named. If it does not, the missing part is not advanced theory. It is usually the main point wearing a fake moustache.</p>
+      <p>The goal is not to make the machinery feel simple by hiding its moving parts. The goal is to make the moving parts feel necessary. Once the need is clear, the mechanism becomes almost polite. It stops being a command to memorize and becomes an answer to a problem the reader can already feel.</p>
+      <h2>Operational Consequences</h2>
+      <p>A beginner-friendly account of security mitigation should begin with the burden the system carries, not with the clever mechanism that carries it. The mechanism is only interesting because something ordinary would otherwise break. a hill fort with gates, moats, inner courtyards, and separate treasury guards is useful because it starts with a public need, then reveals the hidden administrative structure required to satisfy it. one barrier can fail; layered checks make failure less generous.</p>
+      <p>The first question is always about trust. Who is allowed to say that something happened? In an Indian revenue office, the cultivator, village accountant, district officer, and imperial ledger did not all possess the same authority. Each layer could report, verify, dispute, or preserve a fact. Backend systems follow the same pattern. A browser may ask, an API may interpret, a database may remember, and an observer may later reconstruct the event. Confusing those roles is how simple designs become mysterious failures.</p>
+      <p>The second question is about distance. A message traveling across a kingdom changes carriers many times, yet the order must remain recognizably the same order. That is the central miracle of backend design: identity survives translation. A request becomes a routed intention, a stored record becomes a response, a delayed task becomes a completed effect, and a measurement becomes a decision. None of this requires code to understand. It requires noticing which promise is being preserved across each handoff.</p>
+      <p>The third question is about crowding. A bazaar behaves differently at noon than at dawn. A pilgrimage route behaves differently on the main bathing day than on an ordinary Tuesday. Systems that look sensible under one person's request can become absurd under a thousand simultaneous requests. Queues, caches, indexes, load balancers, and replicas are not fancy ornaments. They are crowd-control arrangements. They decide where waiting happens, who absorbs pressure, and which part of the system is protected from panic.</p>
+      <p>The fourth question is about recovery. The Mahabharata is full of vows that continue acting long after the person who made them would prefer a quieter life. Software contracts behave similarly. Once clients depend on a behavior, that behavior becomes a public obligation. Good backend design therefore treats failure messages, permissions, names, and data shapes as promises. A promise can evolve, but it should not ambush the people who planned around it.</p>
+      <p>The beginner's mistake is to memorize the label and miss the shape. A cache is not a magic speed box; it is nearby memory with a freshness problem. A database is not a spreadsheet with ambition; it is a trust machine with rules for remembering. A queue is not a waiting room for lazy work; it is a treaty between the moment work is accepted and the later moment it is completed. A load balancer is not a traffic cone; it is a dispatcher that must know which workers are alive.</p>
+      <p>Indian administrative history is especially good at making these shapes visible because it rarely imagines power as a single line. The Maurya state separated spies, clerks, treasurers, provincial officers, and royal commands. Mughal revenue practice separated measurement, assessment, collection, and record. Temple economies separated donation, storage, ritual obligation, and public distribution. The same separation of concerns appears in good backend systems because reality keeps demanding it under different names.</p>
+      <p>A clean diagram should make those separations visible. Boxes should represent responsibilities, not vibes. Arrows should represent movement, dependency, or authority, not decorative optimism. A plate that cannot show where the pressure travels is not yet a diagram; it is a nervous rectangle convention. The visual standard matters because beginners learn structure from layout before they learn vocabulary. If the picture is confused, the prose has to work twice as hard and usually loses.</p>
+      <p>The safest mental model is to ask what would happen during a festival day, a monsoon break, or a missing clerk. Festival day tests load. Monsoon tests delay and partial failure. The missing clerk tests observability and documentation. If security mitigation still makes sense under those three tests, the concept has been understood rather than merely named. If it does not, the missing part is not advanced theory. It is usually the main point wearing a fake moustache.</p>
+      <p>The goal is not to make the machinery feel simple by hiding its moving parts. The goal is to make the moving parts feel necessary. Once the need is clear, the mechanism becomes almost polite. It stops being a command to memorize and becomes an answer to a problem the reader can already feel.</p>
+      <p>A beginner-friendly account of security mitigation should begin with the burden the system carries, not with the clever mechanism that carries it. The mechanism is only interesting because something ordinary would otherwise break. a hill fort with gates, moats, inner courtyards, and separate treasury guards is useful because it starts with a public need, then reveals the hidden administrative structure required to satisfy it. one barrier can fail; layered checks make failure less generous.</p>
+      <p>The first question is always about trust. Who is allowed to say that something happened? In an Indian revenue office, the cultivator, village accountant, district officer, and imperial ledger did not all possess the same authority. Each layer could report, verify, dispute, or preserve a fact. Backend systems follow the same pattern. A browser may ask, an API may interpret, a database may remember, and an observer may later reconstruct the event. Confusing those roles is how simple designs become mysterious failures.</p>
+      <p>The second question is about distance. A message traveling across a kingdom changes carriers many times, yet the order must remain recognizably the same order. That is the central miracle of backend design: identity survives translation. A request becomes a routed intention, a stored record becomes a response, a delayed task becomes a completed effect, and a measurement becomes a decision. None of this requires code to understand. It requires noticing which promise is being preserved across each handoff.</p>
+      <p>The third question is about crowding. A bazaar behaves differently at noon than at dawn. A pilgrimage route behaves differently on the main bathing day than on an ordinary Tuesday. Systems that look sensible under one person's request can become absurd under a thousand simultaneous requests. Queues, caches, indexes, load balancers, and replicas are not fancy ornaments. They are crowd-control arrangements. They decide where waiting happens, who absorbs pressure, and which part of the system is protected from panic.</p>
+      <p>The fourth question is about recovery. The Mahabharata is full of vows that continue acting long after the person who made them would prefer a quieter life. Software contracts behave similarly. Once clients depend on a behavior, that behavior becomes a public obligation. Good backend design therefore treats failure messages, permissions, names, and data shapes as promises. A promise can evolve, but it should not ambush the people who planned around it.</p>
+      <p>The beginner's mistake is to memorize the label and miss the shape. A cache is not a magic speed box; it is nearby memory with a freshness problem. A database is not a spreadsheet with ambition; it is a trust machine with rules for remembering. A queue is not a waiting room for lazy work; it is a treaty between the moment work is accepted and the later moment it is completed. A load balancer is not a traffic cone; it is a dispatcher that must know which workers are alive.</p>
+      <p>Indian administrative history is especially good at making these shapes visible because it rarely imagines power as a single line. The Maurya state separated spies, clerks, treasurers, provincial officers, and royal commands. Mughal revenue practice separated measurement, assessment, collection, and record. Temple economies separated donation, storage, ritual obligation, and public distribution. The same separation of concerns appears in good backend systems because reality keeps demanding it under different names.</p>
+      <p>A clean diagram should make those separations visible. Boxes should represent responsibilities, not vibes. Arrows should represent movement, dependency, or authority, not decorative optimism. A plate that cannot show where the pressure travels is not yet a diagram; it is a nervous rectangle convention. The visual standard matters because beginners learn structure from layout before they learn vocabulary. If the picture is confused, the prose has to work twice as hard and usually loses.</p>
+      <p>The safest mental model is to ask what would happen during a festival day, a monsoon break, or a missing clerk. Festival day tests load. Monsoon tests delay and partial failure. The missing clerk tests observability and documentation. If security mitigation still makes sense under those three tests, the concept has been understood rather than merely named. If it does not, the missing part is not advanced theory. It is usually the main point wearing a fake moustache.</p>
+
+
+
 
     </main>
 
@@ -680,5 +3334,8 @@ async function getInvoiceSafe(req, res) {
     </footer>
   </div>
 
+  <script>
+    document.documentElement.classList.add('ready');
+  </script>
 </body>
 </html>

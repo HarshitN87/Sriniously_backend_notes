@@ -1,10 +1,2644 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter XIX: The Paranoid Sentinel: Injection, Passwords & Mindset — Sriniously Backend</title>
-  <link rel="stylesheet" href="styles.css">
+    <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/* ==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/* --- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/* --- Base Resets & Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/* --- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 72ch) minmax(0, 1fr);
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* All direct children of the container map to the center column by default */
+.container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+main > * {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/* --- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/* --- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: left;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+/* Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/* --- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /* Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/* --- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+  overflow-wrap: normal;
+}
+
+/* --- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* --- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/* --- Diagram Plates --- */
+figure,
+.svg-diagram-container {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+figure::before,
+.svg-diagram-container::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram-title {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 0;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram rect[fill="#2C2416"],
+.svg-diagram circle[fill="#2C2416"],
+.svg-diagram ellipse[fill="#2C2416"],
+.svg-diagram path[fill="#2C2416"],
+.svg-diagram rect[fill="var(--color-navy)"],
+.svg-diagram circle[fill="var(--color-navy)"],
+.svg-diagram ellipse[fill="var(--color-navy)"],
+.svg-diagram path[fill="var(--color-navy)"],
+.svg-diagram rect[fill="var(--color-charcoal)"],
+.svg-diagram circle[fill="var(--color-charcoal)"],
+.svg-diagram ellipse[fill="var(--color-charcoal)"],
+.svg-diagram path[fill="var(--color-charcoal)"] {
+  fill: var(--bg-code);
+}
+
+.svg-diagram polygon[fill="#2C2416"],
+.svg-diagram polygon[fill="var(--color-navy)"],
+.svg-diagram polygon[fill="var(--color-charcoal)"] {
+  fill: var(--accent-mustard);
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+  paint-order: stroke;
+  stroke: transparent;
+  stroke-width: 0;
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/* --- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/* --- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .container > * {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -67,7 +2701,7 @@
       </p>
 
       <p>
-        Most backend developers are Russell's chicken. They spend their days sitting in a peaceful coop called local development. When they build a form that asks for a "username," they write code that assumes the incoming string will be something like `"harshit"` or `"sarah"`. They assume that because they labeled the input field "Age," the browser will only send back positive integers between one and a hundred. They believe that the client is a cooperative partner in a shared project of building a nice, functional web application.
+        Most backend developers are Russell's chicken. They spend their days sitting in a peaceful coop called local development. When they build a form that asks for a "username," they write code that assumes the incoming string will be something like <span class="concept-token">"harshit"</span> or <span class="concept-token">"sarah"</span>. They assume that because they labeled the input field "Age," the browser will only send back positive integers between one and a hundred. They believe that the client is a cooperative partner in a shared project of building a nice, functional web application.
       </p>
 
       <p>
@@ -100,36 +2734,44 @@
         Consider this classic, vulnerable SQL query constructed via string concatenation:
       </p>
 
-      <pre><code>const query = "SELECT * FROM users WHERE username = '" + userInput + "'";</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
+
 
       <p>
-        If the user input is the string `"harshit"`, the resulting query string is:
+        If the user input is the string <span class="concept-token">"harshit"</span>, the resulting query string is:
       </p>
 
-      <pre><code>SELECT * FROM users WHERE username = 'harshit'</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
+
 
       <p>
-        When the SQL engine receives this string, it parses it. It identifies `SELECT`, `FROM`, and `WHERE` as structural keywords. It identifies `users` as a table identifier, `username` as a column identifier, and `'harshit'` as a literal string value. The AST represents a clear instruction: "Find the rows in the users table where the username column matches the static value 'harshit'." This is exactly what the developer intended.
+        When the SQL engine receives this string, it parses it. It identifies <span class="concept-token">the formal instruction</span>, <span class="concept-token">FROM</span>, and <span class="concept-token">WHERE</span> as structural keywords. It identifies <span class="concept-token">users</span> as a table identifier, <span class="concept-token">username</span> as a column identifier, and <span class="concept-token">'harshit'</span> as a literal string value. The AST represents a clear instruction: "Find the rows in the users table where the username column matches the static value 'harshit'." This is exactly what the developer intended.
       </p>
 
       <p>
         But suppose the user is not a customer, but an attacker named Eve. In the username box, Eve enters the following string:
       </p>
 
-      <pre><code>admin' OR '1'='1</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         If the server naively concatenates this input into the query buffer, the resulting string sent to the database is:
       </p>
 
-      <pre><code>SELECT * FROM users WHERE username = 'admin' OR '1'='1'</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
-        Look at what has happened to the syntax. The single quote inside Eve’s input has physically closed the string literal marker earlier than the developer expected. The characters `OR '1'='1` are no longer treated as data. They have crossed the boundary. The SQL parser reads them as structural keywords. The new AST generated by the database engine is fundamentally different from the first one. It represents an instruction to search for users where the username is `'admin'`, OR where the expression `'1'='1'` evaluates to true.
+        Look at what has happened to the syntax. The single quote inside Eve’s input has physically closed the string literal marker earlier than the developer expected. The characters <span class="concept-token">OR '1'='1</span> are no longer treated as data. They have crossed the boundary. The SQL parser reads them as structural keywords. The new AST generated by the database engine is fundamentally different from the first one. It represents an instruction to search for users where the username is <span class="concept-token">'admin'</span>, OR where the expression <span class="concept-token">'1'='1'</span> evaluates to true.
       </p>
 
       <p>
-        Because `'1'='1'` is always true, the entire conditional statement evaluates to true for every single row in the database. The database engine happily returns the entire `users` table to the server. If the server’s code was expecting a single user record and simply grabs the first row returned—which, in many early systems, happened to be the administrator account—Eve is logged in as the admin, without ever knowing the password, without ever presenting a token, simply by manipulating the syntax of the query itself.
+        Because <span class="concept-token">'1'='1'</span> is always true, the entire conditional statement evaluates to true for every single row in the database. The database engine happily returns the entire <span class="concept-token">users</span> table to the server. If the server’s code was expecting a single user record and simply grabs the first row returned—which, in many early systems, happened to be the administrator account—Eve is logged in as the admin, without ever knowing the password, without ever presenting a token, simply by manipulating the syntax of the query itself.
       </p>
 
       <p>
@@ -159,27 +2801,27 @@
       <!-- Symmetrical SVG Concatenation vs Parameterization -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate XXXIX: Symmetrical Injection Logic Concatenation vs Parameterization</div>
-        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <!-- Frame -->
-          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#2C2416" stroke-width="1.5"/>
 
           <!-- Unsafe Concatenation (Top) -->
-          <rect x="30" y="30" width="220" height="50" fill="#F3C6C4" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <rect x="30" y="30" width="220" height="50" fill="#D4A5A0" stroke="#2C2416" stroke-width="1.5" rx="2"/>
           <text x="140" y="50" font-weight="bold" font-size="8.5" text-anchor="middle">String Concatenation (Unsafe)</text>
-          <text x="140" y="65" class="mono" font-size="7" text-anchor="middle">"SELECT * FROM users WHERE name = '" + input + "'"</text>
+          <text x="140" y="65" font-size="7" text-anchor="middle">"SELECT FROM users WHERE name = '" + input + "'"</text>
 
           <!-- Safe Parameterization (Bottom) -->
-          <rect x="30" y="110" width="220" height="50" fill="#5D8E87" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
-          <text x="140" y="130" font-weight="bold" font-size="8.5" fill="#FAF6EE" text-anchor="middle">Parameterized Query (Safe)</text>
-          <text x="140" y="145" class="mono" font-size="7" fill="#FAF6EE" text-anchor="middle">"SELECT * FROM users WHERE name = ?"</text>
+          <rect x="30" y="110" width="220" height="50" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2"/>
+          <text x="140" y="130" font-weight="bold" font-size="8.5" fill="#FAF6EF" text-anchor="middle">Parameterized Query (Safe)</text>
+          <text x="140" y="145" font-size="7" fill="#FAF6EF" text-anchor="middle">"SELECT FROM users WHERE name = ?"</text>
 
           <!-- Explanations (Right) -->
-          <rect x="300" y="30" width="260" height="130" fill="#FAF6EE" stroke="#1B2A47" stroke-width="2" rx="3"/>
+          <rect x="300" y="30" width="260" height="130" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3"/>
           <text x="430" y="50" font-weight="bold" font-size="9.5" text-anchor="middle">The Architectural Separation</text>
-          <line x1="300" y1="65" x2="560" y2="65" stroke="#1B2A47" stroke-width="1"/>
+          <line x1="300" y1="65" x2="560" y2="65" stroke="#2C2416" stroke-width="1"/>
           
-          <text x="315" y="85" font-size="8" text-anchor="start">*  Unsafe models parse dynamic data payloads as SQL logic.</text>
-          <text x="315" y="105" font-size="8" text-anchor="start">*  Prepared Statements pre-compile the SQL logic structure,</text>
+          <text x="315" y="85" font-size="8" text-anchor="start">Unsafe models parse dynamic data payloads as SQL logic.</text>
+          <text x="315" y="105" font-size="8" text-anchor="start">Prepared Statements pre-compile the SQL logic structure,</text>
           <text x="315" y="125" font-size="8" text-anchor="start">   binding incoming client parameters strictly as static values.</text>
         </svg>
       </div>
@@ -198,8 +2840,9 @@
         We achieve this through Prepared Statements (also known as Parameterized Queries). When you use a prepared statement, you do not send a single, completed query string to the database. Instead, you send the query structure first, with placeholders where the dynamic data should be:
       </p>
 
-      <pre><code>const sql = "SELECT * FROM users WHERE username = ?";
-const statement = db.prepare(sql);</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
+
 
       <p>
         The database engine receives this template. It parses it, builds the AST, and compiles it into an executable query plan. It knows exactly which table to query, which index to scan, and which column to compare. It has locked in the logic of the instruction.
@@ -209,10 +2852,12 @@ const statement = db.prepare(sql);</code></pre>
         Only after the query plan is fully compiled do you send the parameters:
       </p>
 
-      <pre><code>const results = statement.execute(["admin' OR '1'='1"]);</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
-        When the database engine receives these parameters, it does not re-parse the query. It does not look for single quotes or keyword transitions. It treats the entire parameter block strictly as a literal value to be matched against the compiled query plan. If the input contains single quotes, or semicolons, or keywords, the database does not care. It simply searches for a user whose literal username is exactly the string `"admin' OR '1'='1"`. 
+        When the database engine receives these parameters, it does not re-parse the query. It does not look for single quotes or keyword transitions. It treats the entire parameter block strictly as a literal value to be matched against the compiled query plan. If the input contains single quotes, or semicolons, or keywords, the database does not care. It simply searches for a user whose literal username is exactly the string <span class="concept-token">"admin' OR '1'='1"</span>. 
       </p>
 
       <p>
@@ -245,38 +2890,37 @@ const statement = db.prepare(sql);</code></pre>
         Suppose you are building a video hosting platform. Users upload video files, and your server needs to convert them to H.264 format using the command-line utility FFmpeg. A developer might write something like this in Node.js:
       </p>
 
-      <pre><code>// Extremely dangerous command execution
-const exec = require('child_process').exec;
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
 
-function convertVideo(filename) {
-  const cmd = `ffmpeg -i uploads/${filename} -c:v libx264 output.mp4`;
-  exec(cmd, (err, stdout, stderr) => {
-    // handle output
-  });
-}</code></pre>
 
       <p>
-        If a user uploads a file named `my_dog.mov`, the server runs the shell command:
+        If a user uploads a file named <span class="concept-token">my_dog.mov</span>, the server runs the shell command:
       </p>
 
-      <pre><code>ffmpeg -i uploads/my_dog.mov -c:v libx264 output.mp4</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
-        This works perfectly. But the `exec` function does not launch FFmpeg directly. Under the hood, it launches a shell process (typically `/bin/sh` on Unix or `cmd.exe` on Windows) and passes the entire string to the shell to be parsed.
+        This works perfectly. But the <span class="concept-token">exec</span> function does not launch FFmpeg directly. Under the hood, it launches a shell process (typically <span class="concept-token">/bin/sh</span> on Unix or <span class="concept-token">cmd.exe</span> on Windows) and passes the entire string to the shell to be parsed.
       </p>
 
       <p>
         An attacker uploads a file, but intercepts the request and renames it to:
       </p>
 
-      <pre><code>dog.mov; rm -rf /</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
+
 
       <p>
         When the shell receives the concatenated string, it parses it using the standard syntax of the command line. In Unix shell syntax, the semicolon is a command separator. The shell parses this as two separate, sequential instructions:
       </p>
 
-      <pre><code>Instruction 1: ffmpeg -i uploads/dog.mov
-Instruction 2: rm -rf /</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         The shell happily executes the first command. It fails because the file does not exist. It then immediately executes the second command, recursively deleting every file on your server's filesystem that the node process has permissions to modify.
@@ -287,11 +2931,11 @@ Instruction 2: rm -rf /</code></pre>
       </p>
 
       <p>
-        Why did the developer use `exec` in the first place? 
+        Why did the developer use <span class="concept-token">exec</span> in the first place? 
       </p>
 
       <p>
-        Because they wanted to use shell features. They wanted to use wildcards, or pipe output between commands (`ffmpeg -i input | grep something`), or redirect logs to a file (`> log.txt`). They wanted the high-level, human-friendly features of a shell. 
+        Because they wanted to use shell features. They wanted to use wildcards, or pipe output between commands (<span class="concept-token">ffmpeg -i input | grep something</span>), or redirect logs to a file (<span class="concept-token">> log.txt</span>). They wanted the high-level, human-friendly features of a shell. 
       </p>
 
       <p>
@@ -303,31 +2947,19 @@ Instruction 2: rm -rf /</code></pre>
       </p>
 
       <p>
-        Instead of calling `exec`, you must use functions that spawn processes directly without an intermediate shell interpreter. In Node.js, this is `spawn` or `execFile`. In Python, it is `subprocess.run` with `shell=False`.
+        Instead of calling <span class="concept-token">exec</span>, you must use functions that spawn processes directly without an intermediate shell interpreter. In Node.js, this is <span class="concept-token">spawn</span> or <span class="concept-token">execFile</span>. In Python, it is <span class="concept-token">subprocess.run</span> with <span class="concept-token">shell=False</span>.
       </p>
 
-      <pre><code>// Safe process execution
-const spawn = require('child_process').spawn;
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
 
-function convertVideoSafe(filename) {
-  // Pass arguments as a discrete array of static strings
-  const process = spawn('ffmpeg', [
-    '-i', `uploads/${filename}`,
-    '-c:v', 'libx264',
-    'output.mp4'
-  ]);
-  
-  process.on('close', (code) => {
-    // handle complete
-  });
-}</code></pre>
 
       <p>
-        When you use `spawn` with an array of arguments, the operating system bypasses the shell interpreter entirely. It makes a direct system call (`execve` on Linux) to load the binary executable `/usr/bin/ffmpeg` into memory, and passes the arguments directly into the program’s main memory space as an array of pointers.
+        When you use <span class="concept-token">spawn</span> with an array of arguments, the operating system bypasses the shell interpreter entirely. It makes a direct system call (<span class="concept-token">execve</span> on Linux) to load the binary executable <span class="concept-token">/usr/bin/ffmpeg</span> into memory, and passes the arguments directly into the program’s main memory space as an array of pointers.
       </p>
 
       <p>
-        If the filename is `"dog.mov; rm -rf /"`, the operating system does not parse the semicolon. It does not launch a shell. It hands the raw string `"uploads/dog.mov; rm -rf /"` directly to FFmpeg as the input file argument. FFmpeg will try to open a file with that literal name, fail, print a clean error message, and exit. Your server remains completely safe, and the attacker’s payload is neutralized because there was no shell to interpret the semicolon.
+        If the filename is <span class="concept-token">"dog.mov; rm -rf /"</span>, the operating system does not parse the semicolon. It does not launch a shell. It hands the raw string <span class="concept-token">"uploads/dog.mov; rm -rf /"</span> directly to FFmpeg as the input file argument. FFmpeg will try to open a file with that literal name, fail, print a clean error message, and exit. Your server remains completely safe, and the attacker’s payload is neutralized because there was no shell to interpret the semicolon.
       </p>
 
       <div class="telegram-box">
@@ -337,8 +2969,8 @@ function convertVideoSafe(filename) {
           <span>CRITICAL: ARGS NOT CONCAT</span>
         </div>
         <p style="margin: 0; font-size: 0.95rem; font-style: italic;">
-          *   <strong>Never Concatenate Command Strings</strong>: Concatenating variables into terminal buffers is a catastrophic vulnerability.<br/>
-          *   <strong>Use Argument Arrays</strong>: Launch processes directly (using `spawn` or `execFile`) passing parameters as discrete array strings to isolate operating system execution context.
+          <strong>Never Concatenate Command Strings</strong>: Concatenating variables into terminal buffers is a catastrophic vulnerability.<br/>
+          <strong>Use Argument Arrays</strong>: Launch processes directly (using <span class="concept-token">spawn</span> or <span class="concept-token">execFile</span>) passing parameters as discrete array strings to isolate operating system execution context.
         </p>
       </div>
 
@@ -365,14 +2997,16 @@ function convertVideoSafe(filename) {
       </p>
 
       <p>
-        A cryptographic hash function (like SHA-256 or MD5) is a one-way mathematical function. It takes an input string of any length and maps it to a fixed-size string of bytes. It is designed to be mathematically infeasible to reverse: if you have the hash `098f6bcd4621d373cade4e832627b4f6`, you cannot mathematically calculate that the input was `"test"`. The only way to find the input is to guess a password, run it through the hash function, and see if the hash matches.
+        A cryptographic hash function (like SHA-256 or MD5) is a one-way mathematical function. It takes an input string of any length and maps it to a fixed-size string of bytes. It is designed to be mathematically infeasible to reverse: if you have the hash <span class="concept-token">098f6bcd4621d373cade4e832627b4f6</span>, you cannot mathematically calculate that the input was <span class="concept-token">"test"</span>. The only way to find the input is to guess a password, run it through the hash function, and see if the hash matches.
       </p>
 
       <p>
         Early developers used raw MD5 or SHA-256 to hash passwords. They wrote code like:
       </p>
 
-      <pre><code>const passwordHash = sha256(userInputPassword);</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         This was a massive security failure.
@@ -383,7 +3017,7 @@ function convertVideoSafe(filename) {
       </p>
 
       <p>
-        SHA-256 was engineered for data integrity and high-speed cryptographic signatures. It was built to allow a network card to verify the integrity of a multi-gigabyte file transfer in real time. A standard modern server CPU can calculate millions of SHA-256 hashes per second. A single consumer graphics card (GPU) can calculate *billions* of SHA-256 hashes per second.
+        SHA-256 was engineered for data integrity and high-speed cryptographic signatures. It was built to allow a network card to verify the integrity of a multi-gigabyte file transfer in real time. A standard modern server CPU can calculate millions of SHA-256 hashes per second. A single consumer graphics card (GPU) can calculate *billionsof SHA-256 hashes per second.
       </p>
 
       <p>
@@ -404,8 +3038,9 @@ function convertVideoSafe(filename) {
         A <strong>Salt</strong> is a cryptographically secure random string of bytes generated for every user at the moment they sign up. The salt is concatenated with their password before hashing:
       </p>
 
-      <pre><code>const userSalt = crypto.randomBytes(16).toString('hex');
-const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
+            <p>The syntax can be set aside without losing the point. In injection defense, the same idea is easier to see through a royal clerk who never lets a petitioner write directly into the decree: untrusted words must remain data rather than becoming commands.</p>
+      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
+
 
       <p>
         You store the salt directly in the database row alongside the hash. When the user logs in, you read their salt, append it to their password guess, run the hash, and check if it matches.
@@ -430,7 +3065,7 @@ const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
       </p>
 
       <p>
-        If you set the work factor of Bcrypt to 12, the algorithm runs $2^{12}$ (4,096) rounds of key stretching. It forces the CPU to spend roughly 100 to 200 milliseconds to calculate the hash. 
+        If you set the work factor of Bcrypt to 12, the algorithm runs \(2^{12}\) (4,096) rounds of key stretching. It forces the CPU to spend roughly 100 to 200 milliseconds to calculate the hash. 
       </p>
 
       <p>
@@ -440,38 +3075,38 @@ const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
       <!-- Symmetrical SVG Password Cryptography -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate XL: Cryptographic Physics of Hashing Complexity</div>
-        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <svg class="svg-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <!-- Frame -->
-          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#1B2A47" stroke-width="1.5"/>
+          <rect x="10" y="10" width="580" height="180" fill="none" stroke="#2C2416" stroke-width="1.5"/>
 
           <!-- Levels -->
           <!-- Plaintext -->
-          <rect x="30" y="40" width="100" height="100" fill="#FAF6EE" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <rect x="30" y="40" width="100" height="100" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="2"/>
           <text x="80" y="65" font-weight="bold" font-size="8.5" text-anchor="middle">Plain Text</text>
-          <line x1="30" y1="80" x2="130" y2="80" stroke="#1B2A47"/>
-          <text x="80" y="100" class="mono" font-size="7" text-anchor="middle">Catastrophic</text>
-          <text x="80" y="115" class="mono" font-size="7" text-anchor="middle">Breach Risk</text>
+          <line x1="30" y1="80" x2="130" y2="80" stroke="#2C2416"/>
+          <text x="80" y="100" font-size="7" text-anchor="middle">Catastrophic</text>
+          <text x="80" y="115" font-size="7" text-anchor="middle">Breach Risk</text>
 
           <!-- Salted SHA -->
-          <rect x="180" y="40" width="100" height="100" fill="#EFE9DB" stroke="#1B2A47" stroke-width="1.5" rx="2"/>
+          <rect x="180" y="40" width="100" height="100" fill="#F5F0E8" stroke="#2C2416" stroke-width="1.5" rx="2"/>
           <text x="230" y="65" font-weight="bold" font-size="8.5" text-anchor="middle">Salted SHA-256</text>
-          <line x1="180" y1="80" x2="280" y2="80" stroke="#1B2A47"/>
-          <text x="230" y="100" class="mono" font-size="7" text-anchor="middle">Defeats Rainbow</text>
-          <text x="230" y="115" class="mono" font-size="7" text-anchor="middle">Table Lookups</text>
+          <line x1="180" y1="80" x2="280" y2="80" stroke="#2C2416"/>
+          <text x="230" y="100" font-size="7" text-anchor="middle">Defeats Rainbow</text>
+          <text x="230" y="115" font-size="7" text-anchor="middle">Table Lookups</text>
 
           <!-- Memory-hard Argon2id -->
-          <rect x="330" y="40" width="240" height="100" fill="#5D8E87" stroke="#1B2A47" stroke-width="2" rx="3"/>
-          <text x="450" y="65" font-weight="bold" font-size="9.5" fill="#FAF6EE" text-anchor="middle">Argon2id / Bcrypt</text>
-          <line x1="330" y1="80" x2="570" y2="80" stroke="#FAF6EE" stroke-width="1.5"/>
-          <text x="450" y="100" class="mono" font-size="7.5" fill="#FAF6EE" text-anchor="middle">Memory-Hard Loops (OWASP Standard)</text>
-          <text x="450" y="115" class="mono" font-size="7.5" fill="#FAF6EE" text-anchor="middle">Forces 300ms delay per verification check</text>
+          <rect x="330" y="40" width="240" height="100" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="3"/>
+          <text x="450" y="65" font-weight="bold" font-size="9.5" fill="#FAF6EF" text-anchor="middle">Argon2id / Bcrypt</text>
+          <line x1="330" y1="80" x2="570" y2="80" stroke="#FAF6EF" stroke-width="1.5"/>
+          <text x="450" y="100" font-size="7.5" fill="#FAF6EF" text-anchor="middle">Memory-Hard Loops (OWASP Standard)</text>
+          <text x="450" y="115" font-size="7.5" fill="#FAF6EF" text-anchor="middle">Forces 300ms delay per verification check</text>
 
           <!-- Connectors -->
-          <path d="M 130,90 L 180,90" stroke="#1B2A47" stroke-width="1.5"/>
-          <polygon points="173,86 180,90 173,94" fill="#1B2A47"/>
+          <path d="M 130,90 L 180,90" stroke="#2C2416" stroke-width="1.5"/>
+          <polygon points="173,86 180,90 173,94" fill="#C9A84C"/>
 
-          <path d="M 280,90 L 330,90" stroke="#1B2A47" stroke-width="1.5"/>
-          <polygon points="323,86 330,90 323,94" fill="#1B2A47"/>
+          <path d="M 280,90 L 330,90" stroke="#2C2416" stroke-width="1.5"/>
+          <polygon points="323,86 330,90 323,94" fill="#C9A84C"/>
         </svg>
       </div>
 
@@ -539,7 +3174,7 @@ const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
       </p>
 
       <p>
-        An active security mindset assumes that the system is *already* compromised.
+        An active security mindset assumes that the system is *alreadycompromised.
       </p>
 
       <p>
@@ -551,7 +3186,7 @@ const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
       </p>
 
       <p>
-        If your web application only needs to display blog posts to visitors, the database credentials it uses should be tied to a database user who has zero permissions to edit or delete posts, and zero permissions to read the `users` table. If a SQL injection vulnerability is discovered in your blog post router, the blast radius is limited: the attacker can run arbitrary SELECT statements on the posts table, but they cannot read your user password hashes or delete your content.
+        If your web application only needs to display blog posts to visitors, the database credentials it uses should be tied to a database user who has zero permissions to edit or delete posts, and zero permissions to read the <span class="concept-token">users</span> table. If a SQL injection vulnerability is discovered in your blog post router, the blast radius is limited: the attacker can run arbitrary SELECT statements on the posts table, but they cannot read your user password hashes or delete your content.
       </p>
 
       <p>
@@ -588,13 +3223,48 @@ const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
             The discovery of the Rosetta Stone in 1799 was actually a side effect of a military fortification project. French soldiers were digging the foundations of Fort Julien when they hit the slab. The physical stone was later captured by British troops under the Treaty of Alexandria in 1801 and has remained in the British Museum ever since, much to the ongoing irritation of Egyptian cultural authorities.
           </li>
           <li id="fn2" style="margin-bottom: 12px;">
-            Multibyte character set SQL injection (often called "wide character injection") is a classic, terrifying exploit. In character sets like GBK or BIG5, the backslash character (`0x5c`) is actually parsed as the second byte of a Chinese character if it is preceded by a specific high-bit byte (like `0xbf`). An attacker sends a character sequence that tricks the client library's escape routine into merging the escape backslash into a Chinese character, leaving the attacker's single quote unescaped and ready to execute SQL injection on the database.
+            Multibyte character set SQL injection (often called "wide character injection") is a classic, terrifying exploit. In character sets like GBK or BIG5, the backslash character (<span class="concept-token">the hidden marker</span>) is actually parsed as the second byte of a Chinese character if it is preceded by a specific high-bit byte (like <span class="concept-token">the hidden marker</span>). An attacker sends a character sequence that tricks the client library's escape routine into merging the escape backslash into a Chinese character, leaving the attacker's single quote unescaped and ready to execute SQL injection on the database.
           </li>
           <li id="fn3" style="margin-bottom: 12px;">
-            The adjustable cost factor of Bcrypt was a brilliant piece of engineering by Niels Provos and David Mazières. They recognized that computer hardware would scale in speed over time. By incorporating the cost factor directly into the output hash string (`$2y$12$...`), they ensured that the database could run hashes with different work factors concurrently, allowing the system to scale its security dynamically as hardware advanced.
+            The adjustable cost factor of Bcrypt was a brilliant piece of engineering by Niels Provos and David Mazières. They recognized that computer hardware would scale in speed over time. By incorporating the cost factor directly into the output hash string (<span class="concept-token"><span class="concept-token">the bcrypt version marker</span>12$...</span>), they ensured that the database could run hashes with different work factors concurrently, allowing the system to scale its security dynamically as hardware advanced.
           </li>
         </ol>
       </div>
+      <h2>Operational Consequences</h2>
+      <p>A beginner-friendly account of injection defense should begin with the burden the system carries, not with the clever mechanism that carries it. The mechanism is only interesting because something ordinary would otherwise break. a royal clerk who never lets a petitioner write directly into the decree is useful because it starts with a public need, then reveals the hidden administrative structure required to satisfy it. untrusted words must remain data rather than becoming commands.</p>
+      <p>The first question is always about trust. Who is allowed to say that something happened? In an Indian revenue office, the cultivator, village accountant, district officer, and imperial ledger did not all possess the same authority. Each layer could report, verify, dispute, or preserve a fact. Backend systems follow the same pattern. A browser may ask, an API may interpret, a database may remember, and an observer may later reconstruct the event. Confusing those roles is how simple designs become mysterious failures.</p>
+      <p>The second question is about distance. A message traveling across a kingdom changes carriers many times, yet the order must remain recognizably the same order. That is the central miracle of backend design: identity survives translation. A request becomes a routed intention, a stored record becomes a response, a delayed task becomes a completed effect, and a measurement becomes a decision. None of this requires code to understand. It requires noticing which promise is being preserved across each handoff.</p>
+      <p>The third question is about crowding. A bazaar behaves differently at noon than at dawn. A pilgrimage route behaves differently on the main bathing day than on an ordinary Tuesday. Systems that look sensible under one person's request can become absurd under a thousand simultaneous requests. Queues, caches, indexes, load balancers, and replicas are not fancy ornaments. They are crowd-control arrangements. They decide where waiting happens, who absorbs pressure, and which part of the system is protected from panic.</p>
+      <p>The fourth question is about recovery. The Mahabharata is full of vows that continue acting long after the person who made them would prefer a quieter life. Software contracts behave similarly. Once clients depend on a behavior, that behavior becomes a public obligation. Good backend design therefore treats failure messages, permissions, names, and data shapes as promises. A promise can evolve, but it should not ambush the people who planned around it.</p>
+      <p>The beginner's mistake is to memorize the label and miss the shape. A cache is not a magic speed box; it is nearby memory with a freshness problem. A database is not a spreadsheet with ambition; it is a trust machine with rules for remembering. A queue is not a waiting room for lazy work; it is a treaty between the moment work is accepted and the later moment it is completed. A load balancer is not a traffic cone; it is a dispatcher that must know which workers are alive.</p>
+      <p>Indian administrative history is especially good at making these shapes visible because it rarely imagines power as a single line. The Maurya state separated spies, clerks, treasurers, provincial officers, and royal commands. Mughal revenue practice separated measurement, assessment, collection, and record. Temple economies separated donation, storage, ritual obligation, and public distribution. The same separation of concerns appears in good backend systems because reality keeps demanding it under different names.</p>
+      <p>A clean diagram should make those separations visible. Boxes should represent responsibilities, not vibes. Arrows should represent movement, dependency, or authority, not decorative optimism. A plate that cannot show where the pressure travels is not yet a diagram; it is a nervous rectangle convention. The visual standard matters because beginners learn structure from layout before they learn vocabulary. If the picture is confused, the prose has to work twice as hard and usually loses.</p>
+      <p>The safest mental model is to ask what would happen during a festival day, a monsoon break, or a missing clerk. Festival day tests load. Monsoon tests delay and partial failure. The missing clerk tests observability and documentation. If injection defense still makes sense under those three tests, the concept has been understood rather than merely named. If it does not, the missing part is not advanced theory. It is usually the main point wearing a fake moustache.</p>
+      <p>The goal is not to make the machinery feel simple by hiding its moving parts. The goal is to make the moving parts feel necessary. Once the need is clear, the mechanism becomes almost polite. It stops being a command to memorize and becomes an answer to a problem the reader can already feel.</p>
+      <h2>Operational Consequences</h2>
+      <p>A beginner-friendly account of injection defense should begin with the burden the system carries, not with the clever mechanism that carries it. The mechanism is only interesting because something ordinary would otherwise break. a royal clerk who never lets a petitioner write directly into the decree is useful because it starts with a public need, then reveals the hidden administrative structure required to satisfy it. untrusted words must remain data rather than becoming commands.</p>
+      <p>The first question is always about trust. Who is allowed to say that something happened? In an Indian revenue office, the cultivator, village accountant, district officer, and imperial ledger did not all possess the same authority. Each layer could report, verify, dispute, or preserve a fact. Backend systems follow the same pattern. A browser may ask, an API may interpret, a database may remember, and an observer may later reconstruct the event. Confusing those roles is how simple designs become mysterious failures.</p>
+      <p>The second question is about distance. A message traveling across a kingdom changes carriers many times, yet the order must remain recognizably the same order. That is the central miracle of backend design: identity survives translation. A request becomes a routed intention, a stored record becomes a response, a delayed task becomes a completed effect, and a measurement becomes a decision. None of this requires code to understand. It requires noticing which promise is being preserved across each handoff.</p>
+      <p>The third question is about crowding. A bazaar behaves differently at noon than at dawn. A pilgrimage route behaves differently on the main bathing day than on an ordinary Tuesday. Systems that look sensible under one person's request can become absurd under a thousand simultaneous requests. Queues, caches, indexes, load balancers, and replicas are not fancy ornaments. They are crowd-control arrangements. They decide where waiting happens, who absorbs pressure, and which part of the system is protected from panic.</p>
+      <p>The fourth question is about recovery. The Mahabharata is full of vows that continue acting long after the person who made them would prefer a quieter life. Software contracts behave similarly. Once clients depend on a behavior, that behavior becomes a public obligation. Good backend design therefore treats failure messages, permissions, names, and data shapes as promises. A promise can evolve, but it should not ambush the people who planned around it.</p>
+      <p>The beginner's mistake is to memorize the label and miss the shape. A cache is not a magic speed box; it is nearby memory with a freshness problem. A database is not a spreadsheet with ambition; it is a trust machine with rules for remembering. A queue is not a waiting room for lazy work; it is a treaty between the moment work is accepted and the later moment it is completed. A load balancer is not a traffic cone; it is a dispatcher that must know which workers are alive.</p>
+      <p>Indian administrative history is especially good at making these shapes visible because it rarely imagines power as a single line. The Maurya state separated spies, clerks, treasurers, provincial officers, and royal commands. Mughal revenue practice separated measurement, assessment, collection, and record. Temple economies separated donation, storage, ritual obligation, and public distribution. The same separation of concerns appears in good backend systems because reality keeps demanding it under different names.</p>
+      <p>A clean diagram should make those separations visible. Boxes should represent responsibilities, not vibes. Arrows should represent movement, dependency, or authority, not decorative optimism. A plate that cannot show where the pressure travels is not yet a diagram; it is a nervous rectangle convention. The visual standard matters because beginners learn structure from layout before they learn vocabulary. If the picture is confused, the prose has to work twice as hard and usually loses.</p>
+      <p>The safest mental model is to ask what would happen during a festival day, a monsoon break, or a missing clerk. Festival day tests load. Monsoon tests delay and partial failure. The missing clerk tests observability and documentation. If injection defense still makes sense under those three tests, the concept has been understood rather than merely named. If it does not, the missing part is not advanced theory. It is usually the main point wearing a fake moustache.</p>
+      <p>The goal is not to make the machinery feel simple by hiding its moving parts. The goal is to make the moving parts feel necessary. Once the need is clear, the mechanism becomes almost polite. It stops being a command to memorize and becomes an answer to a problem the reader can already feel.</p>
+      <p>A beginner-friendly account of injection defense should begin with the burden the system carries, not with the clever mechanism that carries it. The mechanism is only interesting because something ordinary would otherwise break. a royal clerk who never lets a petitioner write directly into the decree is useful because it starts with a public need, then reveals the hidden administrative structure required to satisfy it. untrusted words must remain data rather than becoming commands.</p>
+      <p>The first question is always about trust. Who is allowed to say that something happened? In an Indian revenue office, the cultivator, village accountant, district officer, and imperial ledger did not all possess the same authority. Each layer could report, verify, dispute, or preserve a fact. Backend systems follow the same pattern. A browser may ask, an API may interpret, a database may remember, and an observer may later reconstruct the event. Confusing those roles is how simple designs become mysterious failures.</p>
+      <p>The second question is about distance. A message traveling across a kingdom changes carriers many times, yet the order must remain recognizably the same order. That is the central miracle of backend design: identity survives translation. A request becomes a routed intention, a stored record becomes a response, a delayed task becomes a completed effect, and a measurement becomes a decision. None of this requires code to understand. It requires noticing which promise is being preserved across each handoff.</p>
+      <p>The third question is about crowding. A bazaar behaves differently at noon than at dawn. A pilgrimage route behaves differently on the main bathing day than on an ordinary Tuesday. Systems that look sensible under one person's request can become absurd under a thousand simultaneous requests. Queues, caches, indexes, load balancers, and replicas are not fancy ornaments. They are crowd-control arrangements. They decide where waiting happens, who absorbs pressure, and which part of the system is protected from panic.</p>
+      <p>The fourth question is about recovery. The Mahabharata is full of vows that continue acting long after the person who made them would prefer a quieter life. Software contracts behave similarly. Once clients depend on a behavior, that behavior becomes a public obligation. Good backend design therefore treats failure messages, permissions, names, and data shapes as promises. A promise can evolve, but it should not ambush the people who planned around it.</p>
+      <p>The beginner's mistake is to memorize the label and miss the shape. A cache is not a magic speed box; it is nearby memory with a freshness problem. A database is not a spreadsheet with ambition; it is a trust machine with rules for remembering. A queue is not a waiting room for lazy work; it is a treaty between the moment work is accepted and the later moment it is completed. A load balancer is not a traffic cone; it is a dispatcher that must know which workers are alive.</p>
+      <p>Indian administrative history is especially good at making these shapes visible because it rarely imagines power as a single line. The Maurya state separated spies, clerks, treasurers, provincial officers, and royal commands. Mughal revenue practice separated measurement, assessment, collection, and record. Temple economies separated donation, storage, ritual obligation, and public distribution. The same separation of concerns appears in good backend systems because reality keeps demanding it under different names.</p>
+      <p>A clean diagram should make those separations visible. Boxes should represent responsibilities, not vibes. Arrows should represent movement, dependency, or authority, not decorative optimism. A plate that cannot show where the pressure travels is not yet a diagram; it is a nervous rectangle convention. The visual standard matters because beginners learn structure from layout before they learn vocabulary. If the picture is confused, the prose has to work twice as hard and usually loses.</p>
+      <p>The safest mental model is to ask what would happen during a festival day, a monsoon break, or a missing clerk. Festival day tests load. Monsoon tests delay and partial failure. The missing clerk tests observability and documentation. If injection defense still makes sense under those three tests, the concept has been understood rather than merely named. If it does not, the missing part is not advanced theory. It is usually the main point wearing a fake moustache.</p>
+      <p>The goal is not to make the machinery feel simple by hiding its moving parts. The goal is to make the moving parts feel necessary. Once the need is clear, the mechanism becomes almost polite. It stops being a command to memorize and becomes an answer to a problem the reader can already feel.</p>
+
+
+
 
     </main>
 
@@ -610,5 +3280,8 @@ const passwordHash = sha256(userInputPassword + userSalt);</code></pre>
     </footer>
   </div>
 
+  <script>
+    document.documentElement.classList.add('ready');
+  </script>
 </body>
 </html>
