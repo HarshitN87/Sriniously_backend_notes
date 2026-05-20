@@ -5,8 +5,2644 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter I: How Requests Travel on the Internet — Sriniously Backend</title>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/* ==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/* --- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/* --- Base Resets & Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/* --- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 72ch) minmax(0, 1fr);
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* All direct children of the container map to the center column by default */
+.container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+main > * {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/* --- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/* --- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: left;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+/* Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/* --- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /* Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/* --- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+  overflow-wrap: normal;
+}
+
+/* --- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* --- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/* --- Diagram Plates --- */
+figure,
+.svg-diagram-container {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+figure::before,
+.svg-diagram-container::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram-title {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 0;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram rect[fill="#2C2416"],
+.svg-diagram circle[fill="#2C2416"],
+.svg-diagram ellipse[fill="#2C2416"],
+.svg-diagram path[fill="#2C2416"],
+.svg-diagram rect[fill="var(--color-navy)"],
+.svg-diagram circle[fill="var(--color-navy)"],
+.svg-diagram ellipse[fill="var(--color-navy)"],
+.svg-diagram path[fill="var(--color-navy)"],
+.svg-diagram rect[fill="var(--color-charcoal)"],
+.svg-diagram circle[fill="var(--color-charcoal)"],
+.svg-diagram ellipse[fill="var(--color-charcoal)"],
+.svg-diagram path[fill="var(--color-charcoal)"] {
+  fill: var(--bg-code);
+}
+
+.svg-diagram polygon[fill="#2C2416"],
+.svg-diagram polygon[fill="var(--color-navy)"],
+.svg-diagram polygon[fill="var(--color-charcoal)"] {
+  fill: var(--accent-mustard);
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+  paint-order: stroke;
+  stroke: transparent;
+  stroke-width: 0;
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/* --- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/* --- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .container > * {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
@@ -89,12 +2725,11 @@
         The physics of capacitive touch can be categorized into two primary methodologies: <strong>self-capacitance</strong> and <strong>mutual-capacitance</strong>. In self-capacitance systems, the controller measures an entire row or column of the ITO grid against the ground. While simple, self-capacitance suffers from "ghosting" when multiple fingers touch the screen simultaneously, as the intersection points become ambiguous. Modern smartphones utilize mutual-capacitance grids. In a mutual-capacitance system, every intersection of row and column lines forms a capacitor. The touchscreen controller drives an AC voltage through the drive lines and measures the charge received on the sensing lines. When your finger touches the screen, it alters the local mutual capacitance at that specific intersection because the human body provides an alternate path for the electric field lines, diverting some charge. This allows the controller to resolve dozens of simultaneous touch coordinates with pinpoint accuracy.
       </p>
 
-            <div class="math-passage">
-      <p class="math-lead">The capacitance of a parallel plate capacitor is mathematically defined by:</p>
-      <div class="math-block">\[C = \frac{\epsilon A}{d}\]</div>
-      <p class="math-gloss">where \(\epsilon\) represents the permittivity of the dielectric layer, \(A\) represents the area of the overlapping plates, and \(d\) is the distance between them. When a human finger approaches, it introduces a secondary grounded path, altering the electrical field lines and causing a measurable shift in the capacitance values. Below is a conceptual implementation of how the digitizer's firmware scans these nodes in a loop:</p>
-      </div>
-
+      <p>
+        The capacitance of a parallel plate capacitor is mathematically defined by:
+        <div class="math-block">\[C = \frac{\epsilon A}{d}\]</div>
+        where \(\epsilon\) represents the permittivity of the dielectric layer, \(A\) represents the area of the overlapping plates, and \(d\) is the distance between them. When a human finger approaches, it introduces a secondary grounded path, altering the electrical field lines and causing a measurable shift in the capacitance values. Below is a conceptual implementation of how the digitizer's firmware scans these nodes in a loop:
+      </p>
 
             <p>The syntax can be set aside without losing the point. In request travel, the same idea is easier to see through a sealed message moving from a village office through district, provincial, and imperial desks: DNS, TLS, routing, and load balancing become successive clerks who preserve the request's identity while changing its envelope.</p>
       <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
@@ -176,31 +2811,31 @@
       <!-- Symmetrical DNS Lookup SVG Diagram -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate II: The Hierarchy of the Domain Name System</div>
-        <svg class="svg-diagram" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="DNS hierarchy lookup diagram">
-          <rect x="10" y="10" width="680" height="230" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="4" />
-          <rect x="30" y="95" width="120" height="64" fill="#D4A5A0" stroke="#2C2416" stroke-width="2" rx="4" />
-          <text x="90" y="118" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Your Device</text>
-          <text x="90" y="138" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">api.instagram.com?</text>
-          <rect x="210" y="95" width="130" height="64" fill="#C9A84C" stroke="#2C2416" stroke-width="2" rx="4" />
-          <text x="275" y="118" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="#2C2416">ISP Resolver</text>
-          <text x="275" y="138" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Recursive Clerk</text>
-          <rect x="430" y="25" width="110" height="52" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="4" />
-          <text x="485" y="48" font-weight="bold" font-size="10" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">Root Server</text>
-          <text x="485" y="64" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">.</text>
-          <rect x="560" y="95" width="110" height="52" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="4" />
-          <text x="615" y="118" font-weight="bold" font-size="10" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">TLD Server</text>
-          <text x="615" y="134" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">.com</text>
-          <rect x="430" y="165" width="140" height="52" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="4" />
-          <text x="500" y="188" font-weight="bold" font-size="10" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">Authoritative DNS</text>
-          <text x="500" y="204" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">instagram.com</text>
-          <line x1="150" y1="127" x2="208" y2="127" stroke="#2C2416" stroke-width="2" stroke-dasharray="4,4" />
-          <polygon points="202,123 208,127 202,131" fill="#C9A84C" />
-          <path d="M 340,118 L 428,52" stroke="#2C2416" stroke-width="2" fill="none" />
-          <polygon points="422,56 428,52 424,62" fill="#C9A84C" />
-          <path d="M 340,127 L 558,122" stroke="#2C2416" stroke-width="2" fill="none" />
-          <polygon points="552,118 558,122 552,126" fill="#C9A84C" />
-          <path d="M 340,136 L 428,188" stroke="#2C2416" stroke-width="2" fill="none" />
-          <polygon points="422,184 428,188 424,178" fill="#C9A84C" />
+        <svg class="svg-diagram" viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
+          <rect x="10" y="10" width="680" height="230" fill="none" stroke="var(--color-navy)" stroke-width="2" />
+          <rect x="30" y="95" width="120" height="60" fill="var(--color-pink)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
+          <text x="90" y="125" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="var(--color-navy)">Your Device</text>
+          <text x="90" y="142" font-size="9" text-anchor="middle" fill="var(--color-navy)">api.instagram.com?</text>
+          <rect x="210" y="95" width="130" height="60" fill="var(--color-mustard)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
+          <text x="275" y="125" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="var(--color-navy)">ISP Resolver</text>
+          <text x="275" y="142" font-size="9" text-anchor="middle" fill="var(--color-navy)">Recursive Clerk</text>
+          <rect x="430" y="25" width="110" height="50" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
+          <text x="485" y="50" font-weight="bold" font-size="10" text-anchor="middle" fill="var(--bg-cream)" dominant-baseline="central">Root Server</text>
+          <text x="485" y="65" font-size="8" text-anchor="middle" fill="var(--bg-cream)">"."</text>
+          <rect x="560" y="95" width="110" height="50" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
+          <text x="615" y="120" font-weight="bold" font-size="10" text-anchor="middle" fill="var(--bg-cream)" dominant-baseline="central">TLD Server</text>
+          <text x="615" y="135" font-size="8" text-anchor="middle" fill="var(--bg-cream)">".com"</text>
+          <rect x="430" y="165" width="140" height="50" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="4" />
+          <text x="500" y="190" font-weight="bold" font-size="10" text-anchor="middle" fill="var(--bg-cream)" dominant-baseline="central">Authoritative DNS</text>
+          <text x="500" y="205" font-size="8" text-anchor="middle" fill="var(--bg-cream)">instagram.com</text>
+          <line x1="150" y1="125" x2="210" y2="125" stroke="var(--color-navy)" stroke-width="2" stroke-dasharray="4,4" />
+          <polygon points="205,121 210,125 205,129" fill="#C9A84C" />
+          <path d="M 340,110 L 430,60" stroke="var(--color-navy)" stroke-width="2" fill="none" />
+          <polygon points="423,59 430,60 426,67" fill="#C9A84C" />
+          <path d="M 340,125 L 560,120" stroke="var(--color-navy)" stroke-width="2" fill="none" />
+          <polygon points="553,117 560,120 553,123" fill="#C9A84C" />
+          <path d="M 340,140 L 430,180" stroke="var(--color-navy)" stroke-width="2" fill="none" />
+          <polygon points="423,184 430,180 425,174" fill="#C9A84C" />
         </svg>
       </div>
 
@@ -240,24 +2875,23 @@
       <!-- Symmetrical TCP Handshake Sequence SVG -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate III: The TCP Three-Way Handshake</div>
-        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="TCP three-way handshake sequence diagram">
-          <rect x="5" y="5" width="490" height="190" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="4" />
-          <line x1="100" y1="36" x2="100" y2="178" stroke="#2C2416" stroke-width="3" />
-          <line x1="400" y1="36" x2="400" y2="178" stroke="#2C2416" stroke-width="3" />
-          <text x="100" y="24" font-weight="bold" font-size="12" text-anchor="middle" fill="#2C2416">Your Device</text>
-          <text x="400" y="24" font-weight="bold" font-size="12" text-anchor="middle" fill="#2C2416">Instagram Server</text>
-          <path d="M 100,52 L 400,88" stroke="#D4A5A0" stroke-width="2.5" fill="none" />
-          <polygon points="392,83 400,88 392,93" fill="#D4A5A0" />
-          <rect x="205" y="58" width="90" height="22" fill="#FFFFFF" stroke="#2C2416" stroke-width="1.5" rx="3" />
-          <text x="250" y="71" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">1. SYN</text>
-          <path d="M 400,96 L 100,132" stroke="#8FAF8A" stroke-width="2.5" fill="none" />
-          <polygon points="108,127 100,132 107,137" fill="#8FAF8A" />
-          <rect x="205" y="102" width="90" height="22" fill="#FFFFFF" stroke="#2C2416" stroke-width="1.5" rx="3" />
-          <text x="250" y="115" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">2. SYN-ACK</text>
-          <path d="M 100,140 L 400,168" stroke="#C9A84C" stroke-width="2.5" fill="none" />
-          <polygon points="392,163 400,168 392,173" fill="#C9A84C" />
-          <rect x="205" y="146" width="90" height="22" fill="#FFFFFF" stroke="#2C2416" stroke-width="1.5" rx="3" />
-          <text x="250" y="159" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">3. ACK</text>
+        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
+          <line x1="100" y1="30" x2="100" y2="180" stroke="var(--color-navy)" stroke-width="3" />
+          <line x1="400" y1="30" x2="400" y2="180" stroke="var(--color-navy)" stroke-width="3" />
+          <text x="100" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Your Device</text>
+          <text x="400" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Instagram Server</text>
+          <path d="M 100,50 L 400,90" stroke="var(--color-coral)" stroke-width="2" fill="none" />
+          <polygon points="393,85 400,90 392,93" fill="var(--color-coral)" />
+          <rect x="210" y="55" width="80" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
+          <text x="250" y="68" font-size="9" text-anchor="middle" fill="var(--color-navy)">1. SYN</text>
+          <path d="M 400,90 L 100,130" stroke="var(--color-mint)" stroke-width="2" fill="none" />
+          <polygon points="108,127 100,130 107,135" fill="var(--color-mint)" />
+          <rect x="210" y="95" width="80" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
+          <text x="250" y="108" font-size="9" text-anchor="middle" fill="var(--color-navy)">2. SYN-ACK</text>
+          <path d="M 100,130 L 400,170" stroke="var(--color-mustard)" stroke-width="2" fill="none" />
+          <polygon points="393,165 400,170 392,173" fill="var(--color-mustard)" />
+          <rect x="210" y="135" width="80" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
+          <text x="250" y="148" font-size="9" text-anchor="middle" fill="var(--color-navy)">3. ACK</text>
         </svg>
       </div>
 
@@ -281,27 +2915,25 @@
         Second, TCP uses <strong>Congestion Control</strong> to manage the global network lanes. If every computer sent packets as fast as physically possible, the internet's core routers would immediately choke, their buffers would overflow, and the entire network would experience a catastrophic collapse known as congestion collapse. To prevent this, TCP is designed to be a "good citizen." It uses mathematical algorithms like <strong>Tahoe, Reno, or Cubic</strong> to dynamically sense how crowded the network is.
       </p>
 
-      <div class="math-passage">
-        <p class="math-lead">To compute when a packet is considered "lost," the TCP stack maintains a running estimation of the <strong>Retransmission Timeout (RTO)</strong>. This is dynamically calculated using Jacobson/Karels algorithm:</p>
-      <div class="math-block">\[\text{RTT\_Delta} = \text{Measured\_RTT} - \text{SRTT}\]</div>
-      <div class="math-block">\[\text{SRTT} \leftarrow \text{SRTT} + \alpha \cdot \text{RTT\_Delta}\]</div>
-      <div class="math-block">\[\text{RTTVAR} \leftarrow \text{RTTVAR} + \beta \cdot (|\text{RTT\_Delta}| - \text{RTTVAR})\]</div>
-      <div class="math-block">\[\text{RTO} = \text{SRTT} + 4 \cdot \text{RTTVAR}\]</div>
-      <p class="math-gloss">where \(\text{SRTT}\) is the Smoothed Round Trip Time, \(\text{RTTVAR}\) is the Round Trip Time Variation, and standard values for the filter gains are \(\alpha = 0.125\) and \(\beta = 0.25\). This ensures the timeout window tightly wraps around actual network conditions.</p>
-      </div>
-
+      <p>
+        To compute when a packet is considered "lost," the TCP stack maintains a running estimation of the <strong>Retransmission Timeout (RTO)</strong>. This is dynamically calculated using Jacobson/Karels algorithm:
+        <div class="math-block">\[\text{RTT\_Delta} = \text{Measured\_RTT} - \text{SRTT}\]</div>
+        <div class="math-block">\[\text{SRTT} \leftarrow \text{SRTT} + \alpha \cdot \text{RTT\_Delta}\]</div>
+        <div class="math-block">\[\text{RTTVAR} \leftarrow \text{RTTVAR} + \beta \cdot (|\text{RTT\_Delta}| - \text{RTTVAR})\]</div>
+        <div class="math-block">\[\text{RTO} = \text{SRTT} + 4 \cdot \text{RTTVAR}\]</div>
+        where \(\text{SRTT}\) is the Smoothed Round Trip Time, \(\text{RTTVAR}\) is the Round Trip Time Variation, and standard values for the filter gains are \(\alpha = 0.125\) and \(\beta = 0.25\). This ensures the timeout window tightly wraps around actual network conditions.
+      </p>
 
       <p>
         When the connection starts, TCP enters <strong>Slow Start</strong>. It starts by sending a single packet. If it receives an ACK, it doubles its output to two packets. Then four. Then eight. It increases exponentially until it hits the Slow Start Threshold (ssthresh)or encounters packet loss. Packet loss is registered when an ACK fails to return within the RTO, or when the client receives <strong>three duplicate ACKs</strong> (indicating that subsequent packets arrived, but a gap remains).
       </p>
 
-            <div class="math-passage">
-      <p class="math-lead">Once loss is detected, TCP immediately drops its transmission window and enters <strong>Congestion Avoidance</strong>, utilizing an <strong>Additive Increase Multiplicative Decrease (AIMD)</strong> algorithm. The mathematical formulas governing the congestion window size (\(W\)) are defined as:</p>
-      <div class="math-block">\[W(t+1) = W(t) + \frac{1}{W(t)} \quad \text{upon receiving an ACK (Additive Increase)}\]</div>
-      <div class="math-block">\[W(t+1) = W(t) \times \beta \quad \text{upon detecting packet loss (Multiplicative Decrease)}\]</div>
-      <p class="math-gloss">where \(\beta\) is typically configured to \(0.5\) in standard Reno implementations, representing a sharp drop of half the sending rate.</p>
-      </div>
-
+      <p>
+        Once loss is detected, TCP immediately drops its transmission window and enters <strong>Congestion Avoidance</strong>, utilizing an <strong>Additive Increase Multiplicative Decrease (AIMD)</strong> algorithm. The mathematical formulas governing the congestion window size (\(W\)) are defined as:
+        <div class="math-block">\[W(t+1) = W(t) + \frac{1}{W(t)} \quad \text{upon receiving an ACK (Additive Increase)}\]</div>
+        <div class="math-block">\[W(t+1) = W(t) \times \beta \quad \text{upon detecting packet loss (Multiplicative Decrease)}\]</div>
+        where \(\beta\) is typically configured to \(0.5\) in standard Reno implementations, representing a sharp drop of half the sending rate.
+      </p>
 
       <p>
         Let us trace the evolution of these algorithms:
@@ -349,43 +2981,40 @@
       <!-- Symmetrical TLS Handshake SVG -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate IV: The Cryptographic TLS 1.3 Handshake</div>
-        <svg class="svg-diagram" viewBox="0 0 500 210" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="TLS 1.3 handshake sequence diagram">
-          <rect x="5" y="5" width="490" height="200" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="4" />
-          <line x1="100" y1="36" x2="100" y2="188" stroke="#2C2416" stroke-width="3" />
-          <line x1="400" y1="36" x2="400" y2="188" stroke="#2C2416" stroke-width="3" />
-          <text x="100" y="24" font-weight="bold" font-size="12" text-anchor="middle" fill="#2C2416">Your Device</text>
-          <text x="400" y="24" font-weight="bold" font-size="12" text-anchor="middle" fill="#2C2416">Instagram Server</text>
-          <path d="M 100,52 L 400,78" stroke="#2C2416" stroke-width="2" fill="none" />
-          <polygon points="392,74 400,78 392,82" fill="#C9A84C" />
-          <rect x="168" y="48" width="164" height="22" fill="#D4A5A0" stroke="#2C2416" stroke-width="1.5" rx="3" />
-          <text x="250" y="61" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">ClientHello (Ciphers)</text>
-          <path d="M 400,92 L 100,118" stroke="#2C2416" stroke-width="2" fill="none" />
-          <polygon points="108,114 100,118 107,122" fill="#C9A84C" />
-          <rect x="128" y="98" width="244" height="22" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="3" />
-          <text x="250" y="111" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#FAF6EF">ServerHello &amp; Cert + Key Exchange</text>
-          <rect x="72" y="132" width="356" height="26" fill="#C9A84C" stroke="#2C2416" stroke-width="1.5" rx="3" />
-          <text x="250" y="147" font-weight="bold" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Diffie-Hellman: Derived Session Key</text>
-          <rect x="88" y="168" width="324" height="24" fill="#F5F0E8" stroke="#2C2416" stroke-dasharray="3,2" stroke-width="1.5" rx="3" />
-          <text x="250" y="182" font-size="9" font-style="italic" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Encrypted Tunnel Established (AES-GCM)</text>
+        <svg class="svg-diagram" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
+          <line x1="100" y1="30" x2="100" y2="180" stroke="var(--color-navy)" stroke-width="3" />
+          <line x1="400" y1="30" x2="400" y2="180" stroke="var(--color-navy)" stroke-width="3" />
+          <text x="100" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Your Device</text>
+          <text x="400" y="20" font-weight="bold" font-size="12" text-anchor="middle" fill="var(--color-navy)">Instagram Server</text>
+          <path d="M 100,50 L 400,80" stroke="var(--color-navy)" stroke-width="1.5" fill="none" />
+          <polygon points="393,76 400,80 392,83" fill="#C9A84C" />
+          <rect x="180" y="45" width="140" height="20" fill="var(--color-pink)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
+          <text x="250" y="58" font-size="8" text-anchor="middle" fill="var(--color-navy)">ClientHello (Ciphers)</text>
+          <path d="M 400,80 L 100,120" stroke="var(--color-navy)" stroke-width="1.5" fill="none" />
+          <polygon points="108,117 100,120 107,125" fill="#C9A84C" />
+          <rect x="150" y="85" width="200" height="20" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
+          <text x="250" y="98" font-size="8" text-anchor="middle" fill="var(--bg-cream)">ServerHello &amp; Cert + Key Exchange</text>
+          <rect x="80" y="125" width="340" height="25" fill="var(--color-mustard)" stroke="var(--color-navy)" stroke-width="1.5" rx="2" />
+          <text x="250" y="141" font-weight="bold" font-size="9" text-anchor="middle" fill="var(--color-navy)">Diffie-Hellman Key Exchange: Derived Session Key</text>
+          <rect x="90" y="160" width="320" height="20" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-dasharray="2,2" stroke-width="1.5" />
+          <text x="250" y="173" font-size="9" font-style="italic" text-anchor="middle" fill="var(--color-navy)">Encrypted Tunnel Established (AES-GCM)</text>
         </svg>
       </div>
 
-            <div class="math-passage">
-      <p class="math-lead">Let us look at the mathematics behind the <strong>Diffie-Hellman Key Exchange</strong> that powers this magic. It is built upon the <strong>Discrete Logarithm Problem</strong> inside finite fields. The client and server agree on a large prime number p and a base generator g. The client selects a secret private key a (a massive random number) and computes its public key share:</p>
-      <div class="math-block">\[A = g^a \pmod p\]</div>
-      <p class="math-lead">The client sends A to the server.</p>
-      </div>
+      <p>
+        Let us look at the mathematics behind the <strong>Diffie-Hellman Key Exchange</strong> that powers this magic. It is built upon the <strong>Discrete Logarithm Problem</strong> inside finite fields. The client and server agree on a large prime number p and a base generator g. The client selects a secret private key a (a massive random number) and computes its public key share:
+        <div class="math-block">\[A = g^a \pmod p\]</div>
+        The client sends A to the server.
+      </p>
 
-
-            <div class="math-passage">
-      <p class="math-lead">The server selects its own secret private key b and computes its public share:</p>
-      <div class="math-block">\[B = g^b \pmod p\]</div>
-      <p class="math-lead">The server sends B to the client. Now, the client computes the shared secret:</p>
-      <div class="math-block">\[S = B^a \pmod p = (g^b)^a \pmod p = g^{ab} \pmod p\]</div>
-      <p class="math-lead">The server computes the shared secret:</p>
-      <div class="math-block">\[S = A^b \pmod p = (g^a)^b \pmod p = g^{ab} \pmod p\]</div>
-      </div>
-
+      <p>
+        The server selects its own secret private key b and computes its public share:
+        <div class="math-block">\[B = g^b \pmod p\]</div>
+        The server sends B to the client. Now, the client computes the shared secret:
+        <div class="math-block">\[S = B^a \pmod p = (g^b)^a \pmod p = g^{ab} \pmod p\]</div>
+        The server computes the shared secret:
+        <div class="math-block">\[S = A^b \pmod p = (g^a)^b \pmod p = g^{ab} \pmod p\]</div>
+      </p>
 
       <p>
         Both sides have arrived at the exact same shared key S without ever transmitting a, b, or S over the wire. An eavesdropper sitting in the middle only catches g, p, A, and B. To find S, they must solve for a or b from the equation \(A = g^a \pmod p\).
@@ -395,20 +3024,19 @@
         In modular arithmetic, when p is a massive prime (typically 2048 bits long), there is no known efficient classical algorithm to calculate this discrete logarithm. It would take a supercomputer billions of years of continuous computation to extract the keys, ensuring that your secret remains completely private. In modern systems, this is optimized further using Elliptic Curve Cryptography (ECDHE) over curves like Curve25519. The mathematics operates on the algebraic structure of elliptic curves over finite fields, where the group operation replaces modular multiplication, and finding the scalar factor \(d\) from a point \(Q = dP\) constitutes the incredibly difficult Elliptic Curve Discrete Logarithm Problem (ECDLP).
       </p>
       
-            <div class="math-passage">
-      <p class="math-lead">An elliptic curve over a finite field \(F_p\) is defined by the Weierstrass equation:</p>
-      <div class="math-block">\[y^2 = x^3 + ax + b \pmod p\]</div>
-      <p class="math-lead">Points on the curve, along with a special point at infinity, form an abelian group under point addition. To perform a key exchange, both parties agree on a base point \(G\) on the curve. The client selects a private integer \(k_{client}\) and computes the public point:</p>
-      <div class="math-block">\[Q_{client} = k_{client} \cdot G\]</div>
-      <p class="math-lead">using scalar point multiplication. The server selects its private \(k_{server}\) and computes:</p>
-      <div class="math-block">\[Q_{server} = k_{server} \cdot G\]</div>
-      <p class="math-lead">They exchange their public points \(Q_{client}\) and \(Q_{server}\). The client then computes:</p>
-      <div class="math-block">\[S = k_{client} \cdot Q_{server} = k_{client} \cdot (k_{server} \cdot G)\]</div>
-      <p class="math-lead">while the server computes:</p>
-      <div class="math-block">\[S = k_{server} \cdot Q_{client} = k_{server} \cdot (k_{client} \cdot G)\]</div>
-      <p class="math-lead">Because scalar multiplication is associative, both arrive at the identical coordinate \(S\), which is hashed to generate the symmetric keys.</p>
-      </div>
-
+      <p>
+        An elliptic curve over a finite field \(F_p\) is defined by the Weierstrass equation:
+        <div class="math-block">\[y^2 = x^3 + ax + b \pmod p\]</div>
+        Points on the curve, along with a special point at infinity, form an abelian group under point addition. To perform a key exchange, both parties agree on a base point \(G\) on the curve. The client selects a private integer \(k_{client}\) and computes the public point:
+        <div class="math-block">\[Q_{client} = k_{client} \cdot G\]</div>
+        using scalar point multiplication. The server selects its private \(k_{server}\) and computes:
+        <div class="math-block">\[Q_{server} = k_{server} \cdot G\]</div>
+        They exchange their public points \(Q_{client}\) and \(Q_{server}\). The client then computes:
+        <div class="math-block">\[S = k_{client} \cdot Q_{server} = k_{client} \cdot (k_{server} \cdot G)\]</div>
+        while the server computes:
+        <div class="math-block">\[S = k_{server} \cdot Q_{client} = k_{server} \cdot (k_{client} \cdot G)\]</div>
+        Because scalar multiplication is associative, both arrive at the identical coordinate \(S\), which is hashed to generate the symmetric keys.
+      </p>
 
       <h2>5. The Under-Ocean Dash: The Physics of the Fiber Transit</h2>
       <p>
@@ -419,19 +3047,17 @@
         To cross the massive oceanic gaps, the signal must leave the air and enter the cold, pitch-black depths of the oceans. It enters the <strong>Submarine Fiber Optic Network</strong>. These undersea cables are marvels of modern engineering. They are not floating wires; they are heavy, armored cables laid along the mountain ranges and deep trenches of the ocean floors. At the core of these cables are thin strands of <strong>highly purified silica glass (fiber)</strong>. These glass strands are so pure that light can travel through them for miles without significant attenuation.
       </p>
 
-            <div class="math-passage">
-      <p class="math-lead">The physics of fiber transit is governed by <strong>Total Internal Reflection</strong> and <strong>Snell’s Law</strong>. The glass fiber is designed with two distinct layers: an inner core with a high refractive index \(n_1\), surrounded by a protective cladding layer with a lower refractive index \(n_2\). When a light pulse is injected into the core at an angle greater than the <strong>critical angle</strong> \(\theta_c\):</p>
-      <div class="math-block">\[\theta_c = \arcsin\left(\frac{n_2}{n_1}\right)\]</div>
-      <p class="math-lead">the light cannot escape into the cladding. Instead, it is reflected 100% back into the core, bouncing down the glass channel in a continuous zigzag pattern at roughly two-thirds the speed of light in a vacuum (~200,000 kilometers per second).</p>
-      </div>
-
+      <p>
+        The physics of fiber transit is governed by <strong>Total Internal Reflection</strong> and <strong>Snell’s Law</strong>. The glass fiber is designed with two distinct layers: an inner core with a high refractive index \(n_1\), surrounded by a protective cladding layer with a lower refractive index \(n_2\). When a light pulse is injected into the core at an angle greater than the <strong>critical angle</strong> \(\theta_c\):
+        <div class="math-block">\[\theta_c = \arcsin\left(\frac{n_2}{n_1}\right)\]</div>
+        the light cannot escape into the cladding. Instead, it is reflected 100% back into the core, bouncing down the glass channel in a continuous zigzag pattern at roughly two-thirds the speed of light in a vacuum (~200,000 kilometers per second).
+      </p>
       
-            <div class="math-passage">
-      <p class="math-lead">Snell's Law defines the relationship between the angles of incidence and refraction:</p>
-      <div class="math-block">\[n_1 \sin(\theta_1) = n_2 \sin(\theta_2)\]</div>
-      <p class="math-lead">When light travels from a high refractive index medium (core) to a low index medium (cladding), refraction ceases entirely at the critical angle, resulting in perfect internal reflection.</p>
-      </div>
-
+      <p>
+        Snell's Law defines the relationship between the angles of incidence and refraction:
+        <div class="math-block">\[n_1 \sin(\theta_1) = n_2 \sin(\theta_2)\]</div>
+        When light travels from a high refractive index medium (core) to a low index medium (cladding), refraction ceases entirely at the critical angle, resulting in perfect internal reflection.
+      </p>
 
       <p>
         But even the purest glass introduces physical obstacles:
@@ -470,12 +3096,11 @@
         Let us look at the mathematics of routing algorithms. A basic algorithm is <strong>Round Robin</strong>, which simply sends request #1 to Server A, request #2 to Server B, and so on. But in modern distributed systems caching is critical. If Server A has cached your user profile in its local memory and the next request lands on Server B, Server B must execute a slow query to the database, rendering the cache useless.
       </p>
 
-            <div class="math-passage">
-      <p class="math-lead">To solve this, we use <strong>Consistent Hashing</strong> (pioneered by David Karger et al. in 1997). In a standard hashing scheme, you might map a request to a server using a modulo operation:</p>
-      <div class="math-block">\[\text{Server} = \text{hash}(\text{user\_id}) \pmod N\]</div>
-      <p class="math-gloss">where N is the number of active servers in your cluster. While simple, this algorithm has a fatal flaw: if one server crashes (N becomes N - 1) or a new server is added (N becomes N + 1), the result of the modulo operation changes for almost every single key. The entire cache of your system is wiped out in a single instant, triggering a catastrophic stampede of database queries.</p>
-      </div>
-
+      <p>
+        To solve this, we use <strong>Consistent Hashing</strong> (pioneered by David Karger et al. in 1997). In a standard hashing scheme, you might map a request to a server using a modulo operation:
+        <div class="math-block">\[\text{Server} = \text{hash}(\text{user\_id}) \pmod N\]</div>
+        where N is the number of active servers in your cluster. While simple, this algorithm has a fatal flaw: if one server crashes (N becomes N - 1) or a new server is added (N becomes N + 1), the result of the modulo operation changes for almost every single key. The entire cache of your system is wiped out in a single instant, triggering a catastrophic stampede of database queries.
+      </p>
 
       <p>
         Consistent Hashing solves this by mapping both servers and request keys onto a circular ring (the hash ring). The hash ring has a range of \(0\) to \(2^{32} - 1\). Below is a fully realized JavaScript class demonstrating this consistent hashing ring mechanics with virtual nodes:

@@ -5,8 +5,2642 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter XVII: The Watchtower: Logging, Monitoring &amp; Observability — Sriniously Backend</title>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/--- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/--- Base Resets & Layout --- */
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/--- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/--- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: 1fr minmax(auto, 72ch) 1fr;
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/All direct children of the container map to the center column by default */
+.container > {
+  grid-column: 2;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+}
+
+main > {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/--- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/--- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: justify;
+}
+
+/Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/--- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/--- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/--- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/--- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/--- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/--- Diagram Plates --- */
+figure {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+}
+
+figure::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 480px;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/--- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/--- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/--- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px 1fr 20px;
+  }
+  .container > {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+/* ==========================================================================
+   WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&display=swap');
+
+/* --- Custom Properties: The Editorial Color Palette --- */
+:root {
+  --bg-cream: #FAF6EF;
+  --color-charcoal: #2C2416;
+  
+  --accent-rose: #D4A5A0;
+  --accent-sage: #8FAF8A;
+  --accent-mustard: #C9A84C;
+  --accent-blue: #A8BFD0;
+  
+  --bg-code: #F5F0E8;
+  --border-color: rgba(44, 36, 22, 0.15);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --border-double: 4px double var(--color-charcoal);
+  --border-single: 2px solid var(--color-charcoal);
+  --shadow-flat: 4px 4px 0px var(--color-charcoal);
+  --shadow-flat-hover: 7px 7px 0px var(--color-charcoal);
+}
+
+/* --- Base Resets & Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.85;
+  padding: 60px 20px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* --- Decorative Camera Frame --- */
+body::before {
+  content: none;
+}
+
+/* --- The Central Column Layout using CSS Grid --- */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+  animation: camera-pan 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 72ch) minmax(0, 1fr);
+  column-gap: 40px;
+}
+
+@keyframes camera-pan {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* All direct children of the container map to the center column by default */
+.container > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+main {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 72ch) minmax(180px, 240px);
+  column-gap: 36px;
+  align-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+main > * {
+  grid-column: 1;
+}
+
+main > figure,
+main > .svg-diagram-container,
+main > .table-container {
+  grid-column: 1 / -1;
+}
+
+/* --- Symmetrical Title Cards --- */
+header.chapter-header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 20px 0;
+}
+
+.chapter-number {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-rose);
+  display: inline-block;
+  margin-bottom: 15px;
+  padding: 4px 16px;
+  border: 1px solid var(--accent-rose);
+  border-radius: 20px;
+}
+
+header.chapter-header h1 {
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 25px;
+  letter-spacing: 0.04em;
+  color: var(--color-charcoal);
+  text-transform: uppercase;
+}
+
+.chapter-epigraph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  line-height: 1.7;
+}
+
+.divider-symmetrical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.divider-symmetrical::before,
+.divider-symmetrical::after {
+  content: "";
+  height: 1px;
+  background-color: var(--accent-rose);
+  flex-grow: 1;
+  max-width: 150px;
+}
+
+.divider-symbol {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 1.1rem;
+  margin: 0 15px;
+  letter-spacing: 3px;
+}
+
+/* --- Typography --- */
+p {
+  margin-bottom: 28px;
+  text-align: left;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+/* Drop-cap */
+p.intro-paragraph::first-letter {
+  font-family: var(--font-serif);
+  font-size: 5rem;
+  float: left;
+  line-height: 0.8;
+  padding-top: 8px;
+  padding-right: 12px;
+  color: var(--accent-rose);
+  font-weight: 900;
+}
+
+h2, h3, h4 {
+  font-family: var(--font-sans);
+  color: var(--color-charcoal);
+  letter-spacing: 0.04em;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-top: 1px solid var(--accent-rose);
+  border-bottom: 1px solid var(--accent-rose);
+  text-transform: uppercase;
+}
+
+h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 6px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-mustard);
+}
+
+/* --- Pull-quotes --- */
+blockquote {
+  grid-column: 2;
+  margin: 40px 0;
+  padding: 10px 40px;
+  border-left: 3px solid var(--accent-rose);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #3d3322; /* Warmer charcoal for pull-quotes */
+  line-height: 1.75;
+}
+
+/* --- Margin Annotation Cards --- */
+aside.margin-card {
+  grid-column: 2;
+  align-self: start;
+  justify-self: start;
+  width: 240px;
+  margin: 0 0 30px 0;
+  padding: 18px;
+  background-color: var(--bg-cream);
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+aside.margin-card.aside {
+  border: 1px solid var(--accent-sage);
+}
+
+aside.margin-card.caution {
+  border: 1px solid var(--accent-mustard);
+}
+
+aside.margin-card.security {
+  border: 1px solid var(--accent-rose);
+}
+
+aside.margin-card .card-label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+aside.margin-card.aside .card-label {
+  color: var(--accent-sage);
+}
+
+aside.margin-card.caution .card-label {
+  color: var(--accent-mustard);
+}
+
+aside.margin-card.security .card-label {
+  color: var(--accent-rose);
+}
+
+aside.margin-card p {
+  font-family: var(--font-serif);
+  margin-bottom: 0;
+  text-align: left;
+  overflow-wrap: normal;
+}
+
+/* --- Code Blocks --- */
+pre {
+  background-color: var(--bg-code);
+  border-left: 4px solid var(--accent-sage);
+  padding: 24px;
+  margin: 35px 0;
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+code {
+  font-family: var(--font-mono);
+  background-color: var(--bg-code);
+  color: var(--color-charcoal);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.concept-token {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+.math-block {
+  margin: 32px auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Symmetrical Table of Contents --- */
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  margin: 50px 0;
+}
+
+@media (min-width: 768px) {
+  .toc-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.toc-card {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-charcoal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.toc-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
+}
+
+.toc-card-num {
+  font-family: var(--font-sans);
+  color: var(--accent-mustard);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.toc-card-title {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.toc-card-desc {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.toc-card-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  background-color: var(--accent-rose);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--color-charcoal);
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+/* --- Vintage Tables --- */
+.table-container {
+  overflow-x: auto;
+  margin: 40px 0;
+  border: 1px solid var(--color-charcoal);
+  border-radius: 4px;
+  box-shadow: var(--shadow-flat);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-code);
+  text-align: left;
+}
+
+th, td {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-charcoal);
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-cream);
+}
+
+/* --- Diagram Plates --- */
+figure,
+.svg-diagram-container {
+  grid-column: 2;
+  border: 1px solid var(--accent-blue);
+  background-color: var(--bg-code);
+  padding: 30px;
+  margin: 40px 0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+figure::before,
+.svg-diagram-container::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed var(--accent-blue);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+figcaption {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram-title {
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  color: var(--color-charcoal);
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+.svg-diagram {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  min-width: 0;
+  display: block;
+  background: transparent;
+}
+
+.svg-diagram rect[fill="#2C2416"],
+.svg-diagram circle[fill="#2C2416"],
+.svg-diagram ellipse[fill="#2C2416"],
+.svg-diagram path[fill="#2C2416"],
+.svg-diagram rect[fill="var(--color-navy)"],
+.svg-diagram circle[fill="var(--color-navy)"],
+.svg-diagram ellipse[fill="var(--color-navy)"],
+.svg-diagram path[fill="var(--color-navy)"],
+.svg-diagram rect[fill="var(--color-charcoal)"],
+.svg-diagram circle[fill="var(--color-charcoal)"],
+.svg-diagram ellipse[fill="var(--color-charcoal)"],
+.svg-diagram path[fill="var(--color-charcoal)"] {
+  fill: var(--bg-code);
+}
+
+.svg-diagram polygon[fill="#2C2416"],
+.svg-diagram polygon[fill="var(--color-navy)"],
+.svg-diagram polygon[fill="var(--color-charcoal)"] {
+  fill: var(--accent-mustard);
+}
+
+.svg-diagram text {
+  font-family: var(--font-sans);
+  fill: var(--color-charcoal);
+  paint-order: stroke;
+  stroke: transparent;
+  stroke-width: 0;
+}
+
+.svg-diagram text.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+
+/* --- Side Navigation (The Archivist's Index) --- */
+.archivist-nav {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+  padding: 10px;
+}
+
+@media (min-width: 1280px) {
+  .archivist-nav {
+    display: flex;
+  }
+}
+
+.archivist-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-charcoal);
+  background-color: var(--bg-cream);
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.archivist-dot:hover,
+.archivist-dot.active {
+  background-color: var(--accent-mustard);
+  transform: scale(1.3);
+}
+
+.archivist-dot::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-charcoal);
+  color: var(--bg-cream);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.archivist-dot:hover::after {
+  opacity: 1;
+}
+
+/* --- Footer Symmetrical Navigation --- */
+footer.chapter-footer {
+  margin-top: 80px;
+  border-top: var(--border-double);
+  padding-top: 40px;
+  text-align: center;
+  grid-column: 2;
+}
+
+.nav-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.vintage-button {
+  background-color: var(--bg-code);
+  border: 1px solid var(--color-charcoal);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 12px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-flat);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vintage-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-flat-hover);
+  background-color: var(--bg-cream);
+}
+
+.vintage-button.mustard {
+  background-color: var(--accent-mustard);
+}
+
+.vintage-button.coral {
+  background-color: var(--accent-rose);
+}
+
+.vintage-button.mint {
+  background-color: var(--accent-sage);
+  color: var(--bg-cream);
+}
+
+.curator-credits {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-charcoal);
+  opacity: 0.6;
+  margin-top: 30px;
+}
+
+.curator-credits a {
+  color: var(--accent-rose);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.curator-credits a:hover {
+  text-decoration: underline;
+}
+
+/* --- Responsive Reflow --- */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 20px minmax(0, 1fr) 20px;
+  }
+  .container > * {
+    grid-column: 2;
+  }
+  main {
+    display: block;
+  }
+  aside.margin-card {
+    grid-column: 1;
+    width: 100%;
+    margin: 20px 0;
+    box-sizing: border-box;
+  }
+}
+
+</style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -89,10 +2723,9 @@
       <p>
         A Logis an immutable, timestamped record of a discrete event that occurred within the application. Logs represent the ground truth of system execution history. When a database transaction commits, a user authenticates, or an external API request fails, a log entry records the precise details of that individual event.
       </p>
-            <div class="math-passage">
-      <div class="math-block">\[\text{Log}(t) = \{\text{Timestamp}, \text{CorrelationId}, \text{Level}, \text{Metadata}, \text{Payload}\}\]</div>
-      </div>
-
+      <p>
+        <div class="math-block">\[\text{Log}(t) = \{\text{Timestamp}, \text{CorrelationId}, \text{Level}, \text{Metadata}, \text{Payload}\}\]</div>
+      </p>
       <p>
         Logs are highly context-rich, carrying stack traces, SQL execution parameters, and local variables. However, because they capture individual events, the volume of logs generated by a busy production cluster can easily saturate network interfaces and disk arrays, requiring high-speed indexing engines.
       </p>
@@ -101,10 +2734,9 @@
       <p>
         A Metricis a numeric value aggregated over time, representing the performance, resource consumption, or throughput of a system. Metrics do not describe individual requests; they describe the collective state of the system over a specified window (e.g., \(10\)-second intervals).
       </p>
-            <div class="math-passage">
-      <div class="math-block">\[\text{Metric}(T_{window}) = \frac{\sum_{i=1}^{N} \text{ResponseTime}_i}{N}\]</div>
-      </div>
-
+      <p>
+        <div class="math-block">\[\text{Metric}(T_{window}) = \frac{\sum_{i=1}^{N} \text{ResponseTime}_i}{N}\]</div>
+      </p>
       <p>
         Metrics are exceptionally lightweight, requiring minimal network overhead and storage space. They are the ideal mechanism for Alertingand real-time dashboard visualization. While a metric dashboard can tell you *whena system is experiencing a latency spike, it lacks the context to tell you *whya specific user's query timed out.
       </p>
@@ -199,10 +2831,9 @@
       <p>
         To prevent this, production-grade loggers (like Go’s <strong>Zap</strong> or Node.js’s <strong>Pino</strong>) execute <strong>Non-Blocking, Async Logging</strong>:
       </p>
-            <div class="math-passage">
-      <div class="math-block">\[\text{Log Event} \rightarrow \text{Memory Ring Buffer} \xrightarrow{\text{Batch System Write}} \text{Stdout / Disk}\]</div>
-      </div>
-
+      <p>
+        <div class="math-block">\[\text{Log Event} \rightarrow \text{Memory Ring Buffer} \xrightarrow{\text{Batch System Write}} \text{Stdout / Disk}\]</div>
+      </p>
       <p>
         Instead of writing directly to the operating system file descriptor, the logging library serializes the JSON string and pushes it onto a high-speed, thread-safe <strong>Memory Ring Buffer</strong>. A separate background worker thread or worker pool reads from this buffer, aggregates the entries, and flushes them to the OS in batches. If the ring buffer fills up during a massive traffic spike, the library can be configured to execute a Drop Policy(dropping <span class="concept-token">DEBUG</span> or <span class="concept-token">INFO</span> logs to protect the system) or apply <strong>Backpressure</strong>, keeping your core server thread completely unblocked.
       </p>
@@ -212,54 +2843,54 @@
         <div class="svg-diagram-title">Plate XXXV: Symmetrical Telemetry Triage Sequence</div>
         <svg class="svg-diagram" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <!-- Background Frame -->
-          <rect x="5" y="5" width="590" height="210" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="4"/>
+          <rect x="5" y="5" width="590" height="210" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="2" rx="4"/>
           
           <!-- Symmetrical Central Axis Grid -->
-          <line x1="300" y1="5" x2="300" y2="215" stroke="#F5F0E8" stroke-width="1" stroke-dasharray="4"/>
-          <line x1="5" y1="110" x2="595" y2="110" stroke="#F5F0E8" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="300" y1="5" x2="300" y2="215" stroke="var(--bg-sand)" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="5" y1="110" x2="595" y2="110" stroke="var(--bg-sand)" stroke-width="1" stroke-dasharray="4"/>
 
           <!-- Step 1: Alert Triggered (Left) -->
-          <rect x="25" y="65" width="110" height="90" fill="#D4A5A0" stroke="#2C2416" stroke-width="2" rx="3"/>
-          <text x="80" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">1. Pager Alert</text>
+          <rect x="25" y="65" width="110" height="90" fill="var(--color-pink)" stroke="var(--color-navy)" stroke-width="2" rx="3"/>
+          <text x="80" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" fill="var(--color-navy)" text-anchor="middle">1. Pager Alert</text>
           <!-- Alarm graphic -->
-          <circle cx="80" cy="115" r="10" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5"/>
-          <line x1="80" y1="115" x2="80" y2="110" stroke="#2C2416" stroke-width="2"/>
-          <line x1="80" y1="115" x2="85" y2="115" stroke="#2C2416" stroke-width="1.5"/>
-          <text x="80" y="142" font-family="'Fira Code', monospace" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Latency &gt; 2s</text>
+          <circle cx="80" cy="115" r="10" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <line x1="80" y1="115" x2="80" y2="110" stroke="var(--color-navy)" stroke-width="2"/>
+          <line x1="80" y1="115" x2="85" y2="115" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <text x="80" y="142" font-family="'Fira Code', monospace" font-size="7" fill="var(--color-navy)" text-anchor="middle">Latency &gt; 2s</text>
 
           <!-- Step 2: Metrics Dashboard (Center-Left) -->
-          <rect x="165" y="65" width="110" height="90" fill="#F5F0E8" stroke="#2C2416" stroke-width="2" rx="3"/>
-          <text x="220" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">2. Metrics</text>
+          <rect x="165" y="65" width="110" height="90" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-width="2" rx="3"/>
+          <text x="220" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" fill="var(--color-navy)" text-anchor="middle">2. Metrics</text>
           <!-- Mini line chart -->
-          <path d="M 180,130 L 195,120 L 210,125 L 225,100 L 240,135 L 255,80" fill="none" stroke="#2C2416" stroke-width="1.5"/>
-          <text x="220" y="142" font-family="'Fira Code', monospace" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Prometheus Query</text>
+          <path d="M 180,130 L 195,120 L 210,125 L 225,100 L 240,135 L 255,80" fill="none" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <text x="220" y="142" font-family="'Fira Code', monospace" font-size="7" fill="var(--color-navy)" text-anchor="middle">Prometheus Query</text>
 
           <!-- Step 3: Log Aggregation (Center-Right) -->
-          <rect x="325" y="65" width="110" height="90" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="3"/>
-          <text x="380" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">3. Structured Logs</text>
+          <rect x="325" y="65" width="110" height="90" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2" rx="3"/>
+          <text x="380" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" fill="var(--color-navy)" text-anchor="middle">3. Structured Logs</text>
           <!-- File lines graphic -->
-          <line x1="345" y1="110" x2="415" y2="110" stroke="#2C2416" stroke-width="1"/>
-          <line x1="345" y1="120" x2="395" y2="120" stroke="#2C2416" stroke-width="1"/>
-          <line x1="345" y1="130" x2="405" y2="130" stroke="#2C2416" stroke-width="1"/>
-          <text x="380" y="142" font-family="'Fira Code', monospace" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Filter UUID Logs</text>
+          <line x1="345" y1="110" x2="415" y2="110" stroke="var(--color-navy)" stroke-width="1"/>
+          <line x1="345" y1="120" x2="395" y2="120" stroke="var(--color-navy)" stroke-width="1"/>
+          <line x1="345" y1="130" x2="405" y2="130" stroke="var(--color-navy)" stroke-width="1"/>
+          <text x="380" y="142" font-family="'Fira Code', monospace" font-size="7" fill="var(--color-navy)" text-anchor="middle">Filter UUID Logs</text>
 
           <!-- Step 4: Distributed Traces (Right) -->
-          <rect x="465" y="65" width="110" height="90" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3"/>
-          <text x="520" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">4. Trace Spans</text>
+          <rect x="465" y="65" width="110" height="90" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="2" rx="3"/>
+          <text x="520" y="88" font-family="'Cinzel', serif" font-weight="bold" font-size="9.5" fill="var(--color-navy)" text-anchor="middle">4. Trace Spans</text>
           <!-- Trace gantt block -->
-          <rect x="480" y="105" width="80" height="6" fill="#D4A5A0" rx="1"/>
-          <rect x="495" y="115" width="50" height="6" fill="#C9A84C" rx="1"/>
+          <rect x="480" y="105" width="80" height="6" fill="var(--color-coral)" rx="1"/>
+          <rect x="495" y="115" width="50" height="6" fill="var(--color-mustard)" rx="1"/>
           <rect x="515" y="125" width="25" height="6" fill="#F5F0E8" rx="1"/>
-          <text x="520" y="142" font-family="'Fira Code', monospace" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Jaeger Span Graph</text>
+          <text x="520" y="142" font-family="'Fira Code', monospace" font-size="7" fill="var(--color-navy)" text-anchor="middle">Jaeger Span Graph</text>
 
           <!-- Flow arrows -->
-          <path d="M 135,110 L 165,110" stroke="#2C2416" stroke-width="1.5" fill="none"/>
+          <path d="M 135,110 L 165,110" stroke="var(--color-navy)" stroke-width="1.5" fill="none"/>
           <polygon points="159,106 165,110 159,114" fill="#C9A84C"/>
 
-          <path d="M 275,110 L 325,110" stroke="#2C2416" stroke-width="1.5" fill="none"/>
+          <path d="M 275,110 L 325,110" stroke="var(--color-navy)" stroke-width="1.5" fill="none"/>
           <polygon points="319,106 325,110 319,114" fill="#C9A84C"/>
 
-          <path d="M 435,110 L 465,110" stroke="#2C2416" stroke-width="1.5" fill="none"/>
+          <path d="M 435,110 L 465,110" stroke="var(--color-navy)" stroke-width="1.5" fill="none"/>
           <polygon points="459,106 465,110 459,114" fill="#C9A84C"/>
         </svg>
       </div>
@@ -313,50 +2944,50 @@
         <div class="svg-diagram-title">Plate XXXVI: Structured JSON Log Ingestion Pipeline</div>
         <svg class="svg-diagram" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
           <!-- Background Frame -->
-          <rect x="5" y="5" width="590" height="210" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="4"/>
+          <rect x="5" y="5" width="590" height="210" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="2" rx="4"/>
           
           <!-- Outer Grid Lines for Symmetrical Alignment -->
-          <line x1="300" y1="5" x2="300" y2="215" stroke="#F5F0E8" stroke-width="1" stroke-dasharray="4"/>
-          <line x1="5" y1="110" x2="595" y2="110" stroke="#F5F0E8" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="300" y1="5" x2="300" y2="215" stroke="var(--bg-sand)" stroke-width="1" stroke-dasharray="4"/>
+          <line x1="5" y1="110" x2="595" y2="110" stroke="var(--bg-sand)" stroke-width="1" stroke-dasharray="4"/>
 
           <!-- Block 1: Application Nodes (Left) -->
-          <rect x="25" y="50" width="115" height="120" fill="#F5F0E8" stroke="#2C2416" stroke-width="2" rx="3"/>
-          <text x="82" y="72" font-family="'Cinzel', serif" font-weight="bold" font-size="10" fill="#2C2416" text-anchor="middle">App Containers</text>
+          <rect x="25" y="50" width="115" height="120" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-width="2" rx="3"/>
+          <text x="82" y="72" font-family="'Cinzel', serif" font-weight="bold" font-size="10" fill="var(--color-navy)" text-anchor="middle">App Containers</text>
           
           <!-- Small internal logs output buffers -->
-          <rect x="35" y="90" width="95" height="20" fill="#FAF6EF" stroke="#2C2416" stroke-width="1"/>
-          <text x="82" y="103" font-family="'Fira Code', monospace" font-size="7" fill="#2C2416" text-anchor="middle">JSON Stdout Stream</text>
-          <rect x="35" y="125" width="95" height="20" fill="#FAF6EF" stroke="#2C2416" stroke-width="1"/>
-          <text x="82" y="138" font-family="'Fira Code', monospace" font-size="7" fill="#2C2416" text-anchor="middle">Ring Buffer: RAM</text>
+          <rect x="35" y="90" width="95" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1"/>
+          <text x="82" y="103" font-family="'Fira Code', monospace" font-size="7" fill="var(--color-navy)" text-anchor="middle">JSON Stdout Stream</text>
+          <rect x="35" y="125" width="95" height="20" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="1"/>
+          <text x="82" y="138" font-family="'Fira Code', monospace" font-size="7" fill="var(--color-navy)" text-anchor="middle">Ring Buffer: RAM</text>
 
           <!-- Block 2: Ingestion Collectors (Center) -->
-          <rect x="210" y="50" width="180" height="120" fill="#8FAF8A" stroke="#2C2416" stroke-width="2.5" rx="4"/>
-          <text x="300" y="72" font-family="'Cinzel', serif" font-weight="bold" font-size="11" fill="#2C2416" text-anchor="middle">Collector Engine</text>
-          <text x="300" y="87" font-family="'Fira Code', monospace" font-size="8.5" fill="#2C2416" text-anchor="middle">(Promtail / Vector)</text>
+          <rect x="210" y="50" width="180" height="120" fill="var(--color-mint)" stroke="var(--color-navy)" stroke-width="2.5" rx="4"/>
+          <text x="300" y="72" font-family="'Cinzel', serif" font-weight="bold" font-size="11" fill="var(--color-navy)" text-anchor="middle">Collector Engine</text>
+          <text x="300" y="87" font-family="'Fira Code', monospace" font-size="8.5" fill="var(--color-navy)" text-anchor="middle">(Promtail / Vector)</text>
           
           <!-- Collector process wheel -->
-          <circle cx="300" cy="130" r="22" fill="#FAF6EF" stroke="#2C2416" stroke-width="2"/>
-          <path d="M 285,130 A 15,15 0 1,1 315,130" fill="none" stroke="#C9A84C" stroke-width="4"/>
+          <circle cx="300" cy="130" r="22" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="2"/>
+          <path d="M 285,130 A 15,15 0 1,1 315,130" fill="none" stroke="var(--color-mustard)" stroke-width="4"/>
 
           <!-- Block 3: Indexed Storage Target (Right) -->
-          <rect x="460" y="50" width="115" height="120" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3"/>
-          <text x="517" y="72" font-family="'Cinzel', serif" font-weight="bold" font-size="10" fill="#2C2416" text-anchor="middle">Index Engine</text>
+          <rect x="460" y="50" width="115" height="120" fill="var(--bg-cream)" stroke="var(--color-navy)" stroke-width="2" rx="3"/>
+          <text x="517" y="72" font-family="'Cinzel', serif" font-weight="bold" font-size="10" fill="var(--color-navy)" text-anchor="middle">Index Engine</text>
           
           <!-- Database cylinder graphic -->
-          <ellipse cx="517" cy="100" rx="25" ry="8" fill="#F5F0E8" stroke="#2C2416" stroke-width="1.5"/>
-          <rect x="492" y="100" width="50" height="30" fill="#F5F0E8" stroke="#2C2416" stroke-width="0"/>
-          <line x1="492" y1="100" x2="492" y2="130" stroke="#2C2416" stroke-width="1.5"/>
-          <line x1="542" y1="100" x2="542" y2="130" stroke="#2C2416" stroke-width="1.5"/>
-          <ellipse cx="517" cy="130" rx="25" ry="8" fill="#F5F0E8" stroke="#2C2416" stroke-width="1.5"/>
-          <text x="517" y="155" font-family="'Fira Code', monospace" font-size="7.5" fill="#2C2416" text-anchor="middle">Grafana Loki</text>
+          <ellipse cx="517" cy="100" rx="25" ry="8" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <rect x="492" y="100" width="50" height="30" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-width="0"/>
+          <line x1="492" y1="100" x2="492" y2="130" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <line x1="542" y1="100" x2="542" y2="130" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <ellipse cx="517" cy="130" rx="25" ry="8" fill="var(--bg-sand)" stroke="var(--color-navy)" stroke-width="1.5"/>
+          <text x="517" y="155" font-family="'Fira Code', monospace" font-size="7.5" fill="var(--color-navy)" text-anchor="middle">Grafana Loki</text>
 
           <!-- Communication Channels -->
           <!-- App -> Collector -->
-          <path d="M 140,110 L 210,110" stroke="#2C2416" stroke-width="2" fill="none"/>
+          <path d="M 140,110 L 210,110" stroke="var(--color-navy)" stroke-width="2" fill="none"/>
           <polygon points="202,106 210,110 202,114" fill="#C9A84C"/>
 
           <!-- Collector -> Target -->
-          <path d="M 390,110 L 460,110" stroke="#2C2416" stroke-width="2" fill="none"/>
+          <path d="M 390,110 L 460,110" stroke="var(--color-navy)" stroke-width="2" fill="none"/>
           <polygon points="452,106 460,110 452,114" fill="#C9A84C"/>
         </svg>
       </div>
@@ -385,10 +3016,9 @@
       <p>
         Let us mathematically model a trace as a DAG. Let \(G = (V, E)\) be a directed graph, where the set of vertices \(V\) represents the spans, and the set of directed edges \(E\) represents the parent-child relationships:
       </p>
-            <div class="math-passage">
-      <div class="math-block">\[e = (v_1, v_2) \in E \implies \text{ParentID}(v_2) = \text{ID}(v_1)\]</div>
-      </div>
-
+      <p>
+        <div class="math-block">\[e = (v_1, v_2) \in E \implies \text{ParentID}(v_2) = \text{ID}(v_1)\]</div>
+      </p>
       <p>
         The trace begins with the Root Span(the absolute entry point, typically the API Gateway). As the request travels, child spans are spawned, mapping downstream operations.
       </p>
@@ -447,10 +3077,9 @@
       <p>
         Rather than configuring every microservice container to serialize, compress, and transmit its telemetry data directly to Prometheus, Loki, or Datadog over the public internet, architectures deploy an OpenTelemetry Collectoras a local sidecar or central daemon:
       </p>
-            <div class="math-passage">
-      <div class="math-block">\[\text{Application Process} \xrightarrow{\text{Low-latency gRPC}} \text{Local Collector} \xrightarrow{\text{Batch Compress & Flush}} \text{SaaS / Storage}\]</div>
-      </div>
-
+      <p>
+        <div class="math-block">\[\text{Application Process} \xrightarrow{\text{Low-latency gRPC}} \text{Local Collector} \xrightarrow{\text{Batch Compress & Flush}} \text{SaaS / Storage}\]</div>
+      </p>
       <p>
         The application process sends its telemetry using a highly optimized, low-latency protocol (OTLP over gRPC or local domain sockets). The local Collector container aggregates these metrics in local memory buffers, compresses the payload, applies tail-based sampling rules, and flushes the data in large, optimized batches to the centralized ingestion indexes. This isolates your application from network lag and ensures that telemetry collection never degrades user experience.
       </p>
