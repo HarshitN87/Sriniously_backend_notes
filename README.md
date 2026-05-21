@@ -1,6 +1,8 @@
 # 🚀 Backend Foundations — Complete Notes
 
-> **"Backend can be compressed into one sentence — the process we use to deal with data."**
+link to hosted website>https://sriniously-backend-notes.vercel.app/ 
+
+**"Backend can be compressed into one sentence — the process we use to deal with data."**
 
 Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layered architecture, request lifecycles, cookies, authentication protocols, database management systems, caching paradigms, REST API design, background jobs, full-text search engines, and fault-tolerant error boundaries.
 
