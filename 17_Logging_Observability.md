@@ -18,13 +18,13 @@ They write their code, run their tests on local mock datasets, compile the build
 
 And if you do not have gauges, you are flying blind in a storm.
 
-**Logging, Monitoring, and Observability** are the empirical gauges of backend engineering. They are not nice-to-have decorations or features you tack on during the final week of development. They are the fundamental sensory organs of your server. Without them, your backend is a silent, black box. When it fails (and it *will* fail), you will have no way of knowing whether it failed because of a database deadlock, a memory leak, a third-party API timeout, or a malicious buffer overflow.
+<strong>Logging, Monitoring, and Observability</strong> are the empirical gauges of backend engineering. They are not nice-to-have decorations or features you tack on during the final week of development. They are the fundamental sensory organs of your server. Without them, your backend is a silent, black box. When it fails (and it *will* fail), you will have no way of knowing whether it failed because of a database deadlock, a memory leak, a third-party API timeout, or a malicious buffer overflow.
 
 ---
 
 ## II. The Observability Spectrum: A Message of Hope
 
-Before we dive into the technical details, let us establish an important psychological boundary: **Observability is a practice, not a fixed set of absolute rules.**
+Before we dive into the technical details, let us establish an important psychological boundary: <strong>Observability is a practice, not a fixed set of absolute rules.</strong>
 
 There is no enterprise system in the world—not at Google, not at Netflix, not at Stripe—that has "one hundred percent perfect observability." Every production system exists on a spectrum of visibility. 
 
@@ -34,7 +34,7 @@ If you are a solo developer launching a bootstrap startup, a simple structured c
 
 ## III. The Core Definitions: Tracing the Lines
 
-Let us clear up the semantic confusion that surrounds these terms. While often used interchangeably, **Logging**, **Monitoring**, and **Observability** represent distinct levels of diagnostic resolution:
+Let us clear up the semantic confusion that surrounds these terms. While often used interchangeably, <strong>Logging</strong>, <strong>Monitoring</strong>, and <strong>Observability</strong> represent distinct levels of diagnostic resolution:
 
 ```text
                                   ┌────────────────────────┐
@@ -85,33 +85,33 @@ How do these systems cooperate during a production emergency? Let us trace the t
   [ 🛠️ The Fix ]         ───► Deploy database index to resolve deadlock
 ```
 
-This is the power of the **Three Pillars of Observability**. By linking your logs, metrics, and traces together with a unique **Correlation ID** (a random UUID assigned to a request the moment it hits your load balancer), you can jump seamlessly from a high-level alert to the exact line of code that failed.
+This is the power of the <strong>Three Pillars of Observability</strong>. By linking your logs, metrics, and traces together with a unique <strong>Correlation ID</strong> (a random UUID assigned to a request the moment it hits your load balancer), you can jump seamlessly from a high-level alert to the exact line of code that failed.
 
 ---
 
 ## V. Logging Levels: The Grammatical Degrees of Urgency
 
-To keep your logs clean and searchable, you must classify every log statement using standard **Log Levels**:
+To keep your logs clean and searchable, you must classify every log statement using standard <strong>Log Levels</strong>:
 
 ### 1. `debug` (The Microscopic Detail)
-*   **Use**: Granular execution tracking during local development (e.g. `"Entering function calculateTax with inputs [amount: 100]"`).
-*   **Production State**: Disabled. Running `debug` logs under production load will saturate your disk disks and inflate log storage costs.
+*   <strong>Use</strong>: Granular execution tracking during local development (e.g. `"Entering function calculateTax with inputs [amount: 100]"`).
+*   <strong>Production State</strong>: Disabled. Running `debug` logs under production load will saturate your disk disks and inflate log storage costs.
 
 ### 2. `info` (The Business Journal)
-*   **Use**: General, successful system operations and business milestones (e.g. `"Payment processed successfully for transaction 9912"`).
-*   **Production State**: Enabled. Used to track general system flow.
+*   <strong>Use</strong>: General, successful system operations and business milestones (e.g. `"Payment processed successfully for transaction 9912"`).
+*   <strong>Production State</strong>: Enabled. Used to track general system flow.
 
 ### 3. `warn` (The Early Warnings)
-*   **Use**: Non-critical anomalies that the system handled successfully, but developers should inspect (e.g. `"User submitted wrong password three times"`, `"Database pool saturated; retrying connection"`).
-*   **Production State**: Enabled. Critical for spotting early degradation.
+*   <strong>Use</strong>: Non-critical anomalies that the system handled successfully, but developers should inspect (e.g. `"User submitted wrong password three times"`, `"Database pool saturated; retrying connection"`).
+*   <strong>Production State</strong>: Enabled. Critical for spotting early degradation.
 
 ### 4. `error` (The Active Crises)
-*   **Use**: Failures that block a specific request from finishing, but the server remains running (e.g. `"Stripe API returned 402 Card Declined"`, `"Postgres unique constraint violation on email"`).
-*   **Production State**: Enabled. These should trigger error-tracking alerts.
+*   <strong>Use</strong>: Failures that block a specific request from finishing, but the server remains running (e.g. `"Stripe API returned 402 Card Declined"`, `"Postgres unique constraint violation on email"`).
+*   <strong>Production State</strong>: Enabled. These should trigger error-tracking alerts.
 
 ### 5. `fatal` (The Capital Punishments)
-*   **Use**: Catastrophic errors that prevent the application from functioning at all, requiring immediate shutdown (e.g. `"Cannot bind to TCP port 8080"`, `"Configuration credentials missing"`).
-*   **Production State**: Enabled. Triggers instant server termination and system administrator pages.
+*   <strong>Use</strong>: Catastrophic errors that prevent the application from functioning at all, requiring immediate shutdown (e.g. `"Cannot bind to TCP port 8080"`, `"Configuration credentials missing"`).
+*   <strong>Production State</strong>: Enabled. Triggers instant server termination and system administrator pages.
 
 ---
 
@@ -127,7 +127,7 @@ During local development, human readability is king. You want colorful, unstruct
 
 But in production, when you are handling 50,000 requests per second, printing human-readable text is a disaster. 
 
-No log management engine can parse arbitrary sentences at scale. In production, your logs must be **Structured JSON**:
+No log management engine can parse arbitrary sentences at scale. In production, your logs must be <strong>Structured JSON</strong>:
 
 ```json
 {
@@ -158,7 +158,7 @@ You can then write complex queries in seconds: *"Show me the average database la
 
 In the past, developers faced massive vendor lock-in. If you instrumented your application using Datadog SDKs, switching to New Relic required rewriting thousands of lines of monitoring code.
 
-The industry solved this by creating **OpenTelemetry (OTel)**.
+The industry solved this by creating <strong>OpenTelemetry (OTel)</strong>.
 
 OpenTelemetry is an open-source, vendor-neutral standard managed by the Cloud Native Computing Foundation (CNCF). It provides a single set of APIs, SDKs, and tools to instrument, generate, and collect telemetry data (metrics, logs, and traces) across Go, Node.js, Python, Java, and Rust. You write your instrumentation code once using OTel standards, and you can export the data to *any* backend system (open-source or proprietary) simply by changing a configuration file.
 
@@ -168,16 +168,16 @@ Depending on your organization's resources, you will deploy one of two standard 
 
 | Category | Components | Core Advantage | Core Disadvantage |
 | :--- | :--- | :--- | :--- |
-| **Open Source Stack** | Grafana, Prometheus, Loki, Jaeger, Promtail | Free licensing, total data control, self-hostable | High operational maintenance overhead |
-| **Proprietary All-in-One** | Datadog, New Relic | Zero maintenance, instant dashboard generation | Massive, unpredictable monthly invoices |
+| <strong>Open Source Stack</strong> | Grafana, Prometheus, Loki, Jaeger, Promtail | Free licensing, total data control, self-hostable | High operational maintenance overhead |
+| <strong>Proprietary All-in-One</strong> | Datadog, New Relic | Zero maintenance, instant dashboard generation | Massive, unpredictable monthly invoices |
 
 ---
 
 ## VIII. Key Takeaways
 
-1.  **Pillars of Diagnostic Power**: Logs trace *what* happened, Metrics graph *trends* over time, and Traces map the *path* of execution. Together, they build a complete watchtower.
-2.  **JSON Supremacy**: Production logging must be structured JSON. Colorful console text is for local developers; machines need clean, indexable schemas.
-3.  **Vendor Neutrality**: Use OpenTelemetry to instrument your code, preserving the flexibility to migrate between monitoring backends without altering your source code.
+1.  <strong>Pillars of Diagnostic Power</strong>: Logs trace *what* happened, Metrics graph *trends* over time, and Traces map the *path* of execution. Together, they build a complete watchtower.
+2.  <strong>JSON Supremacy</strong>: Production logging must be structured JSON. Colorful console text is for local developers; machines need clean, indexable schemas.
+3.  <strong>Vendor Neutrality</strong>: Use OpenTelemetry to instrument your code, preserving the flexibility to migrate between monitoring backends without altering your source code.
 
 ---
 

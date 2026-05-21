@@ -52,19 +52,19 @@ Similarly, mapping filters normalize characters across diverse formats, translat
 ### 2. Tokenization
 The cleaned stream of characters is passed to a Tokenizer, which is responsible for partitioning the contiguous character sequence into discrete units called tokens. The partitioning rules define the semantic boundaries of search terms.
 
-*   **Standard Tokenizer**: Splits text on word boundaries as defined by Unicode Text Segmentation rules, stripping punctuation and isolating words regardless of language. A sequence like `"high-performance"` is broken into distinct tokens `["high", "performance"]`.
-*   **Whitespace Tokenizer**: Partitions text solely on blank spaces, tabs, and line breaks, preserving punctuation marks within the token. Under this strategy, `"high-performance"` remains a single token `"high-performance"`.
-*   **N-Gram Tokenizer**: Breaks words down into sliding windows of characters of length \( N \). The word `"altar"` processed with a 3-gram filter produces the token set `["alt", "lta", "tar"]`. This is highly effective for language identification and substring match operations.
-*   **Edge N-Gram Tokenizer**: Generates character sequences anchored strictly to the beginning of the word. The word `"stone"` yields the tokens `["s", "st", "sto", "ston", "stone"]`. This forms the primary mechanism undergirding high-performance autocomplete features.
+*   <strong>Standard Tokenizer</strong>: Splits text on word boundaries as defined by Unicode Text Segmentation rules, stripping punctuation and isolating words regardless of language. A sequence like `"high-performance"` is broken into distinct tokens `["high", "performance"]`.
+*   <strong>Whitespace Tokenizer</strong>: Partitions text solely on blank spaces, tabs, and line breaks, preserving punctuation marks within the token. Under this strategy, `"high-performance"` remains a single token `"high-performance"`.
+*   <strong>N-Gram Tokenizer</strong>: Breaks words down into sliding windows of characters of length \( N \). The word `"altar"` processed with a 3-gram filter produces the token set `["alt", "lta", "tar"]`. This is highly effective for language identification and substring match operations.
+*   <strong>Edge N-Gram Tokenizer</strong>: Generates character sequences anchored strictly to the beginning of the word. The word `"stone"` yields the tokens `["s", "st", "sto", "ston", "stone"]`. This forms the primary mechanism undergirding high-performance autocomplete features.
 
 ### 3. Token Filtering
 Once the text is split into tokens, the resulting token array is passed through a sequence of Token Filters that modify the tokens' properties, expand them, or prune them from the stream.
 
-*   **Lowercase Filter**: Converts all characters within a token to their lower-case equivalents, ensuring that searches for `"Agni"`, `"agni"`, and `"AGNI"` resolve to the identical index key.
-*   **Stop Filter**: Prunes highly frequent terms that carry minimal semantic differentiation. Words such as `"is"`, `"the"`, `"of"`, and `"and"` are eliminated. If these words were retained, their posting lists would swell to encompass nearly every document in the index, wasting megabytes of memory without improving search relevance.
-*   **Stemming Filters**: Normalizes words by stripping suffixes to isolate their root stems. Stemming is rule-based and operates in linear \( O(C) \) time where \( C \) is word length, akin to the grammatical rules defined in Panini's *Ashtadhyayi*, which systematically structures the morpho-syntactic boundaries of Sanskrit terms. A standard English stemmer like the Porter or Snowball stemmer applies a cascade of suffix-stripping passes, transforming `"stoning"`, `"stoned"`, and `"stones"` into the single root stem `"stone"`.
-*   **Lemmatization Filters**: Lemmatization, by contrast, relies on a rich linguistic dictionary to resolve terms to their base dictionary form (their lemma). For example, `"was"` and `"is"` are mapped to the canonical form `"be"`. Lemmatization requires expensive morpho-syntactic analysis and dictionary lookups, rendering it computationally heavier than simple rule-based stemming, though it yields far superior accuracy for complex inflected languages.
-*   **Synonym Filter**: Expands the vocabulary by mapping synonyms to common index keys. For example, `"altar"` and `"shrine"` can be mapped to a single term, allowing searches for either to retrieve documents containing either, bypassing vocabulary mismatch.
+*   <strong>Lowercase Filter</strong>: Converts all characters within a token to their lower-case equivalents, ensuring that searches for `"Agni"`, `"agni"`, and `"AGNI"` resolve to the identical index key.
+*   <strong>Stop Filter</strong>: Prunes highly frequent terms that carry minimal semantic differentiation. Words such as `"is"`, `"the"`, `"of"`, and `"and"` are eliminated. If these words were retained, their posting lists would swell to encompass nearly every document in the index, wasting megabytes of memory without improving search relevance.
+*   <strong>Stemming Filters</strong>: Normalizes words by stripping suffixes to isolate their root stems. Stemming is rule-based and operates in linear \( O(C) \) time where \( C \) is word length, akin to the grammatical rules defined in Panini's *Ashtadhyayi*, which systematically structures the morpho-syntactic boundaries of Sanskrit terms. A standard English stemmer like the Porter or Snowball stemmer applies a cascade of suffix-stripping passes, transforming `"stoning"`, `"stoned"`, and `"stones"` into the single root stem `"stone"`.
+*   <strong>Lemmatization Filters</strong>: Lemmatization, by contrast, relies on a rich linguistic dictionary to resolve terms to their base dictionary form (their lemma). For example, `"was"` and `"is"` are mapped to the canonical form `"be"`. Lemmatization requires expensive morpho-syntactic analysis and dictionary lookups, rendering it computationally heavier than simple rule-based stemming, though it yields far superior accuracy for complex inflected languages.
+*   <strong>Synonym Filter</strong>: Expands the vocabulary by mapping synonyms to common index keys. For example, `"altar"` and `"shrine"` can be mapped to a single term, allowing searches for either to retrieve documents containing either, bypassing vocabulary mismatch.
 
 The complete sequence of filters produces a normalized array of search terms. These terms serve as the keys in the Term Dictionary, while the values are the Posting Lists. The mapping provides the \( O(1) \) or \( O(\log T) \) lookup performance that bypasses disk scanning.
 
@@ -74,9 +74,9 @@ The compilation of the *Pada-patha* required Sakalya to act as a linguistic comp
 
 Once the *Pada-patha* decoupled the text into discrete lexical items, scholars compiled the *Anukramanis*. Saunaka's *Sarvanukramani* registers detailed metadata tables for each hymn. These records index:
 
-1.  **Metrical Indexing (Chandas)**: Sages categorized every verse by its specific meter (e.g., Gayatri, consisting of 24 syllables; Trishubh, consisting of 44 syllables; Jagati, consisting of 48 syllables). A scholar seeking to study all verses composed in the Trishubh meter could consult Katyayana's metrical index register, which immediately provided a list of every matching hymn number. This matches the behavior of a multi-field inverted index targeting a `"meter"` field.
-2.  **Attribution Indexing (Rishi)**: Sages indexed the authorial lineage of each composer. Hymns attributed to the sage Visvamitra were registered under his family key, mapping to their respective suktas.
-3.  **Deity Indexing (Devata)**: Every verse was categorized by the primary entity invoked (e.g., Agni, Indra, Soma). A search for the key `"Agni"` in the deity registry returned the exact posting list of verses where Agni was addressed, bypassing the need to search the entire Rigvedic corpus sequentially.
+1.  <strong>Metrical Indexing (Chandas)</strong>: Sages categorized every verse by its specific meter (e.g., Gayatri, consisting of 24 syllables; Trishubh, consisting of 44 syllables; Jagati, consisting of 48 syllables). A scholar seeking to study all verses composed in the Trishubh meter could consult Katyayana's metrical index register, which immediately provided a list of every matching hymn number. This matches the behavior of a multi-field inverted index targeting a `"meter"` field.
+2.  <strong>Attribution Indexing (Rishi)</strong>: Sages indexed the authorial lineage of each composer. Hymns attributed to the sage Visvamitra were registered under his family key, mapping to their respective suktas.
+3.  <strong>Deity Indexing (Devata)</strong>: Every verse was categorized by the primary entity invoked (e.g., Agni, Indra, Soma). A search for the key `"Agni"` in the deity registry returned the exact posting list of verses where Agni was addressed, bypassing the need to search the entire Rigvedic corpus sequentially.
 
 This level of multi-dimensional indexing was critical for the preservation of oral transmission. By cross-referencing each verse by author, meter, and deity, the sages constructed a highly redundant parity-check system. If a single syllable was forgotten or corrupted in transmission, the metrical index's syllable count (acting as a document length validation check) would fail, exposing the error. Modern search index schemas utilize similar checksum and length fields to guarantee indices are uncorrupted and physically aligned.
 
@@ -165,11 +165,11 @@ The complete Okapi BM25 relevance score for a document \( d \) given a query \( 
 
 This equation relies on several parameters:
 
-*   **\( f_{t_i,d} \)**: The raw frequency of the query term \( t_i \) in the document \( d \).
-*   **\( |d| \)**: The document length, measured in total word tokens.
-*   **\( \text{avgdl} \)**: The average document length across the entire index corpus.
-*   **\( k_1 \)**: A tunable parameter (typically set between \( 1.2 \) and \( 2.0 \)) that controls the term frequency saturation rate.
-*   **\( b \)**: A tunable parameter (typically set to \( 0.75 \)) that controls the severity of the document length normalization.
+*   <strong>\( f_{t_i,d} \)</strong>: The raw frequency of the query term \( t_i \) in the document \( d \).
+*   <strong>\( |d| \)</strong>: The document length, measured in total word tokens.
+*   <strong>\( \text{avgdl} \)</strong>: The average document length across the entire index corpus.
+*   <strong>\( k_1 \)</strong>: A tunable parameter (typically set between \( 1.2 \) and \( 2.0 \)) that controls the term frequency saturation rate.
+*   <strong>\( b \)</strong>: A tunable parameter (typically set to \( 0.75 \)) that controls the severity of the document length normalization.
 
 To understand the mathematical behavior of term saturation, evaluate the limit of the BM25 term frequency scaling factor as the term frequency \( f_{t_i,d} \) approaches infinity:
 
@@ -273,8 +273,8 @@ For many applications, deploying a dedicated Elasticsearch cluster introduces un
 
 PostgreSQL native search relies on two primary data types:
 
-*   **`tsvector`**: A processed document representation that stores a sorted list of unique lexemes (stemmed words) along with their word positions and weight markings. The sentence `"The fast temple altar"` is parsed into the `tsvector`: `'altar':4 'fast':2 'temple':3`.
-*   **`tsquery`**: A representation of the search terms, incorporating boolean logical operators (`&` for AND, `|` for OR, `!` for NOT). The query `"fast & altar"` is parsed to `'fast' & 'altar'`.
+*   <strong>`tsvector`</strong>: A processed document representation that stores a sorted list of unique lexemes (stemmed words) along with their word positions and weight markings. The sentence `"The fast temple altar"` is parsed into the `tsvector`: `'altar':4 'fast':2 'temple':3`.
+*   <strong>`tsquery`</strong>: A representation of the search terms, incorporating boolean logical operators (`&` for AND, `|` for OR, `!` for NOT). The query `"fast & altar"` is parsed to `'fast' & 'altar'`.
 
 The match operator `@@` is used to execute the search, returning a boolean indicating whether the `tsvector` satisfies the `tsquery`:
 
@@ -346,17 +346,17 @@ Despite Document A holding the absolute top rank in one retrieval list, its poor
 
 In scale-out platforms, relevance scoring is further customized using Function Score query patterns. Application developers can construct mathematical combinations that multiply the base BM25 scores by decay functions based on document properties:
 
-*   **Temporal Decay (Recency)**: Incorporates a Gaussian or exponential decay function that decreases document relevance as age increases. The Gaussian decay function is represented by:
+*   <strong>Temporal Decay (Recency)</strong>: Incorporates a Gaussian or exponential decay function that decreases document relevance as age increases. The Gaussian decay function is represented by:
     \[
     S_{\text{time}}(t) = \exp\left(-\frac{\max(0, |t - t_0| - \text{offset})^2}{2\sigma^2}\right)
     \]
     where \( t_0 \) represents the current timestamp, the offset defines a grace period where no decay occurs, and \( \sigma \) determines the rate of decline.
-*   **Popularity Multipliers**: Factors in a document's transaction density, page-view frequency, or global rating by passing these metadata fields through sublinear log scaling:
+*   <strong>Popularity Multipliers</strong>: Factors in a document's transaction density, page-view frequency, or global rating by passing these metadata fields through sublinear log scaling:
     \[
     S_{\text{popularity}}(x) = \ln(1 + c \cdot x)
     \]
     preventing high-tier records from overwhelming the search results.
-*   **Spatial Decays**: Calculates geographic distance between the searching user and the service provider, multiplying relevance by distance inverse profiles.
+*   <strong>Spatial Decays</strong>: Calculates geographic distance between the searching user and the service provider, multiplying relevance by distance inverse profiles.
 
 ---
 
@@ -364,13 +364,13 @@ In scale-out platforms, relevance scoring is further customized using Function S
 
 | Concept | Core Mathematical or Structural Principle | Computational Complexity |
 | :--- | :--- | :--- |
-| **Inverted Index** | Maps normalized terms back to sorted postings lists of document IDs | \( O(1) \) term lookup, \( O(\log T) \) dict search |
-| **Okapi BM25** | Incorporate term frequency saturation curve and document length normalization | Tuned via hyperparameters \( k_1 \) and \( b \) |
-| **VByte / PForDelta** | Delta encoding with bit/byte compression for posting lists | Decompressed efficiently using CPU SIMD instructions |
-| **Levenshtein Automata** | Intersecting a query DFA directly with the Term Dictionary FST | Reduces fuzzy match cost to \( O(|q|) \) state transitions |
-| **Scatter-Gather** | Broadcast queries to all shards, merge top-K, and fetch sources | \( O(S \cdot K \cdot \log(S \cdot K)) \) heap merge |
-| **PostgreSQL GIN** | Built-in inverted index B-Tree of lexemes mapping to rows | ACID-compliant, high write amplification, optimized for read |
-| **Reciprocal Rank Fusion** | Merges ranked lists from BM25 and vector search using rank reciprocals | Robust, parameter-free hybrid ranking formula |
+| <strong>Inverted Index</strong> | Maps normalized terms back to sorted postings lists of document IDs | \( O(1) \) term lookup, \( O(\log T) \) dict search |
+| <strong>Okapi BM25</strong> | Incorporate term frequency saturation curve and document length normalization | Tuned via hyperparameters \( k_1 \) and \( b \) |
+| <strong>VByte / PForDelta</strong> | Delta encoding with bit/byte compression for posting lists | Decompressed efficiently using CPU SIMD instructions |
+| <strong>Levenshtein Automata</strong> | Intersecting a query DFA directly with the Term Dictionary FST | Reduces fuzzy match cost to \( O(|q|) \) state transitions |
+| <strong>Scatter-Gather</strong> | Broadcast queries to all shards, merge top-K, and fetch sources | \( O(S \cdot K \cdot \log(S \cdot K)) \) heap merge |
+| <strong>PostgreSQL GIN</strong> | Built-in inverted index B-Tree of lexemes mapping to rows | ACID-compliant, high write amplification, optimized for read |
+| <strong>Reciprocal Rank Fusion</strong> | Merges ranked lists from BM25 and vector search using rank reciprocals | Robust, parameter-free hybrid ranking formula |
 
 ---
 

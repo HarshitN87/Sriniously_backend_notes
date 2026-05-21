@@ -18,12 +18,12 @@ It said: *"To the Duke of Westminster, London."*
 
 The clerk did not drop the envelope in a massive bucket and walk house to house searching for the Duke. 
 
-Instead, they ran it through a highly structured, hierarchical filter—a **Prefix Trie**. 
+Instead, they ran it through a highly structured, hierarchical filter—a <strong>Prefix Trie</strong>. 
 
-*   First, they threw it into the **London West (W)** bin.
-*   The W bin was taken to a secondary clerk who sorted it by district: **Mayfair**.
-*   The Mayfair clerk sorted it by street: **Grosvenor Street**.
-*   The street postman carried it to the gate: **Grosvenor House**.
+*   First, they threw it into the <strong>London West (W)</strong> bin.
+*   The W bin was taken to a secondary clerk who sorted it by district: <strong>Mayfair</strong>.
+*   The Mayfair clerk sorted it by street: <strong>Grosvenor Street</strong>.
+*   The street postman carried it to the gate: <strong>Grosvenor House</strong>.
 *   The Duke’s butler received the letter at the gate, sorted it by current location, and placed it on a silver tray outside the Duke's library.
 
 The letter was routed step-by-step, matching its nested string segments against a tree of physical rules. 
@@ -32,7 +32,7 @@ At no point did any individual clerk need to know the entire map of the world.
 
 They only needed to know their local prefix branches.
 
-Let us look at a second, more mechanical analogy: the **Manual Telephone Switchboard** of the 1920s.
+Let us look at a second, more mechanical analogy: the <strong>Manual Telephone Switchboard</strong> of the 1920s.
 
 When a caller picked up their telephone receiver, an electrical current flowed down a copper wire into the central office, dropping a metal shutter on a massive wooden console in front of a switchboard operator. 
 
@@ -57,13 +57,13 @@ The underlying copper wire was identical.
 
 The electrical signals were identical. 
 
-But the **routing decision**—the operator’s physical selection of the plug jack—directed the flow of current to completely different human brains and logical functions.
+But the <strong>routing decision</strong>—the operator’s physical selection of the plug jack—directed the flow of current to completely different human brains and logical functions.
 
-In modern backend development, **Routing** is this manual switchboard operator.
+In modern backend development, <strong>Routing</strong> is this manual switchboard operator.
 
 When a TCP packet containing an HTTP request lands on your server port, it is just a flat stream of ASCII characters. 
 
-The router is the component that inspects the **URL Path** (the destination address) and the **HTTP Method** (the active verb), evaluates them against a registered prefix tree, and dispatches the request to the specific JavaScript, Go, or Rust function—the **Handler**—designed to execute that specific logic.
+The router is the component that inspects the <strong>URL Path</strong> (the destination address) and the <strong>HTTP Method</strong> (the active verb), evaluates them against a registered prefix tree, and dispatches the request to the specific JavaScript, Go, or Rust function—the <strong>Handler</strong>—designed to execute that specific logic.
 
 ---
 
@@ -71,11 +71,11 @@ The router is the component that inspects the **URL Path** (the destination addr
 
 Routing did not spring fully formed from the minds of framework authors. 
 
-It is the product of a thirty-year struggle to decouple **Resource Semantics** from **Physical Disk Storage**.
+It is the product of a thirty-year struggle to decouple <strong>Resource Semantics</strong> from <strong>Physical Disk Storage</strong>.
 
 ### 1. The Era of the Mirror (1991–1995)
 
-In the earliest days of the web, servers like **NCSA HTTPd** and early **Apache** had no routing logic. 
+In the earliest days of the web, servers like <strong>NCSA HTTPd</strong> and early <strong>Apache</strong> had no routing logic. 
 
 They were purely directory mirrors.
 
@@ -93,7 +93,7 @@ The URL was bound to the hardware of the server.
 
 ### 2. The Dynamic File Script (1995–2004)
 
-The rise of server-side scripting languages like **PHP** and **ASP** added programmability, but maintained the filesystem mirror paradigm.
+The rise of server-side scripting languages like <strong>PHP</strong> and <strong>ASP</strong> added programmability, but maintained the filesystem mirror paradigm.
 
 A request for `/users.php?id=42` executed the file `users.php` on disk, which processed the database query.
 
@@ -109,20 +109,20 @@ Furthermore, your URLs looked messy, carrying file extensions (`.php`, `.asp`, `
 
 ### 3. The Centralized Router Revolution (2004–Present)
 
-The breakthrough came with MVC (Model-View-Controller) frameworks in the mid-2000s, spearheaded by **Ruby on Rails** and **Django**.
+The breakthrough came with MVC (Model-View-Controller) frameworks in the mid-2000s, spearheaded by <strong>Ruby on Rails</strong> and <strong>Django</strong>.
 
-Rails introduced the concept of the **Centralized Router**—a single configuration file (`routes.rb`) that declared maps between abstract URL patterns and controller methods:
+Rails introduced the concept of the <strong>Centralized Router</strong>—a single configuration file (`routes.rb`) that declared maps between abstract URL patterns and controller methods:
 
 ```ruby
 # The Decoupled Rails Router
 get '/users/:id', to: 'users#show'
 ```
 
-For the first time, **the filesystem was completely decoupled from the URL**. 
+For the first time, <strong>the filesystem was completely decoupled from the URL</strong>. 
 
 The file on disk could be named `user_controller.rb` and live deep in a nested folder, but the public URL could be `/users/42`. 
 
-The URL was now a **design choice**, a clean semantic interface constructed for humans and RESTful architecture, completely independent of the server's folder layout.
+The URL was now a <strong>design choice</strong>, a clean semantic interface constructed for humans and RESTful architecture, completely independent of the server's folder layout.
 
 ---
 
@@ -148,7 +148,7 @@ app.get('/api/health', healthHandler);
 app.post('/api/auth/login', loginHandler);
 ```
 
-Because static routes do not contain variables, routers can resolve them with near-zero latency using a simple **Hash Map** lookup. 
+Because static routes do not contain variables, routers can resolve them with near-zero latency using a simple <strong>Hash Map</strong> lookup. 
 
 If the key `/api/health` exists in the route map, the router calls the handler immediately.
 
@@ -164,7 +164,7 @@ app.get('/api/users/:id', (req, res) => {
 });
 ```
 
-Because dynamic routes cannot be resolved with flat hash maps, routers construct a **Radix Tree (Prefix Tree)**.
+Because dynamic routes cannot be resolved with flat hash maps, routers construct a <strong>Radix Tree (Prefix Tree)</strong>.
 
 A Radix Tree is an optimized search tree where common prefixes are merged into single nodes:
 
@@ -183,20 +183,20 @@ When a request for `/api/users/42` arrives, the router traverses the tree:
 4.  Invokes the registered user handler.
 
 > [!IMPORTANT]
-> **Route parameters are extracted as strings, never numbers.** Even if the request is `/api/users/42`, `req.params.id` is the string `"42"`. The handler function is strictly responsible for validating, parsing, and casting this string to an integer before querying the database, preventing SQL injection and type crashes.
+> <strong>Route parameters are extracted as strings, never numbers.</strong> Even if the request is `/api/users/42`, `req.params.id` is the string `"42"`. The handler function is strictly responsible for validating, parsing, and casting this string to an integer before querying the database, preventing SQL injection and type crashes.
 
 ### 3. Query Parameters: Nouns vs. Adjectives
 
-One of the most frequent design failures in RESTful APIs is the misuse of **Route Parameters** and **Query Parameters**.
+One of the most frequent design failures in RESTful APIs is the misuse of <strong>Route Parameters</strong> and <strong>Query Parameters</strong>.
 
 What is the difference? 
 
-Think of Route Parameters as **Nouns (the physical address of a house)** and Query Parameters as **Adjectives (the instructions given to the butler)**.
+Think of Route Parameters as <strong>Nouns (the physical address of a house)</strong> and Query Parameters as <strong>Adjectives (the instructions given to the butler)</strong>.
 
-*   **Route Parameters** define the **identity** of the resource. 
+*   <strong>Route Parameters</strong> define the <strong>identity</strong> of the resource. 
     Without them, the resource cannot be located. 
     If you ask for `/api/users/42`, you are looking for a unique, physical user record.
-*   **Query Parameters** (the fields after the `?` mark: `/api/users?sort=age&limit=10`) modify the **presentation** of the resource. 
+*   <strong>Query Parameters</strong> (the fields after the `?` mark: `/api/users?sort=age&limit=10`) modify the <strong>presentation</strong> of the resource. 
     They do not change the identity of the collection; they filter, sort, paginate, or search it.
 
 ```text
@@ -216,7 +216,7 @@ Instead, use query parameters: `/api/users?status=active`.
 
 ## IV. The Pathological Nesting: How Routing Systems Collapse
 
-As backend architectures grow, developers frequently fall into the trap of **Route Nesting Madness**.
+As backend architectures grow, developers frequently fall into the trap of <strong>Route Nesting Madness</strong>.
 
 Imagine you are building a blogging platform. 
 
@@ -234,20 +234,20 @@ It creates massive, fragile URLs that are painful to maintain and slow to parse.
 
 Let us examine why this nested structure is a disaster:
 
-1.  **Multiple Joins and Database Overhead**: 
+1.  <strong>Multiple Joins and Database Overhead</strong>: 
     To process a request to update a comment at `/api/users/42/posts/101/comments/505`, your server-side handler must validate that user 42 actually owns post 101, and that post 101 owns comment 505. 
     You are forced to run multiple nested SQL joins or database lookups just to verify the path.
-2.  **Stateless Redundancy**: 
+2.  <strong>Stateless Redundancy</strong>: 
     If your database uses globally unique UUIDs or auto-incrementing primary keys, comment `505` is already unique across the entire system. 
     You do not need the parent IDs in the path to locate it! 
     The comment has a single, absolute identity.
-3.  **Front-End Fragility**: 
+3.  <strong>Front-End Fragility</strong>: 
     A client application trying to delete a comment must keep track of the `userId` and `postId` in its local state just to construct the URL. 
     If the user navigates away or the UI state changes, compiling the URL becomes highly error-prone.
 
 ### The Rule of Flattening
 
-To maintain clean, performant, and robust architectures, follow the **Rule of Flattening**:
+To maintain clean, performant, and robust architectures, follow the <strong>Rule of Flattening</strong>:
 
 > *"If a resource has a globally unique identifier, its address should be flat. Nesting is only permitted for locating items that cannot exist or be identified without their immediate parent."*
 
@@ -270,10 +270,10 @@ We have now mapped the complete, elegant grammar of the web. Let us review the k
 
 | Layer / Model | Transport Protocol | Latency Profile | Core Benefit | The Bottleneck |
 | :--- | :--- | :--- | :--- | :--- |
-| **GET** | TCP (RFC 793) | ~50 - 150ms | Keep-Alive persistent connection recycling | Head-of-Line Blocking at application layer |
-| **HTTP/2** | TCP (RFC 793) | ~30 - 80ms | Frame Multiplexing on a single socket | Head-of-Line Blocking at transport layer |
-| **HTTP/3** | QUIC over UDP | ~10 - 50ms | Stream Independence and integrated TLS 1.3 | High CPU packet validation overhead |
-| **Serverless** | On-Demand Routing | ~100 - 600ms | Automatic, infinite scaling with zero idle cost | Cold Starts and Stateless connection pool limits |
+| <strong>GET</strong> | TCP (RFC 793) | ~50 - 150ms | Keep-Alive persistent connection recycling | Head-of-Line Blocking at application layer |
+| <strong>HTTP/2</strong> | TCP (RFC 793) | ~30 - 80ms | Frame Multiplexing on a single socket | Head-of-Line Blocking at transport layer |
+| <strong>HTTP/3</strong> | QUIC over UDP | ~10 - 50ms | Stream Independence and integrated TLS 1.3 | High CPU packet validation overhead |
+| <strong>Serverless</strong> | On-Demand Routing | ~100 - 600ms | Automatic, infinite scaling with zero idle cost | Cold Starts and Stateless connection pool limits |
 
 Understanding HTTP methods and CORS boundaries is not merely a tool for loading web pages; it is the ultimate administrative framework of global distributed systems. In the next chapter, we will inspect the seven primary verbs of this language—the HTTP methods—and trace the precise boundaries that separate safe, idempotent, and mutable operations.
 

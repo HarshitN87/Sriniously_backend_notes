@@ -61,6 +61,7 @@
       font-weight: bold;
     }
   </style>
+  <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -160,11 +161,11 @@
       <h3>Operating System Virtual Memory Boundaries and Thread Isolation</h3>
 
       <p>
-        To understand why stateful horizontal scaling fails so catastrophically at the operating system level, one must examine the architecture of virtual memory. When an operating system runs an application server process, the kernel allocates an isolated **Virtual Address Space** for that process. This memory space is rigidly partitioned by the MMU (Memory Management Unit) into page tables, preventing process A from reading or writing to the physical RAM coordinates allocated to process B.
+        To understand why stateful horizontal scaling fails so catastrophically at the operating system level, one must examine the architecture of virtual memory. When an operating system runs an application server process, the kernel allocates an isolated <strong>Virtual Address Space</strong> for that process. This memory space is rigidly partitioned by the MMU (Memory Management Unit) into page tables, preventing process A from reading or writing to the physical RAM coordinates allocated to process B.
       </p>
 
       <p>
-        Symmetrically, within a single process, memory is divided into the Stack and the Heap. The **Stack** is ultra-fast, managed directly by the CPU instruction pointers, and stores local variables, active function call frames, and primitive execution pointers. Symmetrically, the **Heap** is a vast pool of dynamic memory managed by the application's runtime engine (e.g., the V8 engine in Node.js or the runtime allocator in Go). Symmetrically, when a user logs in and the server instantiates a session object:
+        Symmetrically, within a single process, memory is divided into the Stack and the Heap. The <strong>Stack</strong> is ultra-fast, managed directly by the CPU instruction pointers, and stores local variables, active function call frames, and primitive execution pointers. Symmetrically, the <strong>Heap</strong> is a vast pool of dynamic memory managed by the application's runtime engine (e.g., the V8 engine in Node.js or the runtime allocator in Go). Symmetrically, when a user logs in and the server instantiates a session object:
       </p>
 
       <pre><code>const session = { userId: 42, role: 'admin', authenticatedAt: Date.now() };</code></pre>
@@ -247,7 +248,7 @@
       </p>
 
       <p>
-        <strong>RS256 (Asymmetric):</strong> Symmetrically, the RS256 algorithm decouples signing and verification by using a public/private key pair. Symmetrically, the authentication server signs the token using a secret **private key**, while downstream services verify the signature using a widely distributed **public key**.
+        <strong>RS256 (Asymmetric):</strong> Symmetrically, the RS256 algorithm decouples signing and verification by using a public/private key pair. Symmetrically, the authentication server signs the token using a secret <strong>private key</strong>, while downstream services verify the signature using a widely distributed <strong>public key</strong>.
       </p>
 
       <p>
@@ -300,7 +301,7 @@
       <h3>JWKS Key Rotation and Client Cache Validation</h3>
 
       <p>
-        In production systems utilizing RS256, public keys must be rotated periodically to mitigate the risk of key compromise. This is achieved using a **JSON Web Key Set (JWKS)** endpoint. Symmetrically, the authentication server publishes its current active public keys as a JSON structure at a public URL (e.g., `/.well-known/jwks.json`). Each public key is represented with a unique Key ID (`kid`), key type (`kty`), cryptographic algorithm (`alg`), and key parameters (the public modulus `n` and exponent `e`).
+        In production systems utilizing RS256, public keys must be rotated periodically to mitigate the risk of key compromise. This is achieved using a <strong>JSON Web Key Set (JWKS)</strong> endpoint. Symmetrically, the authentication server publishes its current active public keys as a JSON structure at a public URL (e.g., `/.well-known/jwks.json`). Each public key is represented with a unique Key ID (`kid`), key type (`kty`), cryptographic algorithm (`alg`), and key parameters (the public modulus `n` and exponent `e`).
       </p>
 
       <p>
@@ -318,7 +319,7 @@
       </p>
 
       <p>
-        <strong>1. Short-Lived Access Tokens and Refresh Tokens:</strong> Symmetrically, access tokens are given short lifespans (e.g., 5 to 15 minutes). Symmetrically, the client also receives a long-lived **Refresh Token** (e.g., 30 days) stored in a secure, database-backed session table. When the access token expires, the client sends the refresh token to the auth server to obtain a new access token. If the user's session is revoked, the refresh token is deleted from the database, preventing the generation of new access tokens.
+        <strong>1. Short-Lived Access Tokens and Refresh Tokens:</strong> Symmetrically, access tokens are given short lifespans (e.g., 5 to 15 minutes). Symmetrically, the client also receives a long-lived <strong>Refresh Token</strong> (e.g., 30 days) stored in a secure, database-backed session table. When the access token expires, the client sends the refresh token to the auth server to obtain a new access token. If the user's session is revoked, the refresh token is deleted from the database, preventing the generation of new access tokens.
       </p>
 
       <p>
@@ -326,7 +327,7 @@
       </p>
 
       <p>
-        <strong>3. Global Revocation Blocklists (Bloom Filters):</strong> To immediately revoke compromised access tokens before their natural expiration, API gateways maintain a high-speed revocation blocklist. Since checking a centralized database for every request re-introduces a network bottleneck, gateways use memory-efficient **Bloom Filters**.
+        <strong>3. Global Revocation Blocklists (Bloom Filters):</strong> To immediately revoke compromised access tokens before their natural expiration, API gateways maintain a high-speed revocation blocklist. Since checking a centralized database for every request re-introduces a network bottleneck, gateways use memory-efficient <strong>Bloom Filters</strong>.
       </p>
 
       <p>
@@ -334,7 +335,7 @@
       </p>
 
       <p>
-        When a request arrives, the gateway hashes the token's `jti`. If any of the bits at the hash indices are 0, the token is guaranteed **not** to be in the blocklist, allowing the gateway to accept it instantly without a database lookup. If all bits are 1, the token is likely revoked. The false-positive probability is modeled as:
+        When a request arrives, the gateway hashes the token's `jti`. If any of the bits at the hash indices are 0, the token is guaranteed <strong>not</strong> to be in the blocklist, allowing the gateway to accept it instantly without a database lookup. If all bits are 1, the token is likely revoked. The false-positive probability is modeled as:
       </p>
 
       \[ P(\text{false positive}) \approx \left(1 - e^{-kn/m}\right)^k \]
@@ -352,7 +353,7 @@
       <h2>II. The Mechanics of Traffic Dispatch: Load Balancing at Layer 4 and Layer 7</h2>
 
       <p>
-        When an infrastructure array is populated with dozens of stateless, interchangeable application server nodes, a critical entry point must handle incoming traffic. This entry point is the **Load Balancer**. The load balancer stands at the perimeter of the infrastructure, intercepts all inbound client connections, and distributes the network load across the server pool.
+        When an infrastructure array is populated with dozens of stateless, interchangeable application server nodes, a critical entry point must handle incoming traffic. This entry point is the <strong>Load Balancer</strong>. The load balancer stands at the perimeter of the infrastructure, intercepts all inbound client connections, and distributes the network load across the server pool.
       </p>
 
       <p>
@@ -452,7 +453,7 @@
       </p>
 
       <p>
-        <strong>3. Direct Server Return (DSR) Mode:</strong> Symmetrically, this represents the highest-performance L4 routing configuration. Under DSR, the load balancer shares a single Virtual IP with all backend servers. Symmetrically, the backend servers have this VIP configured on a local **loopback interface** (`lo:0`), which is hidden from Address Resolution Protocol (ARP) broadcasts.
+        <strong>3. Direct Server Return (DSR) Mode:</strong> Symmetrically, this represents the highest-performance L4 routing configuration. Under DSR, the load balancer shares a single Virtual IP with all backend servers. Symmetrically, the backend servers have this VIP configured on a local <strong>loopback interface</strong> (`lo:0`), which is hidden from Address Resolution Protocol (ARP) broadcasts.
       </p>
 
       <p>
@@ -475,7 +476,7 @@ sysctl -w net.ipv4.conf.all.arp_announce=2</code></pre>
       </p>
 
       <p>
-        <strong>OS-Level Implementation:</strong> Symmetrically, L4 load balancing is executed directly inside the operating system kernel space. In Linux environments, this is achieved using **IPVS (IP Virtual Server)**, a transport-layer load-balancing framework compiled directly into the Netfilter hook architecture of the Linux kernel. By routing packets inside kernel space, IPVS avoids the latency overhead of user-space context switches and virtual memory copies, allowing it to process millions of packets per second at near-wire speeds.
+        <strong>OS-Level Implementation:</strong> Symmetrically, L4 load balancing is executed directly inside the operating system kernel space. In Linux environments, this is achieved using <strong>IPVS (IP Virtual Server)</strong>, a transport-layer load-balancing framework compiled directly into the Netfilter hook architecture of the Linux kernel. By routing packets inside kernel space, IPVS avoids the latency overhead of user-space context switches and virtual memory copies, allowing it to process millions of packets per second at near-wire speeds.
       </p>
 
       <h3>Layer 7 Load Balancing: Application Layer Mechanics</h3>
@@ -500,7 +501,7 @@ sysctl -w net.ipv4.conf.all.arp_announce=2</code></pre>
       </p>
 
       <p>
-        Modern Layer 7 load balancers (such as Nginx, Envoy, and HAProxy) use **Asynchronous, Event-Driven I/O**. In Linux systems, this relies on the **`epoll`** system call. Symmetrically, the balancer runs a small number of worker threads (typically matching the physical CPU core count). Symmetrically, instead of allocating a thread to each connection, a single worker thread registers thousands of client connection socket file descriptors (FDs) with the kernel using `epoll_ctl()`:
+        Modern Layer 7 load balancers (such as Nginx, Envoy, and HAProxy) use <strong>Asynchronous, Event-Driven I/O</strong>. In Linux systems, this relies on the <strong>`epoll`</strong> system call. Symmetrically, the balancer runs a small number of worker threads (typically matching the physical CPU core count). Symmetrically, instead of allocating a thread to each connection, a single worker thread registers thousands of client connection socket file descriptors (FDs) with the kernel using `epoll_ctl()`:
       </p>
 
       <pre><code>int epoll_fd = epoll_create1(0);
@@ -510,7 +511,7 @@ event.data.fd = client_socket_fd;
 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket_fd, &amp;event);</code></pre>
 
       <p>
-        The worker thread then executes **`epoll_wait()`**, which blocks until one or more file descriptors are ready for I/O operations (such as receiving data or completing a write buffer). When the kernel wakes the worker thread, it returns an array of events, allowing the thread to process active sockets sequentially without thread context-switching overhead. By decoupling connections from threads, Layer 7 balancers can comfortably maintain hundreds of thousands of concurrent open TCP connections, TLS handshakes, and WebSocket streams on a single commodity server.
+        The worker thread then executes <strong>`epoll_wait()`</strong>, which blocks until one or more file descriptors are ready for I/O operations (such as receiving data or completing a write buffer). When the kernel wakes the worker thread, it returns an array of events, allowing the thread to process active sockets sequentially without thread context-switching overhead. By decoupling connections from threads, Layer 7 balancers can comfortably maintain hundreds of thousands of concurrent open TCP connections, TLS handshakes, and WebSocket streams on a single commodity server.
       </p>
 
       <div class="table-container">
@@ -609,13 +610,13 @@ epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket_fd, &amp;event);</code></pre>
       \[ \text{Redistribution Fraction} = \frac{N-1}{N} \]
 
       <p>
-        Symmetrically, as \( N \) grows large, this fraction approaches 100%. Symmetrically, this invalidates nearly the entire cache keyspace. The sudden cache miss avalanche floods the underlying databases, causing a cascading database collapse known as a **database stampede**.
+        Symmetrically, as \( N \) grows large, this fraction approaches 100%. Symmetrically, this invalidates nearly the entire cache keyspace. The sudden cache miss avalanche floods the underlying databases, causing a cascading database collapse known as a <strong>database stampede</strong>.
       </p>
 
       <h3>The Mechanics of Consistent Hashing</h3>
 
       <p>
-        To prevent this, distributed systems utilize **Consistent Hashing**—a mathematical routing technique invented by David Karger and his colleagues at MIT. Consistent hashing ensures that when a server pool scales up or down, only a minimal fraction of keys are redistributed.
+        To prevent this, distributed systems utilize <strong>Consistent Hashing</strong>—a mathematical routing technique invented by David Karger and his colleagues at MIT. Consistent hashing ensures that when a server pool scales up or down, only a minimal fraction of keys are redistributed.
       </p>
 
       <p>
@@ -625,7 +626,7 @@ epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket_fd, &amp;event);</code></pre>
       \[ [0, 2^{32} - 1] \]
 
       <p>
-        This is the **Hash Ring**. Symmetrically, the start of the range (0) is conceptually connected to the end of the range (\( 2^{32} - 1 \)), forming a continuous circle.
+        This is the <strong>Hash Ring</strong>. Symmetrically, the start of the range (0) is conceptually connected to the end of the range (\( 2^{32} - 1 \)), forming a continuous circle.
       </p>
 
       <p>
@@ -713,11 +714,11 @@ epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket_fd, &amp;event);</code></pre>
       <h3>Virtual Nodes (Vnodes) to Resolve Hotspotting</h3>
 
       <p>
-        A basic implementation of consistent hashing suffers from a major mathematical vulnerability. If only a few physical server nodes are mapped to the ring, their coordinates will likely be distributed unevenly. Symmetrically, this creates massive segments on the ring between nodes, and tiny segments elsewhere. The physical server that manages the largest clockwise segment will absorb a disproportionate share of client requests, while other servers remain mostly idle. Symmetrically, this is known as a **hotspot**.
+        A basic implementation of consistent hashing suffers from a major mathematical vulnerability. If only a few physical server nodes are mapped to the ring, their coordinates will likely be distributed unevenly. Symmetrically, this creates massive segments on the ring between nodes, and tiny segments elsewhere. The physical server that manages the largest clockwise segment will absorb a disproportionate share of client requests, while other servers remain mostly idle. Symmetrically, this is known as a <strong>hotspot</strong>.
       </p>
 
       <p>
-        To solve this hotspot problem, consistent hashing architectures introduce **Virtual Nodes (Vnodes)**. Symmetrically, instead of hashing a single physical node coordinates to the ring, each physical node is cloned into a large number of virtual points (typically 100 to 256 vnodes per physical node).
+        To solve this hotspot problem, consistent hashing architectures introduce <strong>Virtual Nodes (Vnodes)</strong>. Symmetrically, instead of hashing a single physical node coordinates to the ring, each physical node is cloned into a large number of virtual points (typically 100 to 256 vnodes per physical node).
       </p>
 
       <p>
@@ -829,7 +830,7 @@ spec:
       </p>
 
       <p>
-        To prevent this, the load balancer and the application server execute a highly coordinated sequence known as **Connection Draining** (or Graceful Shutdown):
+        To prevent this, the load balancer and the application server execute a highly coordinated sequence known as <strong>Connection Draining</strong> (or Graceful Shutdown):
       </p>
 
       <div class="margin-card caution">
@@ -862,13 +863,13 @@ spec:
       </ul>
 
       <p>
-        <strong>4. OS-Level Socket Coordination:</strong> Symmetrically, during the draining window, the server continues transmitting response packets across established sockets. As each active request finishes, the server closes the connection by sending a TCP `FIN` packet. Symmetrically, the load balancer tracks the state of these sockets. Once the active connection count drops to zero, or once the configured **deregistration delay** window expires, the server process exits, and the orchestrator terminates the container. This precise orchestration ensures zero downtime and zero request drops during continuous delivery deployments.
+        <strong>4. OS-Level Socket Coordination:</strong> Symmetrically, during the draining window, the server continues transmitting response packets across established sockets. As each active request finishes, the server closes the connection by sending a TCP `FIN` packet. Symmetrically, the load balancer tracks the state of these sockets. Once the active connection count drops to zero, or once the configured <strong>deregistration delay</strong> window expires, the server process exits, and the orchestrator terminates the container. This precise orchestration ensures zero downtime and zero request drops during continuous delivery deployments.
       </p>
 
       <h2>V. The Chronicles of the Sangam: Kumbh Mela Traffic Dispatching as the Ultimate Load Balancer</h2>
 
       <p>
-        To grasp the operational scale and mathematical complexity of distributed traffic dispatching, one must look beyond the domain of silicon chips and examine one of the largest self-organizing events in human history: the **Kumbh Mela** pilgrimage at the Triveni Sangam in Prayagraj. Symmetrically, during astrologically auspicious bathing windows, tens of millions of pilgrims converge upon a highly constrained riverbank over a period of a few days. The physical flow of millions of human bodies through a temporary city of tents, corridors, and sandbars behaves exactly like high-throughput network packets traversing a distributed cluster under a massive load spike.
+        To grasp the operational scale and mathematical complexity of distributed traffic dispatching, one must look beyond the domain of silicon chips and examine one of the largest self-organizing events in human history: the <strong>Kumbh Mela</strong> pilgrimage at the Triveni Sangam in Prayagraj. Symmetrically, during astrologically auspicious bathing windows, tens of millions of pilgrims converge upon a highly constrained riverbank over a period of a few days. The physical flow of millions of human bodies through a temporary city of tents, corridors, and sandbars behaves exactly like high-throughput network packets traversing a distributed cluster under a massive load spike.
       </p>
 
       <p>
@@ -888,7 +889,7 @@ spec:
       </p>
 
       <p>
-        To manage this bottleneck, the administration implements a dynamic **Least Connections** algorithm:
+        To manage this bottleneck, the administration implements a dynamic <strong>Least Connections</strong> algorithm:
       </p>
 
       <div class="margin-card aside">
@@ -913,11 +914,11 @@ spec:
       </p>
 
       <p>
-        To scale read throughput, distributed systems split the database architecture into a **Primary-Replica** topology. A single, authoritative **Primary Node** handles all write operations (`INSERT`, `UPDATE`, `DELETE`), while multiple **Read Replicas** absorb the massive volume of read queries (`SELECT`).
+        To scale read throughput, distributed systems split the database architecture into a <strong>Primary-Replica</strong> topology. A single, authoritative <strong>Primary Node</strong> handles all write operations (`INSERT`, `UPDATE`, `DELETE`), while multiple <strong>Read Replicas</strong> absorb the massive volume of read queries (`SELECT`).
       </p>
 
       <p>
-        To understand how these replicas remain synchronized with the primary node, one must examine the internal mechanisms of **Write-Ahead Logging (WAL)**.
+        To understand how these replicas remain synchronized with the primary node, one must examine the internal mechanisms of <strong>Write-Ahead Logging (WAL)</strong>.
       </p>
 
       <h3>PostgreSQL WAL Mechanics</h3>
@@ -927,11 +928,11 @@ spec:
       </p>
 
       <p>
-        Instead, PostgreSQL utilizes a **Write-Ahead Log (WAL)**. Symmetrically, when a transaction modifies a row, the database engine writes the exact binary change sequentially to an in-memory WAL buffer. Symmetrically, this WAL record represents a serial stream of modifications (such as "insert row into block X at offset Y"). When the transaction commits, the WAL buffer is immediately flushed to disk sequentially using the `fsync()` system call.
+        Instead, PostgreSQL utilizes a <strong>Write-Ahead Log (WAL)</strong>. Symmetrically, when a transaction modifies a row, the database engine writes the exact binary change sequentially to an in-memory WAL buffer. Symmetrically, this WAL record represents a serial stream of modifications (such as "insert row into block X at offset Y"). When the transaction commits, the WAL buffer is immediately flushed to disk sequentially using the `fsync()` system call.
       </p>
 
       <p>
-        Because sequential disk writes are highly optimized compared to random I/O, this architecture ensures absolute durability: if the database suffers a sudden power failure or kernel panic, it can rebuild its state upon reboot by reading the sequential WAL stream from the last checkpoint and replaying the binary changes. The dirty data pages in the main database memory buffers are written to the actual table files (the heap) asynchronously by a background process known as the **bgwriter**.
+        Because sequential disk writes are highly optimized compared to random I/O, this architecture ensures absolute durability: if the database suffers a sudden power failure or kernel panic, it can rebuild its state upon reboot by reading the sequential WAL stream from the last checkpoint and replaying the binary changes. The dirty data pages in the main database memory buffers are written to the actual table files (the heap) asynchronously by a background process known as the <strong>bgwriter</strong>.
       </p>
 
       <h3>Physical vs. Logical Replication</h3>
@@ -941,7 +942,7 @@ spec:
       </p>
 
       <p>
-        <strong>Physical Streaming Replication:</strong> Symmetrically, physical replication operates at the lowest level of disk block storage. The primary node runs a dedicated **`walsender`** process that streams raw, byte-for-byte WAL blocks over a TCP connection to a **`walreceiver`** process running on the replica. The replica writes these blocks to its own WAL files and immediately applies them to its local shared buffers and heap files using a startup process running in continuous recovery mode.
+        <strong>Physical Streaming Replication:</strong> Symmetrically, physical replication operates at the lowest level of disk block storage. The primary node runs a dedicated <strong>`walsender`</strong> process that streams raw, byte-for-byte WAL blocks over a TCP connection to a <strong>`walreceiver`</strong> process running on the replica. The replica writes these blocks to its own WAL files and immediately applies them to its local shared buffers and heap files using a startup process running in continuous recovery mode.
       </p>
 
       <p>
@@ -949,7 +950,7 @@ spec:
       </p>
 
       <p>
-        <strong>Logical Replication:</strong> Symmetrically, logical replication decodes the raw binary changes of the WAL stream into high-level, logical transaction operations (e.g., "Table Users, Update row ID 5, Column Name = 'Alexander'"). This decoding is executed using logical decoding plugins (such as `pgoutput`). Symmetrically, these logical changes are streamed to the replica using a **Publication-Subscription** model.
+        <strong>Logical Replication:</strong> Symmetrically, logical replication decodes the raw binary changes of the WAL stream into high-level, logical transaction operations (e.g., "Table Users, Update row ID 5, Column Name = 'Alexander'"). This decoding is executed using logical decoding plugins (such as `pgoutput`). Symmetrically, these logical changes are streamed to the replica using a <strong>Publication-Subscription</strong> model.
       </p>
 
       <p>
@@ -965,7 +966,7 @@ spec:
       <h3>Mathematical Modeling of Replication Lag</h3>
 
       <p>
-        Because data cannot travel instantaneously across network wires, there is always a finite delay before a write applied on the primary is replayed on a replica. Symmetrically, this delay is defined as **Replication Lag**.
+        Because data cannot travel instantaneously across network wires, there is always a finite delay before a write applied on the primary is replayed on a replica. Symmetrically, this delay is defined as <strong>Replication Lag</strong>.
       </p>
 
       <p>
@@ -999,17 +1000,17 @@ spec:
       </p>
 
       <p>
-        <strong>3. Lock Contention (Replication Conflicts):</strong> Symmetrically, when physical replication applies WAL changes, it may need to modify a table block currently held by a long-running read query on the replica. This creates a **replication conflict**. The replica's startup process must either wait for the read query to finish (expanding replication lag) or terminate the conflicting read query (returning an error to the user).
+        <strong>3. Lock Contention (Replication Conflicts):</strong> Symmetrically, when physical replication applies WAL changes, it may need to modify a table block currently held by a long-running read query on the replica. This creates a <strong>replication conflict</strong>. The replica's startup process must either wait for the read query to finish (expanding replication lag) or terminate the conflicting read query (returning an error to the user).
       </p>
 
       <h2>VII. Write-to-Read Sticky Routing: The Architectural Solution to Lag</h2>
 
       <p>
-        Replication lag introduces a notorious distributed systems bug: the **Read-Your-Own-Writes Failure**. Symmetrically, this occurs when a user executes a write operation, and their subsequent read request hits a replica that has not yet received the replicated write due to replication lag. The user sees their old data, assumes the action failed, and submits duplicate writes, compounding database stress.
+        Replication lag introduces a notorious distributed systems bug: the <strong>Read-Your-Own-Writes Failure</strong>. Symmetrically, this occurs when a user executes a write operation, and their subsequent read request hits a replica that has not yet received the replicated write due to replication lag. The user sees their old data, assumes the action failed, and submits duplicate writes, compounding database stress.
       </p>
 
       <p>
-        To prevent this, the application layer must implement a technique known as **Write-to-Read Sticky Routing** (or Read-After-Write Consistency). Symmetrically, this routing mechanism intercepts write operations, writes a secure session-based cookie containing the write timestamp to the client, and routes subsequent read requests to the Primary node if the client has written within the replication window (e.g., 2000ms), otherwise routing the query to the Read Replica pool.
+        To prevent this, the application layer must implement a technique known as <strong>Write-to-Read Sticky Routing</strong> (or Read-After-Write Consistency). Symmetrically, this routing mechanism intercepts write operations, writes a secure session-based cookie containing the write timestamp to the client, and routes subsequent read requests to the Primary node if the client has written within the replication window (e.g., 2000ms), otherwise routing the query to the Read Replica pool.
       </p>
 
       <h3>Production-Grade Node.js Middleware Implementation</h3>
@@ -1177,7 +1178,7 @@ app.get('/api/v1/profile/:id', async (req, res) => {
       <h2>VIII. Horizontal Data Partitioning: Database Sharding &amp; Distributed Transactions</h2>
 
       <p>
-        Symmetrically, when write transaction volume or database storage capacity exceeds the resource limits of a single primary node, simple read replica topologies are no longer sufficient. Symmetrically, when a database disk is saturated, the architecture must partition the data itself. Symmetrically, this architectural shift is known as **Database Sharding**.
+        Symmetrically, when write transaction volume or database storage capacity exceeds the resource limits of a single primary node, simple read replica topologies are no longer sufficient. Symmetrically, when a database disk is saturated, the architecture must partition the data itself. Symmetrically, this architectural shift is known as <strong>Database Sharding</strong>.
       </p>
 
       <p>
@@ -1187,11 +1188,11 @@ app.get('/api/v1/profile/:id', async (req, res) => {
       <h3>Sharding Architectures: Range vs. Directory vs. Hash</h3>
 
       <p>
-        The efficiency of a sharded database depends entirely on the sharding topology and the choice of the **Sharding Key**—the column value that dictates which physical node holds a specific row.
+        The efficiency of a sharded database depends entirely on the sharding topology and the choice of the <strong>Sharding Key</strong>—the column value that dictates which physical node holds a specific row.
       </p>
 
       <p>
-        <strong>Range-Based Sharding:</strong> Symmetrically, the data is partitioned based on continuous ranges of the sharding key. For example, User IDs 1 to 1,000,000 are sent to Shard A; IDs 1,000,001 to 2,000,000 are directed to Shard B. Symmetrically, range-based sharding is simple to implement. However, it frequently leads to **hot shards**: if user registration spikes, all new writes are directed to the highest range shard, overloading that single node while other shards remain idle.
+        <strong>Range-Based Sharding:</strong> Symmetrically, the data is partitioned based on continuous ranges of the sharding key. For example, User IDs 1 to 1,000,000 are sent to Shard A; IDs 1,000,001 to 2,000,000 are directed to Shard B. Symmetrically, range-based sharding is simple to implement. However, it frequently leads to <strong>hot shards</strong>: if user registration spikes, all new writes are directed to the highest range shard, overloading that single node while other shards remain idle.
       </p>
 
       <p>
@@ -1205,7 +1206,7 @@ app.get('/api/v1/profile/:id', async (req, res) => {
       \[ \text{Shard ID} = h(\text{key}) \pmod N \]
 
       <p>
-        This distributes data with high statistical uniformity across all shards. Symmetrically, if the system needs to scale by adding a new shard node, the value of \( N \) changes, destroying the routing formula and forcing the migration of nearly all rows across the network. Symmetrically, this scaling nightmare is resolved by applying **consistent hashing** to the shard key ring, mapping both physical shards and key hashes onto a circular space, ensuring only a minimal fraction of rows migrate during shard additions.
+        This distributes data with high statistical uniformity across all shards. Symmetrically, if the system needs to scale by adding a new shard node, the value of \( N \) changes, destroying the routing formula and forcing the migration of nearly all rows across the network. Symmetrically, this scaling nightmare is resolved by applying <strong>consistent hashing</strong> to the shard key ring, mapping both physical shards and key hashes onto a circular space, ensuring only a minimal fraction of rows migrate during shard additions.
       </p>
 
       <h3>The Dilemma of Cross-Shard Joins</h3>
@@ -1221,11 +1222,11 @@ app.get('/api/v1/profile/:id', async (req, res) => {
       <h3>Distributed Transactions: The Two-Phase Commit (2PC) Protocol</h3>
 
       <p>
-        Maintaining data consistency across separate sharded database nodes requires a mechanism to ensure that a transaction modifying data on multiple shards either succeeds completely on all shards or fails completely on all shards. Symmetrically, this is solved using the **Two-Phase Commit (2PC)** protocol.
+        Maintaining data consistency across separate sharded database nodes requires a mechanism to ensure that a transaction modifying data on multiple shards either succeeds completely on all shards or fails completely on all shards. Symmetrically, this is solved using the <strong>Two-Phase Commit (2PC)</strong> protocol.
       </p>
 
       <p>
-        The 2PC protocol orchestrates consensus across a distributed network of database nodes (participants) supervised by a central **Coordinator Node**.
+        The 2PC protocol orchestrates consensus across a distributed network of database nodes (participants) supervised by a central <strong>Coordinator Node</strong>.
       </p>
 
       <p>
@@ -1243,14 +1244,14 @@ app.get('/api/v1/profile/:id', async (req, res) => {
       <div class="margin-card security">
         <span class="card-label">SECURITY</span>
         <p>
-          The major flaw of the Two-Phase Commit protocol is its **blocking nature**. Symmetrically, if the coordinator node crashes after the participants have voted to commit but before transmitting the final `COMMIT` or `ROLLBACK` decision, all participants are trapped in a blocked state. Symmetrically, they must continue holding their database locks indefinitely to ensure eventual consistency, paralyzing the database cluster.
+          The major flaw of the Two-Phase Commit protocol is its <strong>blocking nature</strong>. Symmetrically, if the coordinator node crashes after the participants have voted to commit but before transmitting the final `COMMIT` or `ROLLBACK` decision, all participants are trapped in a blocked state. Symmetrically, they must continue holding their database locks indefinitely to ensure eventual consistency, paralyzing the database cluster.
         </p>
       </div>
 
       <h3>The Asynchronous Alternative: The Saga Pattern</h3>
 
       <p>
-        Because synchronous blocking protocols like 2PC severely limit scalability and latency performance in high-throughput distributed systems, modern microservice architectures utilize the **Saga Pattern**—an eventual consistency framework.
+        Because synchronous blocking protocols like 2PC severely limit scalability and latency performance in high-throughput distributed systems, modern microservice architectures utilize the <strong>Saga Pattern</strong>—an eventual consistency framework.
       </p>
 
       <p>
@@ -1264,7 +1265,7 @@ app.get('/api/v1/profile/:id', async (req, res) => {
       </p>
 
       <p>
-        <strong>Compensating Transactions:</strong> Symmetrically, if a local transaction \( T_k \) fails (e.g., due to an out-of-stock condition or payment rejection), the Saga must orchestrate a series of **compensating transactions** in reverse order:
+        <strong>Compensating Transactions:</strong> Symmetrically, if a local transaction \( T_k \) fails (e.g., due to an out-of-stock condition or payment rejection), the Saga must orchestrate a series of <strong>compensating transactions</strong> in reverse order:
       </p>
 
       \[ C_{k-1}, C_{k-2}, \dots, C_1 \]

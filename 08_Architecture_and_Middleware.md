@@ -34,7 +34,7 @@ They only checked three things: Does this petitioner carry a valid passport? Are
 
 If the passport was forged or the parchment was missing, the Guard turned them away instantly. 
 
-This is the **Controller Layer**—the customs border agent of your backend.
+This is the <strong>Controller Layer</strong>—the customs border agent of your backend.
 
 ### 2. The Second Court: The Royal Council (The Service)
 If the Guard validated the petition, the merchant was escorted to the Royal Council. 
@@ -45,7 +45,7 @@ They did not stand at the gates checking passports.
 
 Instead, they took the validated petition and did the heavy cognitive work: they calculated the expected toll revenue of the canal, checked if the kingdom had sufficient funds, and debated whether the canal would anger the local Duke. 
 
-This is the **Service Layer**—the sovereign business brain of your backend.
+This is the <strong>Service Layer</strong>—the sovereign business brain of your backend.
 
 ### 3. The Third Court: The Vault of Deeds (The Repository)
 Once the Council approved the canal, they did not physically dig the vault or write the deed themselves. 
@@ -56,7 +56,7 @@ The archivist did not debate economics.
 
 They simply pulled the heavy iron drawers, retrieved the ancient land deeds of Lyon, stamped the new canal charter with the King’s royal wax seal, and locked it away in a granite drawer. 
 
-This is the **Repository Layer**—the stone vault that communicates directly with the database.
+This is the <strong>Repository Layer</strong>—the stone vault that communicates directly with the database.
 
 ---
 
@@ -86,29 +86,29 @@ app.post('/api/canal', async (req, res) => {
 
 This is a structural pathology. 
 
-It is called **The Blob**. 
+It is called <strong>The Blob</strong>. 
 
 Let us dissect why coupling HTTP logic directly to business logic is a recipe for system paralysis:
 
-1.  **The Protocol Lock-In**: 
-    If you write your business rules (budget calculation, canal logistics) directly inside the Express.js route handler, your business logic is now **terminally bound to the HTTP protocol**. 
+1.  <strong>The Protocol Lock-In</strong>: 
+    If you write your business rules (budget calculation, canal logistics) directly inside the Express.js route handler, your business logic is now <strong>terminally bound to the HTTP protocol</strong>. 
     What if you want to run the budget calculator from a scheduled cron job inside a CLI script? 
     What if you want to migrate your server to WebSockets or a fast gRPC queue? 
     You cannot. 
     Your calculator expects an Express `req` and `res` object, carrying headers, cookies, and HTTP-specific baggage.
-2.  **Testability Paralysis**: 
+2.  <strong>Testability Paralysis</strong>: 
     To unit-test the budget logic in the coupled code, you cannot simply pass numbers to a function. 
     You must construct mock HTTP requests, mock response objects, spin up a virtual network environment, and parse outgoing JSON streams. 
     Your tests become incredibly slow, verbose, and fragile.
-3.  **The Law of Isolation**: 
+3.  <strong>The Law of Isolation</strong>: 
     By decoupling the layers, we isolate concerns:
-    *   **The Controller** is strictly concerned with **HTTP protocol details**. 
+    *   <strong>The Controller</strong> is strictly concerned with <strong>HTTP protocol details</strong>. 
         It reads route parameters, parses cookies, handles content negotiation, and formats JSON outputs. 
         It has zero awareness of database schemas, SQL dialects, or business equations.
-    *   **The Service** is strictly concerned with **pure business calculations**. 
+    *   <strong>The Service</strong> is strictly concerned with <strong>pure business calculations</strong>. 
         It receives raw, primitive data (strings, numbers), runs logic, orchestrates workflows, and returns clean data structures. 
         It has zero awareness of HTTP—it does not know if the request arrived via HTTP/1.1, HTTP/3, WebSockets, or a terminal command line.
-    *   **The Repository** is strictly concerned with **raw data retrieval and persistence**. 
+    *   <strong>The Repository</strong> is strictly concerned with <strong>raw data retrieval and persistence</strong>. 
         It constructs SQL queries, interacts with ORMs, manages database connections, and abstracts the physical database layout from the service layer.
 
 ---
@@ -127,7 +127,7 @@ flowchart LR
 ```
 
 ### 1. Syntactic Validation (The Controller Gate)
-Syntactic validation checks the **structure and format** of the incoming data. 
+Syntactic validation checks the <strong>structure and format</strong> of the incoming data. 
 
 It answers the question: *Is this data formatted correctly?*
 *   Is the email a valid string containing an `@` symbol?
@@ -136,37 +136,37 @@ It answers the question: *Is this data formatted correctly?*
 
 Because syntactic validation is purely structural, it requires no database queries or network lookups. 
 
-We run it at the **Controller Layer** using schema libraries like **Zod** or **Joi**. 
+We run it at the <strong>Controller Layer</strong> using schema libraries like <strong>Zod</strong> or <strong>Joi</strong>. 
 
 If the client sends garbage format, the controller rejects the request instantly with a `400 Bad Request`, sparing the service and database layers from wasting computational energy.
 
 ### 2. Semantic Validation (The Service Gate)
-Semantic validation checks the **meaning and business validity** of the data. 
+Semantic validation checks the <strong>meaning and business validity</strong> of the data. 
 
 It answers the question: *Does this formatted data make sense in the context of our current system state?*
 *   The email is formatted correctly, but does another user already own this email in our database?
 *   The transaction amount is a positive number, but does the user actually have enough cash in their account balance to execute it?
 
-Because semantic validation requires inspecting the state of the database or checking business invariants, it must live inside the **Service Layer**.
+Because semantic validation requires inspecting the state of the database or checking business invariants, it must live inside the <strong>Service Layer</strong>.
 
 ### 3. Transformations: Parsing and Casting
 Data arriving over network sockets is frequently flat text. 
 
 A route parameter `/api/users/:id` captures the ID as the string `"42"`. 
 
-Before your database can query it, we must execute a **Transformation**—casting the string `"42"` into the integer `42`.
+Before your database can query it, we must execute a <strong>Transformation</strong>—casting the string `"42"` into the integer `42`.
 
 Transformations also sanitize data:
 *   Trimming whitespace from usernames (`" harshit "` to `"harshit"`).
 *   Converting emails to lowercase to prevent duplicate record bugs.
 *   Stripping internal fields (like `isAdmin: true` submitted by malicious clients).
 
-These transformations are performed at the **Controller Layer** during the initial schema validation phase, ensuring that the service layer receives clean, perfectly cast, and typed data structures.
+These transformations are performed at the <strong>Controller Layer</strong> during the initial schema validation phase, ensuring that the service layer receives clean, perfectly cast, and typed data structures.
 
 ### 4. Frontend vs. Server-Side Validation: The Trust Boundary
 A common amateur mistake is assuming that because you wrote beautiful validation logic in React or Vue, your backend is secure. 
 
-**Frontend validation is NOT a security gate.** 
+<strong>Frontend validation is NOT a security gate.</strong> 
 
 It is merely a user experience (UX) convenience, saving the user from waiting for a network round-trip to discover they misspelled their password.
 
@@ -180,7 +180,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"email":"junk"}' https://a
 
 If your backend does not perform strict server-side validation, the raw junk will slide straight into your database, corrupting your state or triggering system crashes. 
 
-**Rule of the Backend:** *Never trust the client. Validate everything, everywhere, at the server gate.*
+<strong>Rule of the Backend:</strong> *Never trust the client. Validate everything, everywhere, at the server gate.*
 
 ---
 
@@ -212,21 +212,21 @@ sequenceDiagram
     Ctrl-->>Net: 13. Pipes serialized response down TCP socket
 ```
 
-1.  **The TCP Gateway**: 
+1.  <strong>The TCP Gateway</strong>: 
     The raw TCP packet lands on the server port, managed by NGINX or Node.js. 
     The stream is parsed into the initial JavaScript Request (`req`) and Response (`res`) objects.
-2.  **The Middleware gauntlet**: 
+2.  <strong>The Middleware gauntlet</strong>: 
     The request flows sequentially through the registered middleware stack (parsing bodies, validating CORS headers, verifying auth tokens).
-3.  **The Controller Handler**: 
+3.  <strong>The Controller Handler</strong>: 
     The router maps the path to the specific controller function. 
     The controller runs Zod schema validation. 
     If successful, it extracts parameter strings, casts them to system types, and invokes the service layer.
-4.  **The Service execution**: 
+4.  <strong>The Service execution</strong>: 
     The service isolates the logical flow. 
     It checks business rules and calls the repository layer.
-5.  **The Repository commit**: 
+5.  <strong>The Repository commit</strong>: 
     The repository translates the request into an active SQL query, executes it against the database, maps the database rows back to clean system objects, and returns them to the service.
-6.  **The Symmetrical return**: 
+6.  <strong>The Symmetrical return</strong>: 
     The service returns a clean Success DTO to the controller. 
     The controller assigns the correct HTTP status code (`201 Created`), serializes the data to a JSON string using `JSON.stringify()`, and pipes it down the TCP socket to the client.
 
@@ -235,7 +235,7 @@ sequenceDiagram
 ## V. The Interception Pipeline: Understanding Middleware
 
 ### 1. What is Middleware?
-In web backends, **Middleware** is a functional pipeline of interception filters that execute sequentially before the request reaches the terminal route handler. 
+In web backends, <strong>Middleware</strong> is a functional pipeline of interception filters that execute sequentially before the request reaches the terminal route handler. 
 
 In frameworks like Express, a middleware is a simple function with a triple-argument signature:
 
@@ -251,7 +251,7 @@ function myMiddleware(req, res, next) {
 Incoming Request ───> [Middleware 1] ───next()───> [Middleware 2] ───next()───> [Route Handler]
 ```
 
-If a middleware does not call `next()`, the pipeline is **short-circuited**. 
+If a middleware does not call `next()`, the pipeline is <strong>short-circuited</strong>. 
 
 The request is terminated, and the execution never reaches your controller. 
 
@@ -260,7 +260,7 @@ This is extremely useful for blocking unauthenticated users or dropping malforme
 ### 2. Why Can't We Do This inside the Route Handlers?
 Technically, you *could* write your authentication checks, body parsing, and logging logic directly inside every single route handler. 
 
-But this violates the core software engineering tenet of **DRY (Don't Repeat Yourself)**.
+But this violates the core software engineering tenet of <strong>DRY (Don't Repeat Yourself)</strong>.
 
 If your application has 100 routes, and 80 of them require the user to be logged in, copying and pasting the authentication token verification logic inside 80 separate controllers creates a maintenance nightmare. 
 
@@ -274,18 +274,18 @@ app.use('/api/secure', authMiddleware);
 ```
 
 ### 3. Handler vs. Middleware: The Operational Boundary
-*   **Middleware** is an **interceptor**. 
+*   <strong>Middleware</strong> is an <strong>interceptor</strong>. 
     It is designed to run common checks, enrich request metadata (like adding `req.user` after validating a token), or log transaction times. 
     It passes control down the stream using `next()`.
-*   **Handlers (Controllers)** are the **terminal leaf** of the routing tree. 
-    They are designed to execute the core, targeted business action (like creating a post) and **close the response loop** by sending bytes back to the client (`res.send()` or `res.json()`). 
+*   <strong>Handlers (Controllers)</strong> are the <strong>terminal leaf</strong> of the routing tree. 
+    They are designed to execute the core, targeted business action (like creating a post) and <strong>close the response loop</strong> by sending bytes back to the client (`res.send()` or `res.json()`). 
     A handler never calls `next()`.
 
 ---
 
 ## VI. The Symmetrical Order: Why Middleware Order Rules All
 
-Because middleware executes sequentially in the exact order they are registered in your application code, **ordering is the absolute law of routing execution**.
+Because middleware executes sequentially in the exact order they are registered in your application code, <strong>ordering is the absolute law of routing execution</strong>.
 
 Let us examine what occurs when you arrange your middleware stack incorrectly:
 
@@ -318,23 +318,23 @@ flowchart TD
     7["7. Global Error Handler<br/>(Absolute bottom: catches all crashes)"]
 ```
 
-1.  **Compression**: Must live at the absolute top, ensuring all outgoing data streams are compressed before traveling down the socket.
-2.  **CORS & Security**: Intercepts preflight `OPTIONS` calls early, returning appropriate headers before business logic runs.
-3.  **Body Parser**: Reads the raw network bytes and populates the `req.body` object, making data accessible to all subsequent filters.
-4.  **Logging**: Captures request paths and starts response timing clocks.
-5.  **Authentication & Context**: Validates tokens, fetches the user from the database, and stores the state inside the thread-safe **Request Context** (`req.context`).
-6.  **Route Handlers**: Runs your controllers.
-7.  **Global Error Handler**: **Must live at the absolute bottom of the stack.** 
+1.  <strong>Compression</strong>: Must live at the absolute top, ensuring all outgoing data streams are compressed before traveling down the socket.
+2.  <strong>CORS & Security</strong>: Intercepts preflight `OPTIONS` calls early, returning appropriate headers before business logic runs.
+3.  <strong>Body Parser</strong>: Reads the raw network bytes and populates the `req.body` object, making data accessible to all subsequent filters.
+4.  <strong>Logging</strong>: Captures request paths and starts response timing clocks.
+5.  <strong>Authentication & Context</strong>: Validates tokens, fetches the user from the database, and stores the state inside the thread-safe <strong>Request Context</strong> (`req.context`).
+6.  <strong>Route Handlers</strong>: Runs your controllers.
+7.  <strong>Global Error Handler</strong>: <strong>Must live at the absolute bottom of the stack.</strong> 
     If any controller or database query crashes, the error falls through the routing tree until it hits this catch-all error middleware, preventing raw stack traces from exposing security details and ensuring the client receives a clean, parameterized `500 Internal Server Error`.
 
 ---
 
 ## VII. Key Takeaways
 
-*   **Layered Architecture** separates the presentation (Controller) from the execution (Service) and persistence (Repository) layers, protecting your business logic from protocol lock-in.
-*   **Syntactic validation** (Zod) lives in the Controller, shielding the system from malformed inputs early. **Semantic validation** (DB queries) lives in the Service, enforcing business laws.
-*   **Middleware** intercepts requests sequentially. The ordering is highly critical: body parsers must run before auth checks, and the global error handler must sit at the absolute bottom of the registry.
-*   **Request Context** acts as the thread-safe storage vehicle that carries parsed user state down the pipeline.
+*   <strong>Layered Architecture</strong> separates the presentation (Controller) from the execution (Service) and persistence (Repository) layers, protecting your business logic from protocol lock-in.
+*   <strong>Syntactic validation</strong> (Zod) lives in the Controller, shielding the system from malformed inputs early. <strong>Semantic validation</strong> (DB queries) lives in the Service, enforcing business laws.
+*   <strong>Middleware</strong> intercepts requests sequentially. The ordering is highly critical: body parsers must run before auth checks, and the global error handler must sit at the absolute bottom of the registry.
+*   <strong>Request Context</strong> acts as the thread-safe storage vehicle that carries parsed user state down the pipeline.
 
 ---
 

@@ -6,11 +6,11 @@
 
 ## I. The Kowtow of Macartney and the Charge of the Light Brigade
 
-In September of 1793, the **Earl of Macartney** arrived at the summer palace of the **Qianlong Emperor** in Rehe, bearing hot-air balloons, pocket watches, and a letter from King George III. 
+In September of 1793, the <strong>Earl of Macartney</strong> arrived at the summer palace of the <strong>Qianlong Emperor</strong> in Rehe, bearing hot-air balloons, pocket watches, and a letter from King George III. 
 
 His mission was simple: open trade between the British Empire and the Qing Dynasty. 
 
-But before he could even present his balloons, the negotiation ground to a screeching halt over a single, highly contested question of physical grammar: the **Kowtow**.
+But before he could even present his balloons, the negotiation ground to a screeching halt over a single, highly contested question of physical grammar: the <strong>Kowtow</strong>.
 
 In the diplomatic grammar of the Qing court, the kowtow—kneeling three times and touching one's forehead to the floor nine times—was an absolute prerequisite. 
 
@@ -28,7 +28,7 @@ Macartney eventually performed a modified British bow; the Emperor, insulted by 
 
 The two empires, unable to agree on a shared protocol for bowing, drifted toward seventy years of war and economic devastation.
 
-Let us look at a second, more immediate tragedy of corrupted grammar: the **Charge of the Light Brigade** in 1854.
+Let us look at a second, more immediate tragedy of corrupted grammar: the <strong>Charge of the Light Brigade</strong> in 1854.
 
 During the Battle of Balaclava, Lord Raglan saw Russian soldiers preparing to carry off captured Turkish guns on the heights. 
 
@@ -48,11 +48,11 @@ He ordered the Light Brigade to charge straight down the throat of the Russian v
 
 Of the six hundred and seven cavalrymen who rode out, only half returned. 
 
-The disaster occurred not because the horses were slow, or because the soldiers were cowards, but because the **grammatical envelope of the message** lacked a shared, deterministic dictionary. 
+The disaster occurred not because the horses were slow, or because the soldiers were cowards, but because the <strong>grammatical envelope of the message</strong> lacked a shared, deterministic dictionary. 
 
 The word "guns" mapped to one coordinate in Raglan's mind and a completely different coordinate in Lucan's mind, and the protocol had no header fields to resolve the ambiguity.
 
-These are not isolated historical curiosities. They are examples of the **Grammatical Coordination Problem**—a mathematical truth that applies to all communicating agents: **If two independent systems try to exchange state without a rigid, deterministic, and universally agreed-upon protocol, their interactions will inevitably slide into corruption, misunderstanding, and systemic failure.**
+These are not isolated historical curiosities. They are examples of the <strong>Grammatical Coordination Problem</strong>—a mathematical truth that applies to all communicating agents: <strong>If two independent systems try to exchange state without a rigid, deterministic, and universally agreed-upon protocol, their interactions will inevitably slide into corruption, misunderstanding, and systemic failure.</strong>
 
 When a web browser in Mumbai tries to communicate with a server in San Francisco, it is facing the exact same problem that broke Macartney at Rehe. 
 
@@ -62,13 +62,13 @@ If the browser sends a raw stream of characters: `give_me_my_dashboard_now_pleas
 
 Is `give_me` a verb? Is `dashboard` a resource? Where do the headers end and the metadata begin?
 
-To solve this, we rely on the **HyperText Transfer Protocol (HTTP)**. 
+To solve this, we rely on the <strong>HyperText Transfer Protocol (HTTP)</strong>. 
 
-Formalized by **Tim Berners-Lee** at CERN in 1989, HTTP is the diplomatic grammar of the web. 
+Formalized by <strong>Tim Berners-Lee</strong> at CERN in 1989, HTTP is the diplomatic grammar of the web. 
 
 It defines exactly how a request must kowtow to a server, exactly how the envelopes must be labeled, and exactly how the status of the transaction must be serialized down the physical wire.
 
-[^1]: There is a beautiful, highly technical essay by the late network theorist Jonathan Postel (author of RFC 793) where he states: *"Be conservative in what you send, and liberal in what you accept."* This is popularly known as **Postel's Law**, and it has guided the implementation of virtually every HTTP client and server for thirty years. It is the reason your browser does not crash when a server returns a slightly misspelled header.
+[^1]: There is a beautiful, highly technical essay by the late network theorist Jonathan Postel (author of RFC 793) where he states: *"Be conservative in what you send, and liberal in what you accept."* This is popularly known as <strong>Postel's Law</strong>, and it has guided the implementation of virtually every HTTP client and server for thirty years. It is the reason your browser does not crash when a server returns a slightly misspelled header.
 
 ---
 
@@ -104,7 +104,7 @@ A client opened a raw TCP socket to the server and sent a single line:
 GET /index.html
 ```
 
-The server read the line, mapped it to a file, loaded the HTML from disk, shipped the raw HTML characters back over the socket, and **immediately closed the connection.**
+The server read the line, mapped it to a file, loaded the HTML from disk, shipped the raw HTML characters back over the socket, and <strong>immediately closed the connection.</strong>
 
 It was simple, it was fast, and it was entirely text-based. 
 
@@ -116,14 +116,14 @@ If the page had an image, HTTP/0.9 could not serve it, because there was no way 
 
 As the web expanded, developers demanded the ability to serve images, style sheets, and binary files. 
 
-This led to the formalization of **HTTP/1.0** in RFC 1945.
+This led to the formalization of <strong>HTTP/1.0</strong> in RFC 1945.
 
 HTTP/1.0 introduced the structural layout we still use today:
-*   **Request/Response Headers**: Key-value pairs carrying metadata about the transaction (e.g., `Content-Type`, `User-Agent`).
-*   **Status Codes**: Numeric indicators of success or failure (e.g., `200 OK`, `404 Not Found`).
-*   **Content-Type (MIME Types)**: Allowing servers to declare exactly what type of asset was being returned.
+*   <strong>Request/Response Headers</strong>: Key-value pairs carrying metadata about the transaction (e.g., `Content-Type`, `User-Agent`).
+*   <strong>Status Codes</strong>: Numeric indicators of success or failure (e.g., `200 OK`, `404 Not Found`).
+*   <strong>Content-Type (MIME Types)</strong>: Allowing servers to declare exactly what type of asset was being returned.
 
-But HTTP/1.0 carried a crippling performance limitation: **Every single request paid a heavy "TCP Connection Tax."**
+But HTTP/1.0 carried a crippling performance limitation: <strong>Every single request paid a heavy "TCP Connection Tax."</strong>
 
 ```mermaid
 flowchart TD
@@ -134,7 +134,7 @@ flowchart TD
     end
 ```
 
-If a webpage contained an HTML file, a CSS stylesheet, and ten images, the browser had to open and close **twelve separate TCP connections** sequentially. 
+If a webpage contained an HTML file, a CSS stylesheet, and ten images, the browser had to open and close <strong>twelve separate TCP connections</strong> sequentially. 
 
 Each connection required a full TCP three-way handshake, costing valuable round-trip latency. 
 
@@ -142,7 +142,7 @@ On a slow 1996 telephone line, the page felt incredibly sluggish, as the browser
 
 ### 3. HTTP/1.1: Persistent Sockets (1997–1999)
 
-Formalized in RFC 2616, **HTTP/1.1** saved the web by introducing **Persistent Connections (Keep-Alive)**.
+Formalized in RFC 2616, <strong>HTTP/1.1</strong> saved the web by introducing <strong>Persistent Connections (Keep-Alive)</strong>.
 
 Under HTTP/1.1, the TCP connection does not close after the response is sent. 
 
@@ -157,11 +157,11 @@ flowchart TD
 ```
 
 HTTP/1.1 also introduced:
-*   **The `Host` Header**: Enabling multiple websites (e.g., `site-a.com` and `site-b.com`) to be served from a single physical IP address—the foundation of shared web hosting.
-*   **Chunked Transfer Encoding**: Letting the server stream long, dynamic responses before knowing their final size.
-*   **PUT, DELETE, and OPTIONS**: Formalizing the verbs necessary for modern RESTful APIs.
+*   <strong>The `Host` Header</strong>: Enabling multiple websites (e.g., `site-a.com` and `site-b.com`) to be served from a single physical IP address—the foundation of shared web hosting.
+*   <strong>Chunked Transfer Encoding</strong>: Letting the server stream long, dynamic responses before knowing their final size.
+*   <strong>PUT, DELETE, and OPTIONS</strong>: Formalizing the verbs necessary for modern RESTful APIs.
 
-But HTTP/1.1 carried its own architectural bottleneck: **Head-of-Line (HOL) Blocking**.
+But HTTP/1.1 carried its own architectural bottleneck: <strong>Head-of-Line (HOL) Blocking</strong>.
 
 Although the TCP connection remained open, the requests were strictly sequential. 
 
@@ -169,15 +169,15 @@ The server had to process and return response #1 before it could start sending r
 
 If response #1 was a slow database query, and response #2 was a fast static image, the image was blocked behind the database write, sitting idle in the server's buffer. 
 
-To bypass this, browsers started opening up to **six parallel TCP connections** to the same host, which worked but consumed massive operating system resources on both ends.
+To bypass this, browsers started opening up to <strong>six parallel TCP connections</strong> to the same host, which worked but consumed massive operating system resources on both ends.
 
 ### 4. HTTP/2: Binary Framing and Multiplexing (2015)
 
-Standardized in 2015 based on Google's experimental SPDY protocol, **HTTP/2** broke the head-of-line blocking bottleneck at the application layer.
+Standardized in 2015 based on Google's experimental SPDY protocol, <strong>HTTP/2</strong> broke the head-of-line blocking bottleneck at the application layer.
 
-Instead of writing text streams, HTTP/2 splits all requests and responses into small, binary **Frames**. 
+Instead of writing text streams, HTTP/2 splits all requests and responses into small, binary <strong>Frames</strong>. 
 
-These frames are labeled with a **Stream ID** and slung down a single TCP connection simultaneously.
+These frames are labeled with a <strong>Stream ID</strong> and slung down a single TCP connection simultaneously.
 
 ```text
 HTTP/2 Stream: [Frame 1 (Stream 1)] -> [Frame 1 (Stream 2)] -> [Frame 2 (Stream 1)] -> [Frame 2 (Stream 2)]
@@ -192,8 +192,8 @@ The browser receives the frames, reads their Stream IDs, and reconstructs the fi
 The head-of-line blocking is completely eliminated.
 
 HTTP/2 also introduced:
-*   **HPACK Header Compression**: Compressing the massive, repetitive HTTP headers using a shared dictionary, saving precious bytes on mobile networks.
-*   **Server Push**: Allowing the server to proactively send critical assets (like CSS files) to the browser before the browser even asks for them.
+*   <strong>HPACK Header Compression</strong>: Compressing the massive, repetitive HTTP headers using a shared dictionary, saving precious bytes on mobile networks.
+*   <strong>Server Push</strong>: Allowing the server to proactively send critical assets (like CSS files) to the browser before the browser even asks for them.
 
 ### 5. HTTP/3: QUIC over UDP (2022)
 
@@ -205,7 +205,7 @@ If a single packet of Stream 1 is lost in transit, TCP halts all processing, ref
 
 A flaky Wi-Fi connection with 1% packet loss would choke the entire multiplexed pipeline.
 
-To solve this final bottleneck, **HTTP/3** replaces TCP entirely with **QUIC (Quick UDP Internet Connections)**, running on top of **UDP**.
+To solve this final bottleneck, <strong>HTTP/3</strong> replaces TCP entirely with <strong>QUIC (Quick UDP Internet Connections)</strong>, running on top of <strong>UDP</strong>.
 
 UDP is a stateless, packet-switched protocol with zero reliability built-in. 
 
@@ -217,7 +217,7 @@ If a packet belonging to Stream 1 is lost, the operating system continues to fee
 
 Only Stream 1 is paused while the lost packet is fetched.
 
-QUIC also integrates **TLS 1.3** directly into its connection handshake, cutting connection time to exactly one round trip, and supports **Connection Migration**, letting your active video call survive as your phone switches from your home Wi-Fi to a cellular network.
+QUIC also integrates <strong>TLS 1.3</strong> directly into its connection handshake, cutting connection time to exactly one round trip, and supports <strong>Connection Migration</strong>, letting your active video call survive as your phone switches from your home Wi-Fi to a cellular network.
 
 ---
 
@@ -225,7 +225,7 @@ QUIC also integrates **TLS 1.3** directly into its connection handshake, cutting
 
 When we construct web applications, how does our code physically handle these incoming HTTP streams? 
 
-Today, the industry is divided between two dominant architectural models: **The Traditional Client-Server Model** and **The Serverless Event Model**.
+Today, the industry is divided between two dominant architectural models: <strong>The Traditional Client-Server Model</strong> and <strong>The Serverless Event Model</strong>.
 
 ### 1. The Client-Server Model: The Dedicated Servant
 
@@ -250,9 +250,9 @@ flowchart LR
 ```
 
 This model is defined by three immutable traits:
-*   **The Client Initiates**: The server stands as a silent, passive sentinel. It cannot initiate a request; it only speaks when spoken to.
-*   **Statelessness**: Every HTTP request is treated as a completely isolated transaction. The server does not inherently remember previous requests from the same user. If your user is logged in, they must explicitly present their identity token with *every single click*, because the protocol has no memory.
-*   **Dedicated Resources**: Your application thread pool stands warm and ready in memory. When a request arrives, the CPU can process it immediately without startup delays.
+*   <strong>The Client Initiates</strong>: The server stands as a silent, passive sentinel. It cannot initiate a request; it only speaks when spoken to.
+*   <strong>Statelessness</strong>: Every HTTP request is treated as a completely isolated transaction. The server does not inherently remember previous requests from the same user. If your user is logged in, they must explicitly present their identity token with *every single click*, because the protocol has no memory.
+*   <strong>Dedicated Resources</strong>: Your application thread pool stands warm and ready in memory. When a request arrives, the CPU can process it immediately without startup delays.
 
 The client-server model gives you total, fine-grained control over your server environment, allowing you to establish low-latency, persistent TCP connections (like WebSockets) for real-time messaging. 
 
@@ -260,7 +260,7 @@ The tradeoff is operational friction: you are responsible for monitoring CPU thr
 
 ### 2. The Serverless Model: The On-Demand Phantom
 
-Pioneered by AWS Lambda in 2014, the serverless event model operates on a completely different philosophy: **Compute on-demand, charge by the millisecond.**
+Pioneered by AWS Lambda in 2014, the serverless event model operates on a completely different philosophy: <strong>Compute on-demand, charge by the millisecond.</strong>
 
 In a serverless model, you do not manage a persistent virtual machine. 
 
@@ -268,7 +268,7 @@ Instead, you write isolated, stateless functions and upload them to a cloud prov
 
 The function sits dormant inside the cloud provider's storage systems. 
 
-When an HTTP request arrives, the cloud provider's router captures it, spins up an isolated, lightweight container in milliseconds, loads your code into RAM, executes the function, returns the HTTP response, and **immediately destroys the container.**
+When an HTTP request arrives, the cloud provider's router captures it, spins up an isolated, lightweight container in milliseconds, loads your code into RAM, executes the function, returns the HTTP response, and <strong>immediately destroys the container.</strong>
 
 ```mermaid
 flowchart LR
@@ -279,12 +279,12 @@ flowchart LR
 ```
 
 This model offers incredible advantages:
-*   **Infinite Elastic Scaling**: If one hundred thousand requests land on your site simultaneously, the router spins up one hundred thousand parallel containers on the fly, handling the traffic without a single configuration tweak.
-*   **Perfect Cost Optimization**: You only pay for the exact milliseconds your code is running. If your site receives no traffic at night, your bill is exactly zero dollars.
+*   <strong>Infinite Elastic Scaling</strong>: If one hundred thousand requests land on your site simultaneously, the router spins up one hundred thousand parallel containers on the fly, handling the traffic without a single configuration tweak.
+*   <strong>Perfect Cost Optimization</strong>: You only pay for the exact milliseconds your code is running. If your site receives no traffic at night, your bill is exactly zero dollars.
 
 But the serverless model carries major trade-offs:
-*   **Cold Starts**: If a function has not been invoked recently, the initial request must wait for the cloud provider to provision the container and load the code, adding up to 500 milliseconds of latency to the first interaction.
-*   **Stateless Execution**: Because the container is destroyed after each run, you cannot store variables in local server memory or maintain persistent database socket pools between calls, forcing you to rely on external caching layers (like Upstash Redis) or database proxies.
+*   <strong>Cold Starts</strong>: If a function has not been invoked recently, the initial request must wait for the cloud provider to provision the container and load the code, adding up to 500 milliseconds of latency to the first interaction.
+*   <strong>Stateless Execution</strong>: Because the container is destroyed after each run, you cannot store variables in local server memory or maintain persistent database socket pools between calls, forcing you to rely on external caching layers (like Upstash Redis) or database proxies.
 
 ---
 
@@ -326,9 +326,9 @@ Let us analyze the three distinct segments of this transaction:
 ### 1. The Request Line
 
 The very first line of the request: `POST /v1/users HTTP/1.1` carries the three core parameters of the request:
-*   **The Verb**: `POST`, indicating that the client wishes to write new data to the server.
-*   **The Path**: `/v1/users`, identifying the specific target resource in our routing tree.
-*   **The Version**: `HTTP/1.1`, declaring which treaty version the client is using to format its grammar.
+*   <strong>The Verb</strong>: `POST`, indicating that the client wishes to write new data to the server.
+*   <strong>The Path</strong>: `/v1/users`, identifying the specific target resource in our routing tree.
+*   <strong>The Version</strong>: `HTTP/1.1`, declaring which treaty version the client is using to format its grammar.
 
 ### 2. The Headers Block
 
@@ -339,7 +339,7 @@ Following the request line is a block of key-value headers:
 
 ### 3. The Body Payload
 
-Separated from the headers block by a **mandatory blank line (CRLF)**, the body contains the raw, serialized payload payload. 
+Separated from the headers block by a <strong>mandatory blank line (CRLF)</strong>, the body contains the raw, serialized payload payload. 
 
 In this case, it is a clean JSON object containing the user's name and role.
 
@@ -351,10 +351,10 @@ We have now mapped the complete, elegant grammar of the web. Let us review the k
 
 | Layer / Model | Transport Protocol | Latency Profile | Core Benefit | The Bottleneck |
 | :--- | :--- | :--- | :--- | :--- |
-| **HTTP/1.1** | TCP (RFC 793) | ~50 - 150ms | Keep-Alive persistent connection recycling | Head-of-Line Blocking at application layer |
-| **HTTP/2** | TCP (RFC 793) | ~30 - 80ms | Frame Multiplexing on a single socket | Head-of-Line Blocking at transport layer |
-| **HTTP/3** | QUIC over UDP | ~10 - 50ms | Stream Independence and integrated TLS 1.3 | High CPU packet validation overhead |
-| **Serverless** | On-Demand Routing | ~100 - 600ms | Automatic, infinite scaling with zero idle cost | Cold Starts and Stateless connection pool limits |
+| <strong>HTTP/1.1</strong> | TCP (RFC 793) | ~50 - 150ms | Keep-Alive persistent connection recycling | Head-of-Line Blocking at application layer |
+| <strong>HTTP/2</strong> | TCP (RFC 793) | ~30 - 80ms | Frame Multiplexing on a single socket | Head-of-Line Blocking at transport layer |
+| <strong>HTTP/3</strong> | QUIC over UDP | ~10 - 50ms | Stream Independence and integrated TLS 1.3 | High CPU packet validation overhead |
+| <strong>Serverless</strong> | On-Demand Routing | ~100 - 600ms | Automatic, infinite scaling with zero idle cost | Cold Starts and Stateless connection pool limits |
 
 HTTP is not merely a tool for loading web pages; it is the ultimate administrative framework of global distributed systems. 
 

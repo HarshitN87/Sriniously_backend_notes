@@ -7,6 +7,7 @@
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -195,15 +196,15 @@
 
       <h3>Step 2: The Propagation Sleep Window</h3>
       <p>
-        Once the readiness check fails, the application must **not** immediately close its listening sockets. Doing so is a catastrophic error. Upstream load balancers, DNS caches, CoreDNS servers, and system routing tables (such as kube-proxy's <code>iptables</code> or IPVS rules) do not update instantaneously. There is a network propagation delay, which can last from several seconds to over a minute in large clusters.
+        Once the readiness check fails, the application must <strong>not</strong> immediately close its listening sockets. Doing so is a catastrophic error. Upstream load balancers, DNS caches, CoreDNS servers, and system routing tables (such as kube-proxy's <code>iptables</code> or IPVS rules) do not update instantaneously. There is a network propagation delay, which can last from several seconds to over a minute in large clusters.
       </p>
       <p>
-        If the server closes its socket immediately upon receiving SIGTERM, the load balancer—still operating on cached routing tables—will continue to forward new client handshakes to the server's IP address. These incoming requests will encounter a closed port, resulting in raw connection refused errors and immediate <code>502 Bad Gateway</code> responses for users. Symmetrically, the server is instructed to execute a **propagation sleep** (typically 10 to 15 seconds) during which it continues to run its HTTP event loop, accepting new connection requests while the network topology adjusts.
+        If the server closes its socket immediately upon receiving SIGTERM, the load balancer—still operating on cached routing tables—will continue to forward new client handshakes to the server's IP address. These incoming requests will encounter a closed port, resulting in raw connection refused errors and immediate <code>502 Bad Gateway</code> responses for users. Symmetrically, the server is instructed to execute a <strong>propagation sleep</strong> (typically 10 to 15 seconds) during which it continues to run its HTTP event loop, accepting new connection requests while the network topology adjusts.
       </p>
 
       <h3>Step 3: Closing the Listening Socket</h3>
       <p>
-        After the propagation window has elapsed, the load balancer has completely stopped routing new traffic to this node. The application can now safely execute a system-level close on its primary listening sockets (e.g., calling <code>listener.Close()</code>). This call deletes the file descriptor from the operating system's listening table, preventing the kernel from accepting new TCP handshakes. However, this system call **does not close active sockets** that are already in the <code>ESTABLISHED</code> state. Active client transactions are fully preserved.
+        After the propagation window has elapsed, the load balancer has completely stopped routing new traffic to this node. The application can now safely execute a system-level close on its primary listening sockets (e.g., calling <code>listener.Close()</code>). This call deletes the file descriptor from the operating system's listening table, preventing the kernel from accepting new TCP handshakes. However, this system call <strong>does not close active sockets</strong> that are already in the <code>ESTABLISHED</code> state. Active client transactions are fully preserved.
       </p>
 
       <h3>Step 4: Draining In-flight Requests</h3>
@@ -253,7 +254,7 @@
           <div class="math-passage">
             <div class="math-block">\[\Delta T_{net\_propagation} \approx T_{endpoints\_update} + T_{kube\_proxy\_sync} + T_{ingress\_reload}\]</div>
           </div>
-          In production clusters, \( \Delta T_{net\_propagation} \) typically ranges from **2 to 15 seconds**, depending on network size, API server load, and load balancer polling intervals.
+          In production clusters, \( \Delta T_{net\_propagation} \) typically ranges from <strong>2 to 15 seconds</strong>, depending on network size, API server load, and load balancer polling intervals.
         </li>
         <li>
           <strong>The Container Track (Kubelet Execution)</strong>:<br>
@@ -955,7 +956,7 @@ func main() {
         At the exact millisecond the database pool is closed, the background RabbitMQ consumer task pulls an active payment transaction from the queue. The consumer attempts to process the payment and write the transaction state to the database. Because the database pool has been closed, the consumer encounters a raw connection error. The transaction fails mid-execution, leaving the client double-charged in Stripe but unregistered in your database ledger.
       </p>
       <p>
-        To prevent data corruption, the teardown must execute in **Symmetrical Reverse Order**:
+        To prevent data corruption, the teardown must execute in <strong>Symmetrical Reverse Order</strong>:
       </p>
 
       <div class="svg-diagram-container">

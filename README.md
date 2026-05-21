@@ -2,7 +2,7 @@
 
 link to hosted website>https://sriniously-backend-notes.vercel.app/ 
 
-**"Backend can be compressed into one sentence — the process we use to deal with data."**
+<strong>"Backend can be compressed into one sentence — the process we use to deal with data."</strong>
 
 Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layered architecture, request lifecycles, cookies, authentication protocols, database management systems, caching paradigms, REST API design, background jobs, full-text search engines, and fault-tolerant error boundaries.
 
@@ -87,13 +87,13 @@ flowchart TD
 
 ## 🎭 Symmetrical Wes Anderson Editorial System
 
-The entire digital book features a publication-grade, vintage **Wes Anderson** visual design system, combining beautiful literary layout aesthetics with robust, contrast-aware responsive scaling:
+The entire digital book features a publication-grade, vintage <strong>Wes Anderson</strong> visual design system, combining beautiful literary layout aesthetics with robust, contrast-aware responsive scaling:
 
-* **Typographical Pairing**: High-contrast, editorial **Playfair Display** for headers, highly readable book-serif **Lora** for body paragraphs, tactile **Courier Prime** for monospaced elements/code, and geometric **Inter** for small metadata.
-* **Symmetrical Viewport Framing**: A thin, elegant border frame outlines the window (`body::after`), creating a polished, book-like symmetry on both desktop and mobile screens.
-* **Responsive SVG Diagrams**: All 25 chapters feature custom SVG diagrams that are dynamically themed. Hardcoded inline styles have been pruned, and CSS attribute-matching selectors automatically map hex properties (like `#FAF6EF`, `#2C2416`, `#ffffff`) to dynamic system variables. Standard elements render via geometric **Jost**, and code labels render via **JetBrains Mono**, preventing text overlapping or bounds alignment issues.
-* **Tactile Aside Cards**: Margin notes are built with solid, category-colored 2px flat borders and offset shadows (`box-shadow: var(--shadow-flat)`) that responsive-lift on mouse hover with smooth CSS transitions.
-* **Perfect Light/Dark Contrast**: Every element, including all diagrams, notes, scrollbars, selection highlights, and tables, seamlessly adjusts between light cream and deep charcoal-brown settings with flawless visual accessibility.
+* <strong>Typographical Pairing</strong>: High-contrast, editorial <strong>Playfair Display</strong> for headers, highly readable book-serif <strong>Lora</strong> for body paragraphs, tactile <strong>Courier Prime</strong> for monospaced elements/code, and geometric <strong>Inter</strong> for small metadata.
+* <strong>Symmetrical Viewport Framing</strong>: A thin, elegant border frame outlines the window (`body::after`), creating a polished, book-like symmetry on both desktop and mobile screens.
+* <strong>Responsive SVG Diagrams</strong>: All 25 chapters feature custom SVG diagrams that are dynamically themed. Hardcoded inline styles have been pruned, and CSS attribute-matching selectors automatically map hex properties (like `#FAF6EF`, `#2C2416`, `#ffffff`) to dynamic system variables. Standard elements render via geometric <strong>Jost</strong>, and code labels render via <strong>JetBrains Mono</strong>, preventing text overlapping or bounds alignment issues.
+* <strong>Tactile Aside Cards</strong>: Margin notes are built with solid, category-colored 2px flat borders and offset shadows (`box-shadow: var(--shadow-flat)`) that responsive-lift on mouse hover with smooth CSS transitions.
+* <strong>Perfect Light/Dark Contrast</strong>: Every element, including all diagrams, notes, scrollbars, selection highlights, and tables, seamlessly adjusts between light cream and deep charcoal-brown settings with flawless visual accessibility.
 
 ---
 

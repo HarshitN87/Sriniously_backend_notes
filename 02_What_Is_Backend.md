@@ -28,7 +28,7 @@ It would last roughly four minutes.
 
 The baskets would be taken, the wooden box would be smashed open for the cash inside, and the cart itself would probably be spray-painted or used as a barricade. 
 
-The system collapses not because the blueberries have changed, or because the padlock is weaker, but because the **boundary of trust** has shifted. 
+The system collapses not because the blueberries have changed, or because the padlock is weaker, but because the <strong>boundary of trust</strong> has shifted. 
 
 In Times Square, the social density is zero. The reputational cost of theft is non-existent. 
 
@@ -56,7 +56,7 @@ Because the verification of the bill's validity was left entirely to the local t
 
 By 1796, the Assignats had experienced a hyperinflationary collapse so absolute that they were virtually worthless. The government had to gather all the printing plates and burn them in the Place Vendôme. 
 
-The lesson of the Assignats is identical to the lesson of the Times Square blueberry cart: **If you leave the rules of your transaction, the validation of your tokens, and the administration of your ledger in an open, untrusted environment, your system will be hijacked, corrupted, and driven to ruin.**
+The lesson of the Assignats is identical to the lesson of the Times Square blueberry cart: <strong>If you leave the rules of your transaction, the validation of your tokens, and the administration of your ledger in an open, untrusted environment, your system will be hijacked, corrupted, and driven to ruin.</strong>
 
 In the digital world, the browser is Times Square. 
 
@@ -72,7 +72,7 @@ And the "backend" is the secure vault, the heavy glass storefront, and the centr
 
 When we talk about the "frontend" and the "backend," we are not just describing two different directories in a workspace or two different programming languages. 
 
-We are describing a fundamental, architectural **Bifurcation of Trust**.
+We are describing a fundamental, architectural <strong>Bifurcation of Trust</strong>.
 
 The frontend—the client—is everything that runs on the user's device. 
 
@@ -82,7 +82,7 @@ The backend—the server—is everything that runs on machines you own, rent, or
 
 This includes the Node.js, Go, or Python application runtimes, the API gateways, the load balancers, the Redis cache clusters, and the persistent PostgreSQL or MongoDB databases.
 
-This division is not arbitrary. It is defined by a single, unyielding rule: **The client is an open book; the server is a secure vault.**
+This division is not arbitrary. It is defined by a single, unyielding rule: <strong>The client is an open book; the server is a secure vault.</strong>
 
 ### 1. The DevTools Revelation
 
@@ -92,13 +92,13 @@ Your server sends a bundle of HTML, CSS, and JavaScript down the wire.
 
 The user's browser receives this bundle, parses it, and executes it. 
 
-But once those files leave your server, **you lose all control over them.** 
+But once those files leave your server, <strong>you lose all control over them.</strong> 
 
 They are loaded into the RAM of a device owned by the user. 
 
 And because the user owns the device, they have complete administrative authority over its operating system, its memory, and its browser runtime.
 
-If you are using Chrome, Safari, or Firefox, you can press `F12` (or right-click and select "Inspect") to open the **Developer Tools**. 
+If you are using Chrome, Safari, or Firefox, you can press `F12` (or right-click and select "Inspect") to open the <strong>Developer Tools</strong>. 
 
 DevTools is not a hacker's toolkit; it is a standard, built-in feature of every modern browser. 
 
@@ -109,7 +109,7 @@ Through DevTools, any user can:
 *   Inject arbitrary JavaScript directly into the console to invoke internal application functions.
 *   Intercept, modify, and replay any network request sent by the browser.
 
-This means that any check, any validation, any cryptographic key, or any business rule you write in the frontend is **purely advisory**. 
+This means that any check, any validation, any cryptographic key, or any business rule you write in the frontend is <strong>purely advisory</strong>. 
 
 If you write a conditional check in your React component:
 
@@ -139,7 +139,7 @@ Modern web applications integrate with a vast ecosystem of third-party services.
 
 We use Stripe or Razorpay for payments, SendGrid for transactional emails, Twilio for SMS verification, and OpenAI for running AI models. 
 
-Each of these services requires your application to authenticate itself by shipping a secret **API Key** along with every request.
+Each of these services requires your application to authenticate itself by shipping a secret <strong>API Key</strong> along with every request.
 
 Imagine if you tried to run your application entirely from the browser, making direct requests to Stripe's servers:
 
@@ -156,7 +156,7 @@ The moment that request leaves the browser, it is logged in the DevTools "Networ
 
 Anyone visiting your site can open that tab, copy your secret key, and use it to charge thousands of dollars of fake transactions to your account, or download your entire customer database, or lock you out of your Stripe account.
 
-To prevent this, the backend must act as a **Secure Proxy**:
+To prevent this, the backend must act as a <strong>Secure Proxy</strong>:
 
 ```mermaid
 flowchart TD
@@ -178,7 +178,7 @@ The key never leaves your server. The user never sees it, never handles it, and 
 
 If the backend's primary duty is to act as a secure, authoritative gateway for data, what does it actually *do* when a request arrives?
 
-Regardless of the framework you choose—whether it is Node.js with Express, Python with Django, Go with Fiber, or Rust with Actix—the core lifecycle of a backend transaction can be compressed into **Five Sequential Acts**:
+Regardless of the framework you choose—whether it is Node.js with Express, Python with Django, Go with Fiber, or Rust with Actix—the core lifecycle of a backend transaction can be compressed into <strong>Five Sequential Acts</strong>:
 
 ```mermaid
 flowchart LR
@@ -196,19 +196,19 @@ The server reads the HTTP verb (`POST`), the target path (`/v1/registration`), t
 
 ### 2. Act II: Validate
 
-This is the gatekeeper stage. Before the server executes any logic, it must assume the incoming payload is **actively hostile**. 
+This is the gatekeeper stage. Before the server executes any logic, it must assume the incoming payload is <strong>actively hostile</strong>. 
 
 It runs the data through a series of strict sanitization and validation checks:
-*   **Schema Validation**: Does the payload contain all required fields? Are the data types correct? (e.g., is the email actually a string, and is the age actually an integer?)
-*   **Sanitization**: Does the input contain malicious scripts? If the user typed `<script>alert('hacked')</script>` in their username field, the server must escape or strip those characters to prevent **Cross-Site Scripting (XSS)** attacks.
-*   **Access Control**: Is this user allowed to write to this endpoint? Does their session token match the resource they are trying to modify?
+*   <strong>Schema Validation</strong>: Does the payload contain all required fields? Are the data types correct? (e.g., is the email actually a string, and is the age actually an integer?)
+*   <strong>Sanitization</strong>: Does the input contain malicious scripts? If the user typed `<script>alert('hacked')</script>` in their username field, the server must escape or strip those characters to prevent <strong>Cross-Site Scripting (XSS)</strong> attacks.
+*   <strong>Access Control</strong>: Is this user allowed to write to this endpoint? Does their session token match the resource they are trying to modify?
 
 ### 3. Act III: Transform
 
 Once the data is verified to be safe and complete, the server must transform it into a useful format. 
 
 For a registration request:
-*   The raw password string (`"password123"`) must never be stored in plain text. The server passes it through a high-computation cryptographic hashing algorithm (like **bcrypt** or **Argon2**)[^2] with a random salt value.
+*   The raw password string (`"password123"`) must never be stored in plain text. The server passes it through a high-computation cryptographic hashing algorithm (like <strong>bcrypt</strong> or <strong>Argon2</strong>)[^2] with a random salt value.
 *   It generates metadata: a unique UUID for the user, a creation timestamp (`created_at: NOW()`), and default permission scopes.
 
 [^2]: We will inspect the mathematics of password hashing in Chapter VIII. For now, understand that bcrypt is deliberately slow—taking about 100 milliseconds to compute a single hash. This slowness is a feature, not a bug; it makes it computationally impossible for an attacker who steals your database to brute-force user passwords, as testing a billion combinations would take hundreds of years.
@@ -231,13 +231,13 @@ The server compiles the result, packages it inside an HTTP response envelope (e.
 
 To appreciate why modern backend systems look the way they do, we must understand how we arrived here. 
 
-The history of backend development is a continuous journey to solve three competing engineering challenges: **Performance, Maintainability, and Scale.**
+The history of backend development is a continuous journey to solve three competing engineering challenges: <strong>Performance, Maintainability, and Scale.</strong>
 
 ### Era I: The Static Web (1991–1993)
 
 In the earliest days of the World Wide Web, there was no dynamic logic on the server. 
 
-Web servers like **NCSA HTTPd** or early versions of Apache were simple file-delivery systems. 
+Web servers like <strong>NCSA HTTPd</strong> or early versions of Apache were simple file-delivery systems. 
 
 When you typed a URL like `http://info.cern.ch/index.html`, the server simply mapped that path to a directory on its local hard drive, read the static HTML file from the disk, and sent it over the TCP socket.
 
@@ -251,7 +251,7 @@ The web was a read-only library.
 
 As companies realized the commercial potential of the web, they demanded interactivity. They wanted search engines, online forms, and early shopping carts.
 
-To solve this, web architects formalized the **Common Gateway Interface (CGI)** in 1993. 
+To solve this, web architects formalized the <strong>Common Gateway Interface (CGI)</strong> in 1993. 
 
 CGI allowed the web server to execute an external program on the operating system (written in Perl, C, or a shell script) whenever a specific URL was hit.
 
@@ -269,7 +269,7 @@ This was a massive architectural leap.
 
 Suddenly, web pages could be dynamic, reading and writing to databases via Perl scripts. 
 
-But CGI had a fatal performance flaw: **It spawned a brand new operating system process for every single incoming request.**
+But CGI had a fatal performance flaw: <strong>It spawned a brand new operating system process for every single incoming request.</strong>
 
 In Linux or Unix, spawning a process (`fork()` and `exec()`) is a heavy operation. 
 
@@ -277,19 +277,19 @@ The OS kernel must allocate a new virtual memory address space, set up file desc
 
 If your site received a sudden rush of a thousand simultaneous visitors, the server would try to spawn a thousand processes at the same time. 
 
-The CPU would lock up under the sheer overhead of **context switching**, the server's RAM would saturate, and the machine would crash under a "process-spawn storm."
+The CPU would lock up under the sheer overhead of <strong>context switching</strong>, the server's RAM would saturate, and the machine would crash under a "process-spawn storm."
 
 ### Era III: Embedded Runtimes and PHP (1995)
 
 To solve the process-spawn storm, developers realized they needed to keep the programming runtime permanently loaded in memory inside the web server itself, rather than spawning it externally.
 
-This led to the creation of embedded module runtimes, the most famous of which was **PHP (Hypertext Preprocessor)**, created by Rasmus Lerdorf in 1995. 
+This led to the creation of embedded module runtimes, the most famous of which was <strong>PHP (Hypertext Preprocessor)</strong>, created by Rasmus Lerdorf in 1995. 
 
 PHP integrated directly with the Apache web server via `mod_php`. 
 
 Instead of launching a separate process, Apache loaded the PHP interpreter once into its own memory space when starting up.
 
-PHP introduced a radical new paradigm: **HTML Templating.** 
+PHP introduced a radical new paradigm: <strong>HTML Templating.</strong> 
 
 Instead of writing a complex C program that outputted HTML strings line-by-line, developers could write standard HTML and embed PHP tags directly inside the file:
 
@@ -309,18 +309,18 @@ It democratized web development, powering the rise of massive platforms like Wor
 
 But as applications grew larger, PHP's biggest strength became its biggest structural weakness. 
 
-Because code could be written anywhere in the file, developers began building massive, unmaintainable codebases where database queries, security validations, and HTML presentation logic were all tangled together in a single file—popularly known as **Spaghetti Code**.
+Because code could be written anywhere in the file, developers began building massive, unmaintainable codebases where database queries, security validations, and HTML presentation logic were all tangled together in a single file—popularly known as <strong>Spaghetti Code</strong>.
 
 ### Era IV: MVC and the Separation of Concerns (2004–2005)
 
-To rescue developers from spaghetti code, the industry turned to the **Model-View-Controller (MVC)** design pattern. 
+To rescue developers from spaghetti code, the industry turned to the <strong>Model-View-Controller (MVC)</strong> design pattern. 
 
-MVC was popularized in the mid-2000s by two highly influential frameworks: **Ruby on Rails** (created by David Heinemeier Hansson in 2004) and **Django** (Python, 2005).
+MVC was popularized in the mid-2000s by two highly influential frameworks: <strong>Ruby on Rails</strong> (created by David Heinemeier Hansson in 2004) and <strong>Django</strong> (Python, 2005).
 
 MVC enforced a strict separation of concerns:
-*   **Model**: The data structure and database communication layer (typically using an **Object-Relational Mapper (ORM)** like ActiveRecord to represent database tables as native language classes).
-*   **View**: The presentation layer (HTML templates with variables).
-*   **Controller**: The traffic cop. It maps the URL to a specific function, reads inputs, queries the model, and hands the resulting data to the view.
+*   <strong>Model</strong>: The data structure and database communication layer (typically using an <strong>Object-Relational Mapper (ORM)</strong> like ActiveRecord to represent database tables as native language classes).
+*   <strong>View</strong>: The presentation layer (HTML templates with variables).
+*   <strong>Controller</strong>: The traffic cop. It maps the URL to a specific function, reads inputs, queries the model, and hands the resulting data to the view.
 
 ```mermaid
 flowchart TD
@@ -331,7 +331,7 @@ flowchart TD
     View --> Response["📤 Response"]
 ```
 
-Rails also popularized the philosophy of **Convention over Configuration**. 
+Rails also popularized the philosophy of <strong>Convention over Configuration</strong>. 
 
 Instead of spending days writing complex configuration files to decide where database tables should map, the framework assumed sensible defaults: a model class named `User` would automatically map to a database table named `users`. 
 
@@ -341,7 +341,7 @@ This dramatically accelerated development velocity.
 
 While MVC frameworks solved maintainability, they ran into a new performance bottleneck as the web transitioned to real-time interactions (like chat, notifications, and continuous streaming).
 
-Traditional servers (like Ruby, Python, or Apache) used a **Thread-per-Request** model. 
+Traditional servers (like Ruby, Python, or Apache) used a <strong>Thread-per-Request</strong> model. 
 
 When a request arrived, the server allocated a dedicated OS thread to handle it. 
 
@@ -356,15 +356,15 @@ If you had ten thousand users waiting on database queries at the same time, you 
 
 Each thread consumes about one megabyte of memory stack space, meaning a server would quickly exhaust its RAM and grind to a halt under high concurrency.
 
-In 2009, **Ryan Dahl** created **Node.js**. 
+In 2009, <strong>Ryan Dahl</strong> created <strong>Node.js</strong>. 
 
-Node.js brought JavaScript to the server, but its real breakthrough was its **Single-Threaded, Event Loop, Non-Blocking I/O** architecture.
+Node.js brought JavaScript to the server, but its real breakthrough was its <strong>Single-Threaded, Event Loop, Non-Blocking I/O</strong> architecture.
 
 Instead of dedicating a thread to each request, Node runs on one single thread. 
 
 When your code initiates an I/O operation (like a database query), Node does not block the thread. 
 
-Instead, it delegates the I/O task to the operating system's kernel or a background worker pool, registers a **Callback Function**, and immediately moves on to handle the next request.
+Instead, it delegates the I/O task to the operating system's kernel or a background worker pool, registers a <strong>Callback Function</strong>, and immediately moves on to handle the next request.
 
 ```text
 Single Thread: [Req 1 DB Read initiated] -> [Req 2 Disk Read initiated] -> [Req 3 process] -> [DB Read Done -> Callback executed]
@@ -376,7 +376,7 @@ Through this event-driven design, a single Node.js server running on modest hard
 
 ### Era VI: Serverless Functions (2014–Present)
 
-Today, we are living in the era of **Serverless Computing**, pioneered by AWS Lambda in 2014.
+Today, we are living in the era of <strong>Serverless Computing</strong>, pioneered by AWS Lambda in 2014.
 
 In all previous eras, developers had to manage servers—virtual machines running on the cloud. 
 
@@ -418,7 +418,7 @@ This process can consume twenty to fifty milliseconds.
 
 If you do this for every single query, your application will feel incredibly sluggish, and the database will crash under the CPU overhead of establishing thousands of connections per second.
 
-To solve this, modern backends use **Connection Pooling**.
+To solve this, modern backends use <strong>Connection Pooling</strong>.
 
 ```mermaid
 flowchart LR
@@ -450,7 +450,7 @@ SELECT * FROM users WHERE email = 'harshit_87@gmail.com';
 
 and your database has a million rows, how does it find Harshit?
 
-If you have not configured your database correctly, it must execute a **Full Table Scan**. 
+If you have not configured your database correctly, it must execute a <strong>Full Table Scan</strong>. 
 
 It reads row #1 from disk into RAM, checks if the email matches, then reads row #2, then row #3, all the way to row #1,000,000.
 
@@ -460,9 +460,9 @@ It saturates disk I/O, consumes 100% of the database CPU, and takes several seco
 
 If ten users run this query at the same time, the database will lock up completely.
 
-To prevent this, the backend must design proper **Database Indexes**.
+To prevent this, the backend must design proper <strong>Database Indexes</strong>.
 
-An index is a separate, highly optimized data structure—typically a **B-Tree (Balanced Tree)**—that keeps a sorted list of your keys (like emails) along with pointers to their physical positions on the disk.
+An index is a separate, highly optimized data structure—typically a <strong>B-Tree (Balanced Tree)</strong>—that keeps a sorted list of your keys (like emails) along with pointers to their physical positions on the disk.
 
 ```text
 B-Tree Root: [H]
@@ -494,7 +494,7 @@ The money has vanished into the digital void.
 
 This is a catastrophic failure of consistency.
 
-To prevent this, the database must process the operations inside an **ACID Transaction**:
+To prevent this, the database must process the operations inside an <strong>ACID Transaction</strong>:
 
 ```sql
 BEGIN TRANSACTION;
@@ -505,9 +505,9 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 'user_b';
 COMMIT;
 ```
 
-With an ACID transaction, the database guarantees **Atomicity**: the two update commands are treated as a single, indivisible unit of work. 
+With an ACID transaction, the database guarantees <strong>Atomicity</strong>: the two update commands are treated as a single, indivisible unit of work. 
 
-They must either both succeed together, or if even a single line fails (or if the server crashes mid-way), the entire transaction is **rolled back**, restoring both balances as if the transaction never started.
+They must either both succeed together, or if even a single line fails (or if the server crashes mid-way), the entire transaction is <strong>rolled back</strong>, restoring both balances as if the transaction never started.
 
 Your state remains perfectly consistent.
 

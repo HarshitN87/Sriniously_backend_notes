@@ -6,7 +6,7 @@
 
 ## I. The Architectural Epiphany: What is Caching?
 
-In the grand physical machinery of computing, there is an unyielding, tragic law of hardware: **Storage capacity is inversely proportional to retrieval speed.**
+In the grand physical machinery of computing, there is an unyielding, tragic law of hardware: <strong>Storage capacity is inversely proportional to retrieval speed.</strong>
 
 ```text
                Speed             Capacity
@@ -27,21 +27,21 @@ Reading from the CPU's internal L1 Cache memory takes exactly 1 nanosecond.
 
 If your backend system has to query a slow physical disk table every single time a client requests a page, your application will crawl at a glacial pace. 
 
-**Caching** is the practice of storing temporary copies of high-frequency data in a high-speed, volatile memory layer (like RAM) so that subsequent reads can be resolved in microseconds rather than milliseconds.
+<strong>Caching</strong> is the practice of storing temporary copies of high-frequency data in a high-speed, volatile memory layer (like RAM) so that subsequent reads can be resolved in microseconds rather than milliseconds.
 
 ### The Importance of Caching: Real-World Case Studies
 
-1.  **The Google Search Example**: 
+1.  <strong>The Google Search Example</strong>: 
     Every single second, thousands of users query Google search for the word `"weather"`. 
     Google does not run a complex machine-learning crawler across the global internet at the moment you hit search. 
     Instead, it queries a high-speed in-memory cache holding the compiled search results from three minutes ago. 
     It returns the static cached representation instantly, sparing its computing core from executing millions of redundant search traversals.
-2.  **The Netflix (CDN) Example**: 
+2.  <strong>The Netflix (CDN) Example</strong>: 
     If millions of viewers in Mumbai try to stream the latest season of a hit show at the exact same hour, they do not pull the massive 10GB video file from Netflix's central database servers in Oregon, USA. 
     If they did, the transatlantic deep-sea fiber optic cables would choke instantly. 
-    Instead, Netflix replicates and caches the video file in high-speed storage caches hosted at the physical **CDN (Content Delivery Network)** edges in Mumbai, directly inside local internet service provider networks. 
+    Instead, Netflix replicates and caches the video file in high-speed storage caches hosted at the physical <strong>CDN (Content Delivery Network)</strong> edges in Mumbai, directly inside local internet service provider networks. 
     The file is served locally over a distance of a few miles, preventing international network bottlenecks and cutting buffering latency to zero.
-3.  **The Twitter (X) Trending Topics Example**: 
+3.  <strong>The Twitter (X) Trending Topics Example</strong>: 
     The list of trending hashtags is read by millions of active users every minute. 
     If Twitter's servers had to run a complex SQL query (`SELECT hashtag, COUNT(*) FROM tweets GROUP BY hashtag ORDER BY COUNT DESC`) across its massive multi-terabyte database every time someone loaded their home feed, the entire database cluster would crash in seconds. 
     Instead, Twitter runs background cron scripts that compute the trends once every 60 seconds and save the final list in an in-memory database like Redis. 
@@ -67,24 +67,24 @@ In professional software engineering, caching is not a single tool—it is a nes
 ```
 
 ### 1. Network Caching (CDNs & DNS)
-*   **DNS Caching**: 
+*   <strong>DNS Caching</strong>: 
     When your browser wants to map `google.com` to `142.250.190.46`, it does not query the authoritative global root name servers across the world. 
     It checks your local browser DNS cache, your operating system cache, and your local ISP router cache. 
     Only if all caches fail does it perform a slow network traversal.
-*   **Content Delivery Networks (CDNs)**: 
+*   <strong>Content Delivery Networks (CDNs)</strong>: 
     Geographically distributed clusters of proxy cache servers (like Cloudflare, Akamai, or AWS CloudFront) that cache static files (images, CSS styles, compiled JS scripts, and video bundles) at the physical network edge, close to the end user.
 
 ### 2. Software Caching (In-Memory Key-Value Stores)
 When dynamic API data (like user profiles or shopping cart records) cannot be cached at the static CDN edge, backend developers cache the database queries inside specialized, in-memory key-value databases:
-*   **Redis (REmote DIctionary Server)**: 
+*   <strong>Redis (REmote DIctionary Server)</strong>: 
     An ultra-high performance, in-memory, network-accessible key-value database. 
     Because Redis stores its entire dataset directly inside volatile RAM, it reads and writes keys in less than a millisecond, acting as the ultimate buffer shielding your database.
-*   **Memcached**: 
+*   <strong>Memcached</strong>: 
     An extremely simple, highly optimized, multi-threaded in-memory key-value cache designed for basic string storage.
 
 ### 3. Hardware Caching
 At the lowest level of physical computation, hardware engineers build nested caching tiers directly into the silicon of the CPU:
-*   **L1, L2, and L3 Caches**: 
+*   <strong>L1, L2, and L3 Caches</strong>: 
     Ultra-small, ultra-fast memory units integrated directly onto the CPU chip. 
     They store recently used instruction sequences and variables so that the processor doesn't have to wait for the slow physical RAM motherboard cycles.
 
@@ -100,7 +100,7 @@ We rely on two primary caching strategies:
 The cache-aside pattern is the most common approach. 
 The application queries the cache first. 
 
-If the data is missing (a **Cache Miss**), it queries the main database, saves the result inside the cache for future reads, and returns it.
+If the data is missing (a <strong>Cache Miss</strong>), it queries the main database, saves the result inside the cache for future reads, and returns it.
 
 ```text
 Application ─── 1. Query Cache ──────────────────────> [ Cache (Redis) ]
@@ -109,10 +109,10 @@ Application ─── 3. Query Postgres Database ──────────>
 Application ─── 4. Save result inside Cache ─────────> [ Cache (Redis) ]
 ```
 
-*   **Pros**: Highly resource-efficient. 
+*   <strong>Pros</strong>: Highly resource-efficient. 
     You only load data into the cache when a user actually requests it, keeping your RAM footprint lean.
-*   **Cons**: Introduces latency on cache misses. 
-    Also vulnerable to **stale data bugs** (if an admin updates a user profile directly in PostgreSQL, the cache still holds the old profile until the cache record expires).
+*   <strong>Cons</strong>: Introduces latency on cache misses. 
+    Also vulnerable to <strong>stale data bugs</strong> (if an admin updates a user profile directly in PostgreSQL, the cache still holds the old profile until the cache record expires).
 
 ### 2. Write-Through Strategy
 In this pattern, the application treats the cache as the primary writer. 
@@ -123,9 +123,9 @@ Every time data is updated, the application writes the update to the cache, and 
 Application ─── 1. Write Data ───> [ Cache (Redis) ] ─── 2. Write Data ───> [ Database (SQL) ]
 ```
 
-*   **Pros**: The cache is structurally guaranteed to never serve stale data. 
+*   <strong>Pros</strong>: The cache is structurally guaranteed to never serve stale data. 
     Every read from the cache is always 100% fresh and accurate.
-*   **Cons**: Introduces high write latency, as every database write now requires writing to two distinct memory systems.
+*   <strong>Cons</strong>: Introduces high write latency, as every database write now requires writing to two distinct memory systems.
 
 ---
 
@@ -135,19 +135,19 @@ Because system RAM is highly expensive, you cannot cache every database row fore
 
 If your Redis memory fills up completely, it will crash with an out-of-memory error. 
 
-To prevent this, caches enforce **Eviction Policies**—rules that dictate which old keys to throw away to make room for new data:
+To prevent this, caches enforce <strong>Eviction Policies</strong>—rules that dictate which old keys to throw away to make room for new data:
 
-1.  **TTL (Time-To-Live)**: 
+1.  <strong>TTL (Time-To-Live)</strong>: 
     When saving data in Redis, the developer attaches a strict expiration timer (e.g. `EXPIRE user_42 3600`—expires in exactly one hour). 
     Once the timer hits zero, the cache automatically deletes the key.
-2.  **LRU (Least Recently Used)**: 
+2.  <strong>LRU (Least Recently Used)</strong>: 
     The database tracks the timestamp of when each key was last read. 
     When memory is full, Redis automatically evicts the keys that haven't been accessed for the longest duration. 
     This keeps high-frequency keys in memory forever.
-3.  **LFU (Least Frequently Used)**: 
+3.  <strong>LFU (Least Frequently Used)</strong>: 
     The database tracks an access counter for each key. 
     When memory saturates, the database deletes keys that have the lowest total access frequency, regardless of how recently they were touched.
-4.  **No Eviction**: 
+4.  <strong>No Eviction</strong>: 
     The database returns an out-of-memory error on writes when memory saturates, forcing the developer to manually manage capacity.
 
 ---
@@ -162,7 +162,7 @@ It hashes the SQL statement to use as a key (`MD5("SELECT * FROM products JOIN..
 
 ### 2. Stateful Session Caching
 As we studied in Chapter IX, stateful sessions scale terribly if stored in local server RAM. 
-To build horizontally scalable clusters, developers store user session objects in a shared **Redis database**. 
+To build horizontally scalable clusters, developers store user session objects in a shared <strong>Redis database</strong>. 
 Because Redis is accessed over the local network in less than a millisecond, every web server in your cluster can query it concurrently to authenticate users instantly.
 
 ### 3. API Response Caching
@@ -191,10 +191,10 @@ Because Redis handles raw integer increments (`INCR`) in microseconds, it can pr
 
 ## VI. Key Takeaways
 
-1.  **Caching** balances the physical law of speed vs capacity by keeping high-frequency data in fast volatile memory (RAM).
-2.  **CDNs** cache static files at the network edge, while **Redis** caches dynamic queries inside the application software layer.
-3.  **Lazy Caching** saves memory resources by only loading requested items, while **Write-Through** avoids stale data bugs by writing to cache and disk simultaneously.
-4.  **LRU and TTL eviction** are the physical shields of cache capacity, automatically throwing away dormant data to protect RAM boundaries.
+1.  <strong>Caching</strong> balances the physical law of speed vs capacity by keeping high-frequency data in fast volatile memory (RAM).
+2.  <strong>CDNs</strong> cache static files at the network edge, while <strong>Redis</strong> caches dynamic queries inside the application software layer.
+3.  <strong>Lazy Caching</strong> saves memory resources by only loading requested items, while <strong>Write-Through</strong> avoids stale data bugs by writing to cache and disk simultaneously.
+4.  <strong>LRU and TTL eviction</strong> are the physical shields of cache capacity, automatically throwing away dormant data to protect RAM boundaries.
 
 ---
 

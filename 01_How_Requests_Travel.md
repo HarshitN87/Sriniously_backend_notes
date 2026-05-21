@@ -26,7 +26,7 @@ It was a beautiful, elegant, highly fragile protocol.
 
 If the sun was obscured by clouds, or if the water in Loulon's clock ran slightly faster than the water in Constantinople's clock, or if a watchman on Mount Samos fell asleep for ten minutes before lighting his pile of pine logs, the message was corrupted. The Emperor might prepare for a small border skirmish while a massive siege army was already marching on Nicomedia. 
 
-This is the central tragedy of communication: **Human intent is rich, multi-dimensional, and highly complex; the physical universe is noisy, local, and deeply indifferent.**
+This is the central tragedy of communication: <strong>Human intent is rich, multi-dimensional, and highly complex; the physical universe is noisy, local, and deeply indifferent.</strong>
 
 We tend to forget this. We live in an era where the internet feels like a magic cloud—a weightless, placeless ether where bytes float freely. You tap a red heart icon on an Instagram post, and the state changes instantly. The icon turns red, the counter increments, and you move on. We treat this as an act of telepathy. We assume the request simply *teleports* from our phone's screen to Instagram's database and back.
 
@@ -54,7 +54,7 @@ Let us trace that journey, step by step, from the moment your finger touches the
 
 Everything begins on your device. The moment your finger touches the glass screen, the capacitive charge of your skin alters the electrostatic field of the phone's digitizer. The operating system captures this change as an interrupt, translates it into an event, and hands it to the Instagram application.
 
-The app's logic immediately constructs an **HTTP request**—a formal message written in the grammar of the web:
+The app's logic immediately constructs an <strong>HTTP request</strong>—a formal message written in the grammar of the web:
 
 ```http
 POST /v1/posts/928374/like HTTP/1.1
@@ -68,11 +68,11 @@ Content-Type: application/json
 }
 ```
 
-At this point, the request is just a structured block of text loaded in your phone's RAM. It is a letter written, stamped, and ready to go. But before your phone can dispatch it, it faces a fundamental problem: **It does not know where to send it.**
+At this point, the request is just a structured block of text loaded in your phone's RAM. It is a letter written, stamped, and ready to go. But before your phone can dispatch it, it faces a fundamental problem: <strong>It does not know where to send it.</strong>
 
-The request says `Host: api.instagram.com`. But routers do not understand names. A router is a physical box of silicon and copper that routes packets based on numerical **IP addresses** (like `157.240.1.35`). Your phone needs to translate the human-readable domain name `api.instagram.com` into a numerical address.
+The request says `Host: api.instagram.com`. But routers do not understand names. A router is a physical box of silicon and copper that routes packets based on numerical <strong>IP addresses</strong> (like `157.240.1.35`). Your phone needs to translate the human-readable domain name `api.instagram.com` into a numerical address.
 
-This is the job of the **Domain Name System (DNS)**. And to understand DNS, we have to look back at the great administrative crisis of early computing.
+This is the job of the <strong>Domain Name System (DNS)</strong>. And to understand DNS, we have to look back at the great administrative crisis of early computing.
 
 ### 1. The Stanford Hosts File Crisis
 
@@ -100,9 +100,9 @@ More importantly, the bandwidth consumed by hundreds of computers trying to down
 
 The system was completely non-scalable. It was a classic centralization failure.
 
-In 1983, a computer scientist named **Paul Mockapetris** was tasked with solving this problem. 
+In 1983, a computer scientist named <strong>Paul Mockapetris</strong> was tasked with solving this problem. 
 
-His solution was the **Domain Name System (DNS)**, formalized in RFCs 882 and 883. 
+His solution was the <strong>Domain Name System (DNS)</strong>, formalized in RFCs 882 and 883. 
 
 Instead of a single centralized list, Mockapetris designed a hierarchical, distributed database. 
 
@@ -121,9 +121,9 @@ This design was a masterclass in administrative delegation.
 
 Stanford no longer needed to know the address of every computer on the network. 
 
-Instead, the **Root Servers** at the top of the tree only needed to know the addresses of the servers that managed the **Top-Level Domains** (like `.com`, `.org`, `.edu`). 
+Instead, the <strong>Root Servers</strong> at the top of the tree only needed to know the addresses of the servers that managed the <strong>Top-Level Domains</strong> (like `.com`, `.org`, `.edu`). 
 
-The `.com` servers only needed to know the addresses of the **Authoritative Name Servers** for each registered domain (like `instagram.com`). 
+The `.com` servers only needed to know the addresses of the <strong>Authoritative Name Servers</strong> for each registered domain (like `instagram.com`). 
 
 And Instagram's authoritative servers only needed to know the addresses of their own subdomains (like `api.instagram.com`).
 
@@ -137,9 +137,9 @@ When your phone needs to resolve `api.instagram.com`, it does not immediately wa
 
 Instead, it relies on a complex hierarchy of caches designed to trade fresh information for speed:
 
-*   **Step 1: The Browser/App Cache**. The Instagram app checks its own internal memory cache. If you liked a post five seconds ago, it already knows the IP address.
-*   **Step 2: The OS Cache**. If the app does not know, it asks the phone's operating system. The OS maintains its own DNS cache (which it builds by reading your local hosts file and keeping track of recent queries).
-*   **Step 3: The Recursive Resolver (Your ISP or Cloudflare)**. If the OS cache misses, your phone dispatches a DNS query packet to a **Recursive DNS Resolver**. This is a server run by your internet service provider (ISP), or a public service like Cloudflare (`1.1.1.1`) or Google (`8.8.8.8`). The resolver's entire job is to hunt down IP addresses on behalf of clients.
+*   <strong>Step 1: The Browser/App Cache</strong>. The Instagram app checks its own internal memory cache. If you liked a post five seconds ago, it already knows the IP address.
+*   <strong>Step 2: The OS Cache</strong>. If the app does not know, it asks the phone's operating system. The OS maintains its own DNS cache (which it builds by reading your local hosts file and keeping track of recent queries).
+*   <strong>Step 3: The Recursive Resolver (Your ISP or Cloudflare)</strong>. If the OS cache misses, your phone dispatches a DNS query packet to a <strong>Recursive DNS Resolver</strong>. This is a server run by your internet service provider (ISP), or a public service like Cloudflare (`1.1.1.1`) or Google (`8.8.8.8`). The resolver's entire job is to hunt down IP addresses on behalf of clients.
 
 If the recursive resolver has resolved `api.instagram.com` recently for someone else, it reads the answer from its local memory cache and hands it back to your phone. 
 
@@ -147,7 +147,7 @@ The transaction is finished in under five milliseconds.
 
 But what if the recursive resolver's cache is empty? 
 
-Then, the resolver must initiate a **Recursive Query Walk**:
+Then, the resolver must initiate a <strong>Recursive Query Walk</strong>:
 
 ```mermaid
 sequenceDiagram
@@ -166,7 +166,7 @@ sequenceDiagram
 
 Once the resolver gets the final IP address (`157.240.1.35`), it does two things:
 
-First, it caches the result for a duration specified by the authoritative server, called the **Time to Live (TTL)**. 
+First, it caches the result for a duration specified by the authoritative server, called the <strong>Time to Live (TTL)</strong>. 
 
 The TTL might be sixty seconds or one hour. 
 
@@ -188,7 +188,7 @@ But the internet is not a dedicated, point-to-point line between your phone and 
 
 It is a shared, packet-switched network. 
 
-Your request will be broken down into small blocks of data called **Packets**, slung into a routing network, and intermingled with millions of other packets.
+Your request will be broken down into small blocks of data called <strong>Packets</strong>, slung into a routing network, and intermingled with millions of other packets.
 
 In a packet-switched network, packets can take different physical routes to the destination. 
 
@@ -202,13 +202,13 @@ If the database receives "post 928374," but the packet containing the action "li
 
 If the packets arrive out of order, the server might try to commit the transaction before it has validated your user ID.
 
-To solve this, we rely on **TCP (Transmission Control Protocol)**. 
+To solve this, we rely on <strong>TCP (Transmission Control Protocol)</strong>. 
 
-Designed by Vint Cerf and Bob Kahn in 1974, TCP is a **reliable, connection-oriented transport protocol** built on top of the stateless, unreliable IP layer. 
+Designed by Vint Cerf and Bob Kahn in 1974, TCP is a <strong>reliable, connection-oriented transport protocol</strong> built on top of the stateless, unreliable IP layer. 
 
 TCP makes a bold promise: "I do not care how messy the underlying network is; I will ensure that your packets arrive at the destination in the exact order they were sent, with zero corruption, and zero losses."
 
-How does it keep this promise? It starts with the **Three-Way Handshake**.
+How does it keep this promise? It starts with the <strong>Three-Way Handshake</strong>.
 
 ### 1. The Mechanics of the Handshake
 
@@ -231,15 +231,15 @@ sequenceDiagram
 
 Let us look at the deep mathematical details of this dance:
 
-*   **Step 1: The SYN (Synchronize)**. Your phone generates a random 32-bit integer called the **Initial Sequence Number (ISN)**—let us say $Seq = X$. It constructs a TCP segment, sets the `SYN` flag in the TCP header to $1$, and sends it to the server's IP address on port `443` (the port for secure HTTPS). The `SYN` segment carries no payload; it is simply a signal saying: "I wish to establish a connection, and my sequence numbering will start at $X$."
-*   **Step 2: The SYN-ACK (Synchronize-Acknowledgment)**. The server receives the `SYN` packet. It generates its own random Initial Sequence Number—let us say $Seq = Y$. It constructs its own TCP segment, sets the `SYN` flag to $1$, and the `ACK` flag to $1$. Crucially, it sets the acknowledgment number in the header to $X + 1$. This is a mathematical confirmation saying: "I have received your SYN segment at index $X$. I am ready to receive your next segment starting at index $X + 1$. Here is my own SYN signal, starting at index $Y$."
-*   **Step 3: The ACK (Acknowledgment)**. Your phone receives the `SYN-ACK` segment. It constructs a final TCP segment, sets the `ACK` flag to $1$, and sets the acknowledgment number to $Y + 1$. This tells the server: "I have received your SYN signal at index $Y$. I am ready to start sending data starting at index $Y + 1$."
+*   <strong>Step 1: The SYN (Synchronize)</strong>. Your phone generates a random 32-bit integer called the <strong>Initial Sequence Number (ISN)</strong>—let us say $Seq = X$. It constructs a TCP segment, sets the `SYN` flag in the TCP header to $1$, and sends it to the server's IP address on port `443` (the port for secure HTTPS). The `SYN` segment carries no payload; it is simply a signal saying: "I wish to establish a connection, and my sequence numbering will start at $X$."
+*   <strong>Step 2: The SYN-ACK (Synchronize-Acknowledgment)</strong>. The server receives the `SYN` packet. It generates its own random Initial Sequence Number—let us say $Seq = Y$. It constructs its own TCP segment, sets the `SYN` flag to $1$, and the `ACK` flag to $1$. Crucially, it sets the acknowledgment number in the header to $X + 1$. This is a mathematical confirmation saying: "I have received your SYN segment at index $X$. I am ready to receive your next segment starting at index $X + 1$. Here is my own SYN signal, starting at index $Y$."
+*   <strong>Step 3: The ACK (Acknowledgment)</strong>. Your phone receives the `SYN-ACK` segment. It constructs a final TCP segment, sets the `ACK` flag to $1$, and sets the acknowledgment number to $Y + 1$. This tells the server: "I have received your SYN signal at index $Y$. I am ready to start sending data starting at index $Y + 1$."
 
 Only after this three-way handshake is complete does the logical connection transition to the `ESTABLISHED` state. Both sides have synchronized their sequence numbers and allocated memory buffers for the upcoming exchange.
 
 ### 2. The Cost of Politeness
 
-The three-way handshake is incredibly robust, but it introduces a major physical constraint: **Latency.**
+The three-way handshake is incredibly robust, but it introduces a major physical constraint: <strong>Latency.</strong>
 
 Notice that the handshake requires one and a half round trips across the physical network before any actual HTTP data can be sent. 
 
@@ -255,7 +255,7 @@ And as we will see in the next section, it gets even worse when we add security.
 
 ## IV. The Diplomatic Seal
 
-In the early, innocent days of the web, HTTP requests were sent in **plain text**. 
+In the early, innocent days of the web, HTTP requests were sent in <strong>plain text</strong>. 
 
 If you sent a packet across the network, every router, switch, and service provider along the way could read the raw bytes. 
 
@@ -263,19 +263,19 @@ If you typed a password, it was sent as plain text.
 
 If you sent an authentication token, any malicious actor sniffing packets on a coffee shop's public Wi-Fi could read the token, hijack your session, and post pictures of dirigibles on your account without your permission.
 
-To prevent this, Netscape Communications developed **SSL (Secure Sockets Layer)** in the mid-1990s, led by engineer Taher Elgamal. 
+To prevent this, Netscape Communications developed <strong>SSL (Secure Sockets Layer)</strong> in the mid-1990s, led by engineer Taher Elgamal. 
 
-SSL was later standardized and renamed **TLS (Transport Layer Security)**. 
+SSL was later standardized and renamed <strong>TLS (Transport Layer Security)</strong>. 
 
 TLS acts as a cryptographic vault wrapping our TCP connection. 
 
 It ensures three things:
 
-1.  **Encryption**: No one can read the data except the client and the server.
-2.  **Integrity**: No one can alter the data in transit without both sides realizing it.
-3.  **Authentication**: The client can verify that the server is actually who it claims to be, rather than an imposter intercepting your traffic.
+1.  <strong>Encryption</strong>: No one can read the data except the client and the server.
+2.  <strong>Integrity</strong>: No one can alter the data in transit without both sides realizing it.
+3.  <strong>Authentication</strong>: The client can verify that the server is actually who it claims to be, rather than an imposter intercepting your traffic.
 
-To establish this secure vault, we must execute another handshake on top of TCP: the **TLS Handshake**.
+To establish this secure vault, we must execute another handshake on top of TCP: the <strong>TLS Handshake</strong>.
 
 ### 1. The TLS 1.3 Cryptographic Handshake
 
@@ -283,9 +283,9 @@ In the older TLS 1.2 protocol, the cryptographic handshake required two complete
 
 This meant that by the time you had resolved DNS, completed the TCP handshake, and finished the TLS 1.2 handshake, your request had made three complete round trips across the globe before sending any actual HTTP cargo.
 
-To fix this, the IETF released **TLS 1.3** in 2018. 
+To fix this, the IETF released <strong>TLS 1.3</strong> in 2018. 
 
-TLS 1.3 is a radical optimization. It slashes the cryptographic handshake down to just **one single round trip** by combining the key exchange and cipher suite negotiation into the very first step.
+TLS 1.3 is a radical optimization. It slashes the cryptographic handshake down to just <strong>one single round trip</strong> by combining the key exchange and cipher suite negotiation into the very first step.
 
 Here is how the modern TLS 1.3 handshake works:
 
@@ -302,12 +302,12 @@ sequenceDiagram
     Note over C,S: 🔒 Shared Encrypted Session Keys Derived
 ```
 
-*   **Step 1: The ClientHello**. Your phone constructs a packet containing the list of modern cryptographic algorithms it supports (called **Cipher Suites**). Crucially, it also makes a "guess" about which key exchange algorithm the server will choose (typically **ECDHE—Elliptic Curve Diffie-Hellman Ephemeral**), generates its half of the public key key-share guess, and sends it inline with the ClientHello.
-*   **Step 2: The ServerHello**. The server receives the ClientHello. It selects the cipher suite it wants to use, accepts the client's public key-share, and computes its own half of the public key-share. It combines these two public keys to derive a **shared session key** that only the client and server can know. 
+*   <strong>Step 1: The ClientHello</strong>. Your phone constructs a packet containing the list of modern cryptographic algorithms it supports (called <strong>Cipher Suites</strong>). Crucially, it also makes a "guess" about which key exchange algorithm the server will choose (typically <strong>ECDHE—Elliptic Curve Diffie-Hellman Ephemeral</strong>), generates its half of the public key key-share guess, and sends it inline with the ClientHello.
+*   <strong>Step 2: The ServerHello</strong>. The server receives the ClientHello. It selects the cipher suite it wants to use, accepts the client's public key-share, and computes its own half of the public key-share. It combines these two public keys to derive a <strong>shared session key</strong> that only the client and server can know. 
 
 The server then replies with its ServerHello segment, containing:
 1.  Its chosen cipher suite and public key share.
-2.  Its **Digital Certificate**, which proves its identity (signed by a trusted Certificate Authority like Let's Encrypt or DigiCert).
+2.  Its <strong>Digital Certificate</strong>, which proves its identity (signed by a trusted Certificate Authority like Let's Encrypt or DigiCert).
 3.  A digital signature proving that the server physically owns the private key associated with that certificate.
 
 Your phone receives this ServerHello. 
@@ -320,7 +320,7 @@ Then, it combines its private key share with the server's public key share to de
 
 Both sides now hold a shared secret key. 
 
-All subsequent communications are encrypted using a high-speed symmetric algorithm (typically **AES-GCM or ChaCha20**). 
+All subsequent communications are encrypted using a high-speed symmetric algorithm (typically <strong>AES-GCM or ChaCha20</strong>). 
 
 The TLS handshake is complete. The digital letters are sealed.
 
@@ -340,7 +340,7 @@ If that single server suffered a hardware failure, or if a backhoe cut the power
 
 Instead, Instagram runs on a fleet of thousands of application servers. 
 
-When your request arrives at the edge of the data center, it hits a **Load Balancer**.
+When your request arrives at the edge of the data center, it hits a <strong>Load Balancer</strong>.
 
 ```mermaid
 flowchart LR
@@ -360,7 +360,7 @@ It acts as a reverse proxy, terminating the incoming TLS connection, decrypting 
 
 In the earliest days of the web, load balancing was a crude affair. 
 
-Developers relied on **DNS Round-Robin**. 
+Developers relied on <strong>DNS Round-Robin</strong>. 
 
 When a user resolved `api.instagram.com`, the authoritative DNS server would return a list of several IP addresses:
 
@@ -372,7 +372,7 @@ api.instagram.com.   60   IN   A   157.240.1.37
 
 Each user's browser would choose the first IP in the list, and the DNS server would rotate the list for the next query. 
 
-This distributed traffic, but it had a massive flaw: **Zero Health Awareness.**
+This distributed traffic, but it had a massive flaw: <strong>Zero Health Awareness.</strong>
 
 If Server 36 crashed due to a hardware failure, the DNS server kept handing out its address. 
 
@@ -392,9 +392,9 @@ If an application server crashes, the load balancer takes it out of the active p
 
 To distribute the load, the load balancer uses several mathematical algorithms:
 
-*   **Round-Robin**: Routing requests sequentially down the list of servers.
-*   **Least Connections**: Sending the request to the server currently handling the fewest active TCP sessions, which keeps the fleet's CPU utilization uniform.
-*   **IP Hash**: Hashing the client's IP address to ensure that a specific user's requests always land on the same application server, which is useful for legacy applications that store session states in local RAM.
+*   <strong>Round-Robin</strong>: Routing requests sequentially down the list of servers.
+*   <strong>Least Connections</strong>: Sending the request to the server currently handling the fewest active TCP sessions, which keeps the fleet's CPU utilization uniform.
+*   <strong>IP Hash</strong>: Hashing the client's IP address to ensure that a specific user's requests always land on the same application server, which is useful for legacy applications that store session states in local RAM.
 
 The load balancer selects an idle server—let us say App Server 2—and forwards your decrypted HTTP request across a high-speed, private network switch.
 
@@ -406,7 +406,7 @@ Your request has finally arrived at its destination. The logical processing can 
 
 The application server (running a backend runtime like Node.js, Python, or Go) receives the raw HTTP packet. It parses the request headers and body, placing them inside a request object structure (like Express's `req` object).
 
-Now, the server executes the **Application pipeline**:
+Now, the server executes the <strong>Application pipeline</strong>:
 
 ```mermaid
 flowchart TD
@@ -423,7 +423,7 @@ First, the server must verify *who* you are and *what* clearance you hold.
 
 The request carries an `Authorization: Bearer eyJhbGciOiJIUzI1NiIs...` header. 
 
-This is a **JSON Web Token (JWT)**, which we will inspect in detail in Chapter VIII. 
+This is a <strong>JSON Web Token (JWT)</strong>, which we will inspect in detail in Chapter VIII. 
 
 The server decodes the token, verifies its cryptographic signature using a shared secret or a public key, and extracts the claims. 
 
@@ -440,13 +440,13 @@ If these checks succeed, the server routes the request to the specific business 
 
 The business logic handler’s task is to execute the transaction: "Record that user `harshit_87` liked post `928374`."
 
-To make this change permanent, the server must write to a **Database**. 
+To make this change permanent, the server must write to a <strong>Database</strong>. 
 
 This is the most critical and challenging layer of systems engineering. 
 
 An application server's RAM is volatile: if the power cord is pulled, or if the runtime crashes, everything in memory is wiped out. 
 
-The database must commit the transaction to non-volatile storage (SSD or HDD) in a way that respects **ACID guarantees** (Atomicity, Consistency, Isolation, Durability).
+The database must commit the transaction to non-volatile storage (SSD or HDD) in a way that respects <strong>ACID guarantees</strong> (Atomicity, Consistency, Isolation, Durability).
 
 The server compiles a database query—typically written in SQL:
 
@@ -465,9 +465,9 @@ If every single user click forced a direct, synchronous write to a relational da
 
 If ten thousand people like a celebrity's post in the same second, writing to PostgreSQL ten thousand times would lock tables, saturate disk I/O, and crash the database.
 
-To prevent this, the server relies on **Caching and Asynchronous Aggregators**.
+To prevent this, the server relies on <strong>Caching and Asynchronous Aggregators</strong>.
 
-Instead of writing everything to disk synchronously, the server might write the like to a high-speed, in-memory cache like **Redis**. 
+Instead of writing everything to disk synchronously, the server might write the like to a high-speed, in-memory cache like <strong>Redis</strong>. 
 
 It increments the post's like counter in memory: `INCR post:928374:likes`. 
 
@@ -477,7 +477,7 @@ Then, a background process periodically flushes these aggregated counters to the
 
 ### 3. Step 3: Optimistic UI — The Grand Illusion
 
-Once the database has committed the change and the cache is updated, the application server constructs an **HTTP Response**:
+Once the database has committed the change and the cache is updated, the application server constructs an <strong>HTTP Response</strong>:
 
 ```http
 HTTP/1.1 200 OK
@@ -493,13 +493,13 @@ Cache-Control: private, no-cache
 
 The response is slung back through the private network switch, encrypted by the load balancer using the TLS session key, packaged into TCP segments, and dispatched over the undersea cables and copper lines back to your device.
 
-But here is a final secret of systems design: **Your phone did not wait for this response before showing you the red heart.**
+But here is a final secret of systems design: <strong>Your phone did not wait for this response before showing you the red heart.</strong>
 
 If you had to wait for the entire round-trip journey—DNS, TCP handshake, TLS handshake, load balancing, application routing, database index writes, and the return trip—the heart icon would take two hundred milliseconds to light up. 
 
 In the hyper-optimized attention economy, this two-hundred-millisecond delay feels sluggish. It feels broken.
 
-To create the illusion of instant telepathy, modern mobile apps use **Optimistic UI Updates**.
+To create the illusion of instant telepathy, modern mobile apps use <strong>Optimistic UI Updates</strong>.
 
 The moment your finger taps the screen, the application's local JavaScript/Swift engine changes the heart icon from white to red and increments the counter *immediately*. 
 

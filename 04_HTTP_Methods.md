@@ -12,12 +12,12 @@ On a purely mechanical level, the action is identical.
 
 It is the application of friction to wood pulp, guided by the neural circuits of your hand. 
 
-But the **semantic verb** attached to this act determines the legal and material structure of the universe:
-*   If you drag the pen across a guest book at a wedding, you are performing a passive, non-binding record of attendance. It has no side effects. It alters no rights. (This is a **GET**).
-*   If you drag the pen across a bank check for ten thousand dollars, you are creating a brand-new financial instrument, generating a debit token that will cascade through the clearing houses. (This is a **POST**).
-*   If you drag the pen across your previous last will and testament to replace it with a brand-new document containing entirely new beneficiaries, you are executing a complete, destructive overwrite of state. (This is a **PUT**).
-*   If you drag the pen through a single clause of an existing contract to scratch out a spelling error while leaving the other thirty pages intact, you are performing a localized, partial mutation of state. (This is a **PATCH**).
-*   If you drag the pen across a deed of release, declaring that a debt is cancelled and the record is formally expunged from the archives, you are executing a deletion. (This is a **DELETE**).
+But the <strong>semantic verb</strong> attached to this act determines the legal and material structure of the universe:
+*   If you drag the pen across a guest book at a wedding, you are performing a passive, non-binding record of attendance. It has no side effects. It alters no rights. (This is a <strong>GET</strong>).
+*   If you drag the pen across a bank check for ten thousand dollars, you are creating a brand-new financial instrument, generating a debit token that will cascade through the clearing houses. (This is a <strong>POST</strong>).
+*   If you drag the pen across your previous last will and testament to replace it with a brand-new document containing entirely new beneficiaries, you are executing a complete, destructive overwrite of state. (This is a <strong>PUT</strong>).
+*   If you drag the pen through a single clause of an existing contract to scratch out a spelling error while leaving the other thirty pages intact, you are performing a localized, partial mutation of state. (This is a <strong>PATCH</strong>).
+*   If you drag the pen across a deed of release, declaring that a debt is cancelled and the record is formally expunged from the archives, you are executing a deletion. (This is a <strong>DELETE</strong>).
 
 The physical universe is indifferent to these differences. 
 
@@ -29,9 +29,9 @@ If you treat a bank check as a guest book—signing it twenty times because you 
 
 If you treat a will as a minor scratch-out, you will trigger decades of litigation.
 
-Let us look at a second, more everyday analogy: the **Elevator Button** vs. the **Slot Machine Lever**.
+Let us look at a second, more everyday analogy: the <strong>Elevator Button</strong> vs. the <strong>Slot Machine Lever</strong>.
 
-When you enter an elevator and press the button for the fifth floor, you are executing an **idempotent operation**. 
+When you enter an elevator and press the button for the fifth floor, you are executing an <strong>idempotent operation</strong>. 
 
 You press the "5" button once, and the elevator moves to the fifth floor. 
 
@@ -41,11 +41,11 @@ It does not double its speed. It does not charge you ten times.
 
 It simply registers that you wish to be on the fifth floor, a destination it has already committed to. 
 
-Pressing the button one time or one hundred times produces the **exact same final state**.
+Pressing the button one time or one hundred times produces the <strong>exact same final state</strong>.
 
 Now, contrast this with the lever of a slot machine at a casino in Las Vegas.
 
-Each pull of the lever is a **non-idempotent operation**. 
+Each pull of the lever is a <strong>non-idempotent operation</strong>. 
 
 Pull it once, and you spend one coin and roll the gears. 
 
@@ -55,7 +55,7 @@ The state of your wallet, the state of the machine's memory, and the state of th
 
 If a network glitch pauses the universe and replay-attacks your lever pulls, you will be ruined.
 
-These two concepts—**Semantic Verbs** and **Idempotency**—are the twin pillars of **HTTP Methods**.
+These two concepts—<strong>Semantic Verbs</strong> and <strong>Idempotency</strong>—are the twin pillars of <strong>HTTP Methods</strong>.
 
 When we build backends, we are not merely receiving bytes; we are executing human intentions. 
 
@@ -75,17 +75,17 @@ The early web did not need any other words, because it was a read-only library.
 
 But as the web grew into an engine of global commerce, we expanded our vocabulary. 
 
-Today, the HTTP method vocabulary is defined by **Seven Primary Verbs**, each carrying a unique semantic and behavioral profile:
+Today, the HTTP method vocabulary is defined by <strong>Seven Primary Verbs</strong>, each carrying a unique semantic and behavioral profile:
 
 | Method | Core Purpose | Request Body? | Safe? | Idempotent? | Analogy |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **GET** | Retrieve/read data | ❌ No | ✅ Yes | ✅ Yes | 📖 Reading a book from the shelf |
-| **POST** | Create a new resource | ✅ Yes | ❌ No | ❌ No | 📝 Writing a new book and placing it on the shelf |
-| **PUT** | Replace an entire resource | ✅ Yes | ❌ No | ✅ Yes | 📕 Replacing an entire book with a new edition |
-| **PATCH** | Partially update a resource | ✅ Yes | ❌ No | ❌ No (Usually) | ✏️ Editing a single chapter of the book |
-| **DELETE** | Remove a resource | ❌ No | ❌ No | ✅ Yes | 🗑️ Removing a book from the shelf |
-| **HEAD** | Retrieve headers only | ❌ No | ✅ Yes | ✅ Yes | 👀 Looking at a book's cover without opening it |
-| **OPTIONS** | Probe server capabilities | ❌ No | ✅ Yes | ✅ Yes | ❓ Asking "what can I do with this shelf?" |
+| <strong>GET</strong> | Retrieve/read data | ❌ No | ✅ Yes | ✅ Yes | 📖 Reading a book from the shelf |
+| <strong>POST</strong> | Create a new resource | ✅ Yes | ❌ No | ❌ No | 📝 Writing a new book and placing it on the shelf |
+| <strong>PUT</strong> | Replace an entire resource | ✅ Yes | ❌ No | ✅ Yes | 📕 Replacing an entire book with a new edition |
+| <strong>PATCH</strong> | Partially update a resource | ✅ Yes | ❌ No | ❌ No (Usually) | ✏️ Editing a single chapter of the book |
+| <strong>DELETE</strong> | Remove a resource | ❌ No | ❌ No | ✅ Yes | 🗑️ Removing a book from the shelf |
+| <strong>HEAD</strong> | Retrieve headers only | ❌ No | ✅ Yes | ✅ Yes | 👀 Looking at a book's cover without opening it |
+| <strong>OPTIONS</strong> | Probe server capabilities | ❌ No | ✅ Yes | ✅ Yes | ❓ Asking "what can I do with this shelf?" |
 
 Let us inspect the deep, logical architecture of these verbs:
 
@@ -95,9 +95,9 @@ Let us inspect the deep, logical architecture of these verbs:
 
 It is designed strictly to read data. 
 
-Under the HTTP specification, a `GET` request **must be Safe**. 
+Under the HTTP specification, a `GET` request <strong>must be Safe</strong>. 
 
-Safety is a formal technical term meaning that the operation **must not modify the resource state on the server**.
+Safety is a formal technical term meaning that the operation <strong>must not modify the resource state on the server</strong>.
 
 When a browser executes `GET /v1/posts/928374`, the server might log the request, update analytics counters, or rotate server logs. 
 
@@ -105,7 +105,7 @@ But these are secondary side effects.
 
 The post itself—the resource—must remain completely unmodified.
 
-Because `GET` is safe and idempotent, the network infrastructure of the internet is allowed to **cache it aggressively**. 
+Because `GET` is safe and idempotent, the network infrastructure of the internet is allowed to <strong>cache it aggressively</strong>. 
 
 CDNs, proxies, and home routers can capture the server's response to a `GET` request and save it in memory. 
 
@@ -117,11 +117,11 @@ When the next visitor asks for the same URL, the proxy returns the cached copy w
 
 It is designed to create new resources or execute complex, state-mutating actions (like processing a payment).
 
-A `POST` request is **neither Safe nor Idempotent**. 
+A `POST` request is <strong>neither Safe nor Idempotent</strong>. 
 
 Every time you execute a `POST` request, the server is expected to write new data to the database, generate a new UUID, or deduct money from a ledger.
 
-Because `POST` is non-idempotent, it is **never cached**. 
+Because `POST` is non-idempotent, it is <strong>never cached</strong>. 
 
 If a browser tries to cache a `POST` payment request, the user would only be charged once, but the merchant would never receive the subsequent orders. 
 
@@ -135,18 +135,18 @@ One of the most common coordination failures in API design is the confusion betw
 
 Both are used to update existing resources, but they do so under completely different mathematical guarantees.
 
-*   `PUT` is designed for **Complete Replacement**. 
-    When you send a `PUT` request to `/v1/users/42`, the payload must contain the **entire representation of the resource**. 
+*   `PUT` is designed for <strong>Complete Replacement</strong>. 
+    When you send a `PUT` request to `/v1/users/42`, the payload must contain the <strong>entire representation of the resource</strong>. 
     If the user has twenty fields (name, age, email, address, avatar, etc.) and you only want to update the age, a `PUT` request must still carry all twenty fields. 
     The server reads the payload and completely overwrites the existing row in the database. 
     If you omit the email field, the server will assume you wish to erase it, setting the database column to `NULL`.
-    Because `PUT` completely overwrites the resource, it is **Idempotent**. 
+    Because `PUT` completely overwrites the resource, it is <strong>Idempotent</strong>. 
     Replacing a resource with the same data ten times leaves the resource in the exact same state as replacing it once.
 
-*   `PATCH` was added late to the HTTP dictionary in 2010 (RFC 5789) to allow **Partial Updates**. 
+*   `PATCH` was added late to the HTTP dictionary in 2010 (RFC 5789) to allow <strong>Partial Updates</strong>. 
     With `PATCH`, you only transmit the fields you wish to change: `{ "age": 22 }`. 
     The server reads the payload, loads the existing user row, surgeries the new values into the specific columns, and saves the record back to disk.
-    Because `PATCH` is evaluated dynamically based on the current state of the resource, it is **not inherently idempotent**. 
+    Because `PATCH` is evaluated dynamically based on the current state of the resource, it is <strong>not inherently idempotent</strong>. 
     If you send a `PATCH` request containing an increment instruction: `{ "op": "increment", "path": "/views" }`, executing it three times will add three to the view count, not one.
 
 ### 4. OPTIONS: The Diplomatic Border Patrol
@@ -159,7 +159,7 @@ It asks the server: "What verbs, headers, and credentials are permitted on this 
 
 The server replies with metadata headers (like `Allow: GET, POST, OPTIONS`), telling the client how to behave. 
 
-As we shall see, `OPTIONS` is the foundational gateway for **CORS preflight checks**, acting as the border patrol of cross-origin web safety.
+As we shall see, `OPTIONS` is the foundational gateway for <strong>CORS preflight checks</strong>, acting as the border patrol of cross-origin web safety.
 
 ---
 
@@ -191,15 +191,15 @@ From the client's perspective, the request timed out.
 
 The phone has no idea whether the server processed the transaction and the response was lost, or whether the server crashed before processing the transaction.
 
-If the operation is **GET, PUT, or DELETE**, the client can safely retry the request automatically. 
+If the operation is <strong>GET, PUT, or DELETE</strong>, the client can safely retry the request automatically. 
 
 If the server already deleted the user or updated the field, running it a second time does no harm.
 
-But if the operation is **POST**, retrying the request is incredibly dangerous. 
+But if the operation is <strong>POST</strong>, retrying the request is incredibly dangerous. 
 
 If the client automatically retries the `POST /purchase` request, the server will receive it as a fresh transaction, charge the card a second time, and issue two tickets.
 
-To make non-idempotent `POST` requests safe in distributed networks, we must implement **Idempotency Keys**:
+To make non-idempotent `POST` requests safe in distributed networks, we must implement <strong>Idempotency Keys</strong>:
 
 ```mermaid
 sequenceDiagram
@@ -223,11 +223,11 @@ Through this proxy system, we project an idempotent interface onto a non-idempot
 
 ## IV. The Border Control: SOP and the CORS Preflight Check
 
-If HTTP methods are the grammar of communication, **CORS (Cross-Origin Resource Sharing)** is the border control system that enforces territorial boundaries between different domains.
+If HTTP methods are the grammar of communication, <strong>CORS (Cross-Origin Resource Sharing)</strong> is the border control system that enforces territorial boundaries between different domains.
 
 ### 1. The Same-Origin Policy (SOP)
 
-To understand CORS, we must first understand the **Same-Origin Policy (SOP)**, designed by Netscape in 1995.
+To understand CORS, we must first understand the <strong>Same-Origin Policy (SOP)</strong>, designed by Netscape in 1995.
 
 SOP is the most critical security boundary in browser architectures. 
 
@@ -247,7 +247,7 @@ The blog script would read your balance, send it to a hacker server, and proceed
 
 SOP blocks this. 
 
-Under SOP, the browser allows Website A to *send* a request to Website B, but it **strictly blocks the script on Website A from reading the returned response** unless Website B explicitly gives permission.
+Under SOP, the browser allows Website A to *send* a request to Website B, but it <strong>strictly blocks the script on Website A from reading the returned response</strong> unless Website B explicitly gives permission.
 
 ### 2. Cross-Origin Resource Sharing (CORS)
 
@@ -257,7 +257,7 @@ What if your frontend lives on `https://sriniously.com` and your backend API liv
 
 These are different origins (subdomains are treated as different origins by the browser).
 
-To allow this, we use **CORS**—a protocol that uses HTTP headers to negotiate permissions across origins.
+To allow this, we use <strong>CORS</strong>—a protocol that uses HTTP headers to negotiate permissions across origins.
 
 When `https://sriniously.com` makes an API call to `https://api.sriniously.com`, the browser automatically appends the `Origin` header to the request:
 
@@ -283,7 +283,7 @@ If the `Access-Control-Allow-Origin` matches the origin of the script, the brows
 If the header is missing, or if it says `Access-Control-Allow-Origin: https://other-site.com`, the browser triggers a security error in the console, blocking the script from reading the JSON.
 
 > [!CAUTION]
-> **CORS is a browser security enforcement, not a server shield.** The backend server *does* execute the database query and process the request. It is the *browser* that intercepts the response and blocks the JavaScript code from reading it. An attacker using a command-line tool like `curl` can bypass CORS entirely because `curl` is not a browser and does not enforce SOP.
+> <strong>CORS is a browser security enforcement, not a server shield.</strong> The backend server *does* execute the database query and process the request. It is the *browser* that intercepts the response and blocks the JavaScript code from reading it. An attacker using a command-line tool like `curl` can bypass CORS entirely because `curl` is not a browser and does not enforce SOP.
 
 ### 3. The Preflight OPTIONS Check
 
@@ -297,7 +297,7 @@ The browser would then block the malicious site from reading the success respons
 
 But the damage is already done—the account is deleted!
 
-To prevent this, the browser executes a **Preflight Request** before launching any "non-simple" requests (which includes `PUT`, `PATCH`, `DELETE`, or any request with custom headers or JSON payloads).
+To prevent this, the browser executes a <strong>Preflight Request</strong> before launching any "non-simple" requests (which includes `PUT`, `PATCH`, `DELETE`, or any request with custom headers or JSON payloads).
 
 ```mermaid
 sequenceDiagram
@@ -309,7 +309,7 @@ sequenceDiagram
     Server-->>Browser: 200 OK
 ```
 
-1.  Before sending the actual `PUT /v1/users/42` request, the browser automatically launches a silent **preflight check** using the `OPTIONS` verb.
+1.  Before sending the actual `PUT /v1/users/42` request, the browser automatically launches a silent <strong>preflight check</strong> using the `OPTIONS` verb.
 2.  The preflight request carries headers asking for permission:
     *   `Access-Control-Request-Method: PUT`
     *   `Access-Control-Request-Headers: Content-Type`
@@ -327,10 +327,10 @@ We have now mapped the complete, elegant grammar of the web. Let us review the k
 
 | Layer / Model | Transport Protocol | Latency Profile | Core Benefit | The Bottleneck |
 | :--- | :--- | :--- | :--- | :--- |
-| **GET** | TCP (RFC 793) | ~50 - 150ms | Keep-Alive persistent connection recycling | Head-of-Line Blocking at application layer |
-| **HTTP/2** | TCP (RFC 793) | ~30 - 80ms | Frame Multiplexing on a single socket | Head-of-Line Blocking at transport layer |
-| **HTTP/3** | QUIC over UDP | ~10 - 50ms | Stream Independence and integrated TLS 1.3 | High CPU packet validation overhead |
-| **Serverless** | On-Demand Routing | ~100 - 600ms | Automatic, infinite scaling with zero idle cost | Cold Starts and Stateless connection pool limits |
+| <strong>GET</strong> | TCP (RFC 793) | ~50 - 150ms | Keep-Alive persistent connection recycling | Head-of-Line Blocking at application layer |
+| <strong>HTTP/2</strong> | TCP (RFC 793) | ~30 - 80ms | Frame Multiplexing on a single socket | Head-of-Line Blocking at transport layer |
+| <strong>HTTP/3</strong> | QUIC over UDP | ~10 - 50ms | Stream Independence and integrated TLS 1.3 | High CPU packet validation overhead |
+| <strong>Serverless</strong> | On-Demand Routing | ~100 - 600ms | Automatic, infinite scaling with zero idle cost | Cold Starts and Stateless connection pool limits |
 
 Understanding HTTP methods and CORS boundaries is not merely a tool for loading web pages; it is the ultimate administrative framework of global distributed systems. In the next chapter, we will inspect the seven primary verbs of this language—the HTTP methods—and trace the precise boundaries that separate safe, idempotent, and mutable operations.
 
