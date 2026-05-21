@@ -151,130 +151,34 @@
       </p>
 
       <p>
-        Go represents errors via the built-in <code>error</code> interface, which simply requires a type to implement a single <code>Error() string</code> method. Functions that can fail return a tuple: the successful result and the error value. The caller is obligated to explicitly check the error:
-      </p>
-
-      <pre><code>// Production-Grade Go Error Wrapping
-package main
-
-import (
-	"errors"
-	"fmt"
-)
-
-type ErrCode string
-
-const (
-	ErrConnectionTimeout ErrCode = "CONNECTION_TIMEOUT"
-	ErrUniqueViolation   ErrCode = "UNIQUE_VIOLATION"
-	ErrNotFound          ErrCode = "NOT_FOUND"
-)
-
-type QueryError struct {
-	Code    ErrCode
-	Message string
-	Err     error
-}
-
-func (e *QueryError) Error() string {
-	if e.Err != nil {
-		return fmt.Sprintf("[%s] %s: %v", e.Code, e.Message, e.Err)
-	}
-	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
-}
-
-func (e *QueryError) Unwrap() error {
-	return e.Err
-}
-
-func executeQuery() error {
-	return errors.New("driver: connection reset by peer")
-}
-
-func FetchUserData(userID string) (*string, error) {
-	err := executeQuery()
-	if err != nil {
-		return nil, &QueryError{
-			Code:    ErrConnectionTimeout,
-			Message: "failed to retrieve user profile from shard database",
-			Err:     err,
-		}
-	}
-	username := "Chanakya"
-	return &username, nil
-}
-</code></pre>
-
-      <p>
-        This approach entirely avoids stack unwinding. Returning an error value in Go is as cheap as returning an integer. While critics argue this leads to repetitive <code>if err != nil</code> checks, it forces the engineer to explicitly consider the failure at the exact boundary where it occurs, rather than letting it slip past silently.
+        Go represents errors via a built-in error interface, which simply requires a type to implement a single error-string representation method. Functions that can fail return a tuple: the successful result and the error value. The caller is obligated to explicitly check the error value immediately after invocation.
       </p>
 
       <p>
-        Rust elevates this concept to its logical peak through the <code>Result&lt;T, E&gt;</code> monad—a strongly typed algebraic data type enum defined as:
+        In a production-grade implementation, this is achieved by declaring a custom error structure. Symmetrically, this structure holds an error classification code string (such as <code>CONNECTION_TIMEOUT</code>), a detailed human-readable message string, and an underlying causal error reference to preserve the physical error history. Symmetrically, the structure implements the error interface, formatting a combined string that nests the classification code, the message, and the original cause. Symmetrically, it implements an unwrap method that returns the underlying causational error. Symmetrically, when an execution layer fetches user data from a database shard and encounters a database driver timeout, it catches the raw driver reset error and wraps it inside this custom structure—providing high-level context before returning the tuple to the caller. Symmetrically, this value-based error propagation entirely avoids stack unwinding, rendering the returning of an error as computationally cheap as returning a standard integer. This design forces the system designer to explicitly address failures at the exact boundaries where they occur.
       </p>
-      <pre><code>enum Result&lt;T, E&gt; {
-    Ok(T),
-    Err(E),
-}</code></pre>
 
       <p>
-        Rust enforces error checking at compile time. A function returning a <code>Result</code> cannot have its success value accessed without explicitly unwrapping or matching the enum. The language provides monadic composition helpers like <code>and_then</code>, <code>map_err</code>, and the elegant <code>?</code> operator for concise, safe propagation:
+        Rust elevates this concept to its structural peak through the monadic <code>Result</code> type—a strongly typed algebraic data type enum that holds either a success variant containing the computed data or a failure variant containing the error details.
+      </p>
+      
+      <p>
+        To understand this design without complex mathematics, one can visualize the <strong>Double-Sided Cargo Box</strong> and the <strong>Railway Track Switcher</strong> metaphors.
       </p>
 
-      <pre><code>// Monadic Composition and Rust Result Handling
-use std::fmt;
+      <p>
+        The <strong>Double-Sided Cargo Box</strong> metaphor represents the containment of state. Symmetrically, when a function executes an operation that can fail, it returns a sealed cargo box. This box has exactly two designated doors—success and failure—and the caller is physically prevented from accessing the internal payload without actively engaging the latches. Symmetrically, to process the cargo, the caller must register two separate, mutually exclusive pathways: one to open the success door and retrieve the data, and another to open the failure door and handle the error. Symmetrically, if a function attempts to retrieve a user record, it returns this sealed cargo box. Symmetrically, if the user exists, the box is populated at the success door; if a connection timeout occurs, the box is populated at the failure door. Symmetrically, this compile-time enforcement ensures that no transaction can proceed with unhandled exceptions.
+      </p>
 
-#[derive(Debug)]
-pub enum DatabaseError {
-    ConnectionTimeout,
-    UniqueViolation(String),
-    QueryFailed(String),
-}
-
-impl fmt::Display for DatabaseError {
-    fn fmt(&self, f: &mut fmt::Formatter&lt;'_&gt;) -> fmt::Result {
-        match self {
-            DatabaseError::ConnectionTimeout => write!(f, "Database connection timed out"),
-            DatabaseError::UniqueViolation(ref field) => write!(f, "Unique constraint violated on field: {}", field),
-            DatabaseError::QueryFailed(ref reason) => write!(f, "Database query failed: {}", reason),
-        }
-    }
-}
-
-impl std::error::Error for DatabaseError {}
-
-pub struct User {
-    pub id: u64,
-    pub username: String,
-}
-
-pub fn fetch_user_id(username: &str) -> Result&lt;u64, DatabaseError&gt; {
-    if username == "admin" {
-        Ok(1)
-    } else if username == "timeout" {
-        Err(DatabaseError::ConnectionTimeout)
-    } else {
-        Err(DatabaseError::QueryFailed("User record not found".to_string()))
-    }
-}
-
-// Propagating errors monadically using the ? operator
-pub fn get_user_profile(username: &str) -> Result&lt;User, String&gt; {
-    let user_id = fetch_user_id(username)
-        .map_err(|e| format!("Profile retrieval failed: {}", e))?; // Converts DatabaseError to String
-    
-    Ok(User {
-        id: user_id,
-        username: username.to_string(),
-    })
-}
-</code></pre>
+      <p>
+        The <strong>Railway Track Switcher</strong> metaphor represents the flow of composition. Symmetrically, the execution of a request is a train traveling along a track. The happy path represents a straight, clean mainline rail. Symmetrically, each successive operation—such as parsing, validating, fetching, or updating—represents a segment of the track. Symmetrically, monadic helpers and the elegant propagation operator act as automatic track switchers. Symmetrically, if an operation succeeds, the train continues smoothly along the mainline. Symmetrically, if an operation fails, the track switcher immediately shifts the rails, sending the train onto a parallel siding—the failure track—which bypasses all subsequent mainline stations and routes the train directly to the terminal error handler. Symmetrically, the propagation operator acts as this automatic switcher mechanism: it checks the cargo box at each milestone, continuing forward on success, or immediately switching control to the return siding on failure, converting the error to the caller's format automatically.
+      </p>
 
       <p>
         In terms of assembly-level execution, Rust's monadic errors represent a true <strong>zero-cost abstraction</strong>. Under the hood, the compiler represents a <code>Result&lt;T, E&gt;</code> as a union containing the data of <code>T</code> or <code>E</code>, alongside a 1-byte discriminant tag indicating which variant is active. 
       </p>
       <p>
-        Furthermore, the Rust compiler performs **niche optimizations** (or layout optimizations). If the success type <code>T</code> contains an invalid bit pattern (for example, a non-zero pointer like <code>NonNull&lt;T&gt;</code>, or a reference), the compiler uses that invalid bit pattern (the null pointer value) to represent the <code>Err</code> variant. Consequently, a <code>Result&lt;&amp;str, MyError&gt;</code> consumes exactly the same number of bytes in memory as a raw pointer, passing through registers with zero padding and zero runtime overhead.
+        Furthermore, the Rust compiler performs <strong>niche optimizations</strong> (or layout optimizations). If the success type <code>T</code> contains an invalid bit pattern (for example, a non-zero pointer like <code>NonNull&lt;T&gt;</code>, or a reference), the compiler uses that invalid bit pattern (the null pointer value) to represent the <code>Err</code> variant. Consequently, a <code>Result&lt;&amp;str, MyError&gt;</code> consumes exactly the same number of bytes in memory as a raw pointer, passing through registers with zero padding and zero runtime overhead.
       </p>
 
       <aside class="margin-card aside">
@@ -359,147 +263,22 @@ pub fn get_user_profile(username: &str) -> Result&lt;User, String&gt; {
 
       <h3>1. Production-Grade TypeScript Express Error Handler</h3>
       <p>
-        In JavaScript and TypeScript backends, exceptions that occur asynchronously must be caught and routed to Express's <code>next(error)</code> pipeline. The following implementation illustrates a robust, typed exception structure with metadata capturing, correlation ID tagging, and stack trace sanitization:
+        In JavaScript and TypeScript backend architectures, exceptions that occur asynchronously must be captured and routed to the server's central error propagation pipeline. Symmetrically, this is achieved by declaring a robust hierarchical domain exception structure.
       </p>
-
-      <pre><code>// Professional TypeScript Global Error Handler Middleware
-import { Request, Response, NextFunction } from 'express';
-
-// Base Class for all Domain Exceptions
-export abstract class ApplicationError extends Error {
-  abstract readonly statusCode: number;
-  abstract readonly errorCode: string;
-
-  constructor(message: string, public readonly isOperational: boolean = true) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
-// Specific Domain Exception Classes
-export class ValidationError extends ApplicationError {
-  readonly statusCode = 400;
-  readonly errorCode = 'VALIDATION_ERROR';
-  constructor(message: string, public readonly details: Record&lt;string, string&gt;) {
-    super(message);
-  }
-}
-
-export class AuthenticationError extends ApplicationError {
-  readonly statusCode = 401;
-  readonly errorCode = 'UNAUTHORIZED';
-  constructor(message: string = 'Authentication required') {
-    super(message);
-  }
-}
-
-export class ResourceNotFoundError extends ApplicationError {
-  readonly statusCode = 404;
-  readonly errorCode = 'RESOURCE_NOT_FOUND';
-  constructor(message: string) {
-    super(message);
-  }
-}
-
-// Centralized Global Handler Middleware
-export const globalErrorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // Generate or retrieve a correlation ID for request tracing
-  const correlationId = (req.headers['x-correlation-id'] as string) || 
-    `ERR-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-  // Log the error internally with full details
-  if (err instanceof ApplicationError &amp;&amp; err.isOperational) {
-    console.warn({
-      correlationId,
-      type: err.errorCode,
-      message: err.message,
-      statusCode: err.statusCode,
-      timestamp: new Date().toISOString()
-    });
-
-    return res.status(err.statusCode).json({
-      success: false,
-      error: {
-        code: err.errorCode,
-        message: err.message,
-        correlationId,
-        ...(err instanceof ValidationError &amp;&amp; { details: err.details })
-      }
-    });
-  }
-
-  // Unhandled / Non-operational exceptions (e.g. Database connection lost, null pointer reference)
-  // These represent true system failures and must be logged with high severity (CRITICAL)
-  console.error({
-    correlationId,
-    type: 'UNHANDLED_CRITICAL_FAILURE',
-    message: err.message,
-    stack: err.stack, // Log full stack trace internally
-    timestamp: new Date().toISOString()
-  });
-
-  // Security Boundary: Strip internal data and return a generic 500 error
-  return res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected operational failure occurred. Please contact systems administration.',
-      correlationId
-    }
-  });
-};
-</code></pre>
-
-      <h3>2. Go Concurrent Router Middleware Recovery</h3>
       <p>
-        In concurrent runtime systems like Go, unhandled panics inside single goroutines will crash the entire operating system process. The web server must run a global recovery middleware that intercepts panics, prevents process termination, and returns a clean, sanitized HTTP response:
+        Symmetrically, the system implements a base application error class that extends the language's native error constructor. Symmetrically, this base class defines mandatory abstract properties for the HTTP status code (such as <code>400</code> for client validation or <code>401</code> for unauthorized access) and a distinct machine-readable error classification code string (such as <code>RESOURCE_NOT_FOUND</code>). Symmetrically, during instantiation, the base constructor captures the current execution stack trace and marks the exception as operational (indicating a known, predicted failure state). Symmetrically, specific domain subclasses—such as validation errors, authentication errors, or resource-not-found errors—implement these abstract properties. Symmetrically, a validation error subclass is designed to capture an additional key-value details dictionary pinpointing malformed request field paths.
       </p>
-
-      <pre><code>package main
-
-import (
-	"log"
-	"net/http"
-	"runtime/debug"
-)
-
-func RecoveryMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				// Capture the stack trace internally
-				stackTrace := debug.Stack()
-				correlationID := "ERR-GO-" + r.Header.Get("X-Request-ID")
-
-				// Log full error and stack trace inside the server logs
-				log.Printf("[CRITICAL] Panic Recovered! Correlation ID: %s | Error: %v\nStack Trace:\n%s", 
-					correlationID, err, stackTrace)
-
-				// Write sanitized error response back to client
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusInternalServerError)
-				_, _ = w.Write([]byte(`{
-					"success": false,
-					"error": {
-						"code": "INTERNAL_SERVER_ERROR",
-						"message": "An unexpected server crash occurred.",
-						"correlationId": "` + correlationID + `"
-					}
-				}`))
-			}
-		}()
-		next.ServeHTTP(w, r)
-	})
-}
-</code></pre>
-
-      <h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">IV. Security Protocols Inside Error Boundaries</h2>
+      <p>
+        Symmetrically, the centralized global error handler middleware sits at the terminal boundary of the routing pipeline. Symmetrically, when an error is caught, the middleware generates a unique request correlation ID (prefixed with <code>ERR-</code> and containing a timestamp) to enable distributed request tracing. Symmetrically, if the caught error is an instance of the base application error class and is marked as operational, the middleware logs the classification code, message, and status code to the internal logging pipeline, and returns a structured JSON payload to the client. Symmetrically, this payload contains the error code, the user-friendly message, the correlation ID, and any key-value field validation details. Symmetrically, if the caught error is unhandled, non-operational failure—such as a database connection loss or a null pointer dereference—the middleware logs the full, symbolicated stack trace to the secure server logs with a critical severity flag. Symmetrically, to preserve security boundaries, it strips all internal implementation details and returns a generic, sanitized <code>500 Internal Server Error</code> JSON response to the client.
+      </p>
+<h3>2. Go Concurrent Router Middleware Recovery</h3>
+      <p>
+        In highly concurrent systems like Go, the runtime spawns an independent goroutine (execution thread) for each incoming HTTP request. Symmetrically, if an unhandled panic occurs within a single goroutine, the exception will bubble up to the runtime scheduler, causing the entire operating system process to crash and immediately terminating all other active customer connections.
+      </p>
+      <p>
+        To prevent this catastrophic process-wide failure, a concurrent router must mount a global recovery middleware at the outermost execution boundary. Symmetrically, this middleware leverages Go's deferred function mechanism, registering a recovery callback that is guaranteed by the runtime scheduler to execute when the active goroutine's stack unwinds. Symmetrically, inside the deferred function, the middleware invokes the native recovery routine. Symmetrically, if a panic is detected, the recovery routine halts the termination sequence and intercepts the panic payload. Symmetrically, the middleware extracts the full, symbolicated thread stack trace using the runtime debugger utility, generates a request correlation ID prefixed with <code>ERR-GO-</code>, and writes the complete debug stack to the secure internal server log. Symmetrically, the middleware writes an HTTP <code>500 Internal Server Error</code> status code and a sanitized JSON error payload back to the client socket, allowing the server to clean up stack allocations and continue processing other requests smoothly.
+      </p>
+<h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">IV. Security Protocols Inside Error Boundaries</h2>
       <p>
         Error boundaries represent a critical security frontier. When a system encounters an anomalous state, its secondary objective—immediately behind preserving state integrity—is to prevent data leakage. Attackers deliberately trigger validation failures, database deadlocks, and connection timeouts to map the internal architecture of the system. A secure backend must be designed to remain completely opaque under stress.
       </p>
@@ -557,7 +336,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 
       <h4>1.2 Full Jitter</h4>
       <p>
-        To break this client synchronization, the **Full Jitter** algorithm distributes retries uniformly across the entire backoff spectrum. The delay \(T_{\text{sleep}}\) is a random variable sampled from a uniform distribution:
+        To break this client synchronization, the <strong>Full Jitter</strong> algorithm distributes retries uniformly across the entire backoff spectrum. The delay \(T_{\text{sleep}}\) is a random variable sampled from a uniform distribution:
       </p>
       <div class="math-block">
         \[ T_{\text{sleep}}(n) \sim \text{Uniform}\left(0,\; \min\left(T_{\max},\; T_{\text{base}} \cdot 2^n\right)\right) \]
@@ -568,7 +347,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 
       <h4>1.3 Equal Jitter</h4>
       <p>
-        If some level of predictable minimum backoff is desired alongside random distribution, **Equal Jitter** divides the backoff into a deterministic half and a randomized half:
+        If some level of predictable minimum backoff is desired alongside random distribution, <strong>Equal Jitter</strong> divides the backoff into a deterministic half and a randomized half:
       </p>
       <div class="math-block">
         \[ T_{\text{temp}} = \min\left(T_{\max},\; T_{\text{base}} \cdot 2^n\right) \]
@@ -582,7 +361,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 
       <h4>1.4 Decorrelated Jitter</h4>
       <p>
-        To prevent synchronization without relying solely on the retry count \(n\), the **Decorrelated Jitter** algorithm calculates the sleep time for the current attempt based on the *actual sleep time of the previous attempt* \(T_{i-1}\):
+        To prevent synchronization without relying solely on the retry count \(n\), the <strong>Decorrelated Jitter</strong> algorithm calculates the sleep time for the current attempt based on the <em>actual sleep time of the previous attempt</em> \(T_{i-1}\):
       </p>
       <div class="math-block">
         \[ T_i = \min\left(T_{\max},\; \text{Uniform}\left(T_{\text{base}},\; T_{i-1} \cdot 3\right)\right) \]
@@ -638,7 +417,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 
       <h3>2. Idempotency and Distributed Lock Tables</h3>
       <p>
-        If a client retries a write request (such as a payment transaction or an order placement), the system must guarantee that processing the request multiple times has no additional side effects beyond the first attempt. This is known as **idempotency**.
+        If a client retries a write request (such as a payment transaction or an order placement), the system must guarantee that processing the request multiple times has no additional side effects beyond the first attempt. This is known as <strong>idempotency</strong>.
       </p>
       <p>
         Idempotency is achieved by requiring the client to pass a unique <code>Idempotency-Key</code> header (typically a UUIDv4) with every write operation. The server maintains a distributed lock and transaction register (often backed by Redis) to coordinate requests.
@@ -650,96 +429,23 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	<li>When a request arrives, the server checks the Redis ledger for the <code>Idempotency-Key</code>.</li>
 	<li>If the key does not exist, the server registers the key with an <code>IN_PROGRESS</code> state and sets a short TTL (e.g., 5 seconds) to act as a lock, preventing concurrent duplicates.</li>
 	<li>If the key exists and its state is <code>IN_PROGRESS</code>, the server returns a <code>409 Conflict</code>, indicating that a duplicate transaction is already active.</li>
-	<li>If the key exists and its state is <code>SUCCESS</code>, the server immediately returns the *cached response body and status code* from the first execution, avoiding any re-processing or database mutation.</li>
+	<li>If the key exists and its state is <code>SUCCESS</code>, the server immediately returns the <em>cached response body and status code</em> from the first execution, avoiding any re-processing or database mutation.</li>
 	<li>If the first attempt threw an internal failure, the key is evicted, allowing subsequent attempts to execute clean.</li>
       </ol>
 
       <p>
-        The following implementation illustrates an idempotency middleware backed by Redis:
+        In a production-grade implementation, this lifecycle is managed by an idempotency middleware interceptor that operates against state-mutating requests (such as <code>POST</code>, <code>PUT</code>, or <code>PATCH</code>). Symmetrically, when a request carrying an idempotency key header is received, the middleware intercepts the execution and constructs two distinct coordinate paths inside the distributed Redis key-value store: a transient execution lock key prefixed with <code>idempotency:lock:</code> and a persistent transaction record key prefixed with <code>idempotency:record:</code>.
       </p>
-
-      <pre><code>// Production-Grade Redis-Backed Idempotency Middleware in TypeScript
-import { Request, Response, NextFunction } from 'express';
-import Redis from 'ioredis';
-
-const redis = new Redis({
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: 6379,
-});
-
-export const idempotencyMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const idempotencyKey = req.headers['idempotency-key'];
-  
-  // Only apply idempotency to state-mutating requests (POST, PUT, PATCH)
-  if (!idempotencyKey || typeof idempotencyKey !== 'string' || req.method === 'GET') {
-    return next();
-  }
-
-  const lockKey = `idempotency:lock:${idempotencyKey}`;
-  const recordKey = `idempotency:record:${idempotencyKey}`;
-
-  try {
-    // Attempt to acquire an execution lock using NX (Not Exists) and a 5-second TTL
-    const acquiredLock = await redis.set(lockKey, 'locked', 'NX', 'PX', 5000);
-    
-    if (!acquiredLock) {
-      return res.status(409).json({
-        success: false,
-        error: {
-          code: 'DUPLICATE_REQUEST_ACTIVE',
-          message: 'A transaction with this idempotency key is already in progress. Please wait.'
-        }
-      });
-    }
-
-    // Check if a successful record already exists
-    const existingRecord = await redis.get(recordKey);
-    if (existingRecord) {
-      // Release the lock and return the cached response immediately
-      await redis.del(lockKey);
-      const cachedResponse = JSON.parse(existingRecord);
-      
-      return res.status(cachedResponse.status).json(cachedResponse.body);
-    }
-
-    // Intercept the res.json method to capture the success payload
-    const originalJson = res.json;
-    res.json = function (body: any): Response {
-      res.json = originalJson; // Restore the original method reference
-
-      // Only cache successful or client-error responses (exclude 5xx server failures)
-      if (res.statusCode &gt;= 200 &amp;&amp; res.statusCode &lt; 500) {
-        const responsePayload = {
-          status: res.statusCode,
-          body
-        };
-        
-        // Cache the response for 24 hours (86400 seconds)
-        redis.set(recordKey, JSON.stringify(responsePayload), 'EX', 86400)
-          .then(() => redis.del(lockKey))
-          .catch((err) => console.error('Failed to save idempotency cache:', err));
-      } else {
-        // Evict the lock immediately if a server-side failure occurred
-        redis.del(lockKey).catch((err) => console.error('Failed to release lock:', err));
-      }
-
-      return originalJson.call(res, body);
-    };
-
-    next();
-  } catch (error) {
-    console.error('Idempotency system failure:', error);
-    // In fail-secure mode, allow the request to proceed if Redis is unreachable
-    next();
-  }
-};
-</code></pre>
-
-      <h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">VI. The Circuit Breaker Pattern: A Three-State Finite Automaton</h2>
+      <p>
+        Symmetrically, the middleware attempts to write the transient lock key to Redis using the <code>SET NX PX</code> protocol. Symmetrically, this atomic write instructs Redis to store the key only if it does not already exist, and assigns a short, 5-second expiration timeout. Symmetrically, if this lock write fails—indicating that an identical transaction is already active—the middleware terminates the request immediately and returns an HTTP <code>409 Conflict</code> status code and a duplicate transaction warning to the client.
+      </p>
+      <p>
+        Symmetrically, if the lock is successfully acquired, the middleware queries the persistent transaction record key. Symmetrically, if a cached record exists, the middleware immediately releases the transient lock, deserializes the cached payload, and writes the saved response body and status code directly back to the client socket—completely bypassing the application logic and database layer.
+      </p>
+      <p>
+        Symmetrically, if no record is found in Redis, the middleware allows the request to proceed to the core services. Symmetrically, it overrides the server's serialization output stream. Symmetrically, if the execution completes successfully and returns a success status code (less than <code>500</code>), the middleware serializes the response payload, caches it under the persistent record key with a 24-hour expiration window, and deletes the transient lock key. Symmetrically, if the execution crashes and returns a server failure, the middleware evicts the transient lock key immediately, allowing the client to safely retry the transaction. Symmetrically, if the Redis cluster itself becomes unreachable, the middleware logs the error and gracefully permits the request to execute directly in a fail-safe mode, ensuring that external caching infrastructure failures do not block core application pathways.
+      </p>
+<h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">VI. The Circuit Breaker Pattern: A Three-State Finite Automaton</h2>
       <p>
         The Circuit Breaker pattern, popularized by Netflix Hystrix and formalized by Michael Nygard, is the primary fault-isolation mechanism in distributed systems. It acts as an automated safety switch that wraps remote calls, preventing a failing downstream dependency from consuming all system threads.
       </p>
@@ -853,13 +559,13 @@ export const idempotencyMiddleware = async (
 
       <h3>1. Little's Law and Bulkhead Sizing Mechanics</h3>
       <p>
-        To size bulkheads mathematically, engineers rely on **Little's Law**, a fundamental theorem in queuing theory. Little's Law states that the long-term average number of active, concurrent requests \( C \) in a stationary queuing system is equal to the long-term average effective arrival rate \( \lambda \) multiplied by the average time \( L \) that a request spends in the system:
+        To size bulkheads mathematically, engineers rely on <strong>Little's Law</strong>, a fundamental theorem in queuing theory. Little's Law states that the long-term average number of active, concurrent requests \( C \) in a stationary queuing system is equal to the long-term average effective arrival rate \( \lambda \) multiplied by the average time \( L \) that a request spends in the system:
       </p>
       <div class="math-block">
         \[ C = \lambda \cdot L \]
       </div>
       <p>
-        Let us evaluate a practical backend instance. Consider a payment processing platform where a single API node receives an arrival rate \( \lambda = 100 \) requests per second under normal peak conditions.
+        Evaluating a practical backend instance confirms this relationship. Consider a payment processing platform where a single API node receives an arrival rate \( \lambda = 100 \) requests per second under normal peak conditions.
       </p>
       <p>
         The platform relies on two downstream microservices:
@@ -896,7 +602,7 @@ export const idempotencyMiddleware = async (
         Because the thread pool is capped at 100, the slower Service C will immediately consume all 100 threads. As a result, the fast, perfectly healthy Service B is completely starved. Requests for Receipt Generation are rejected with <code>503 Service Unavailable</code> because no threads are available to process them.
       </p>
       <p>
-        By implementing **Bulkhead Isolation**, the thread pool is explicitly partitioned:
+        By implementing <strong>Bulkhead Isolation</strong>, the thread pool is explicitly partitioned:
       </p>
       <ul>
         <li><strong>Bulkhead B (Receipts)</strong>: Capped at 15 threads.</li>
@@ -908,7 +614,7 @@ export const idempotencyMiddleware = async (
 
       <h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">VIII. Retry Budgets and Amplification Storms</h2>
       <p>
-        While retries heal transient network interruptions, using them without limits in deep microservice graphs is highly dangerous. If every service in a call chain retries a failed dependency independently, the system will experience **retry amplification**, leading to a self-inflicted Distributed Denial of Service (DDoS) attack.
+        While retries heal transient network interruptions, using them without limits in deep microservice graphs is highly dangerous. If every service in a call chain retries a failed dependency independently, the system will experience <strong>retry amplification</strong>, leading to a self-inflicted Distributed Denial of Service (DDoS) attack.
       </p>
 
       <h3>1. The Mathematics of Retry Amplification</h3>
@@ -933,7 +639,7 @@ export const idempotencyMiddleware = async (
 
       <h3>2. Enforcing a Dynamic Retry Budget</h3>
       <p>
-        To prevent retry storms, professional architectures enforce a **Retry Budget** at each client node. Instead of permitting an arbitrary number of retries per request, the system tracks successes and retries in a rolling time window using a token bucket or a sliding window log:
+        To prevent retry storms, professional architectures enforce a <strong>Retry Budget</strong> at each client node. Instead of permitting an arbitrary number of retries per request, the system tracks successes and retries in a rolling time window using a token bucket or a sliding window log:
       </p>
       <div class="math-block">
         \[ \text{RetryBudget}(t) = \frac{\text{Retries}(t)}{\text{Successes}(t) + \text{Retries}(t)} \leq B_{\max} \]
@@ -1000,7 +706,7 @@ export const idempotencyMiddleware = async (
 
       <h3>1. Fallback Response Architecture</h3>
       <p>
-        When a soft dependency fails, the global error system should intercept the failure and return a **fallback response** instead of a generic 500 error:
+        When a soft dependency fails, the global error system should intercept the failure and return a <strong>fallback response</strong> instead of a generic 500 error:
       </p>
       <ul>
         <li><strong>Cached Fallback</strong>: Return the most recently cached successful response from Redis. Stale data is highly preferred over a broken UI.</li>
@@ -1010,34 +716,71 @@ export const idempotencyMiddleware = async (
 
       <h3>2. Partial Failure Handling in Aggregated APIs</h3>
       <p>
-        In GraphQL or aggregate REST APIs (e.g., API Gateways combining profile data, recent orders, and loyalty points), a partial failure must never cause the entire request to fail. The server should return a partial success payload, setting the failed field to <code>null</code> while populating an <code>errors</code> array containing localized diagnostics:
+        In GraphQL or aggregate REST APIs (e.g., API Gateways combining profile data, recent orders, and loyalty points), a partial failure must never cause the entire request to fail. The server should return a partial success payload, setting the failed field to <code>null</code> while populating an <code>errors</code> array containing localized diagnostics.
       </p>
-
-      <pre><code>// Symmetrical Envelope for Partial Failures (GraphQL / Aggregate JSON)
-{
-  "data": {
-    "user": {
-      "id": "108",
-      "name": "Aryabhata",
-      "profileImage": "https://cdn.example.com/assets/aryabhata.jpg",
-      "recentOrders": [
-        { "orderId": "TX-9901", "total": 150.00 }
-      ],
-      "loyaltyPoints": null // Soft dependency failed; return null gracefully
-    }
-  },
-  "errors": [
-    {
-      "path": ["user", "loyaltyPoints"],
-      "message": "Loyalty registry is temporarily unreachable.",
-      "code": "DEPENDENCY_TIMEOUT",
-      "severity": "WARNING"
-    }
-  ]
-}
-</code></pre>
-
-      <h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">X. Dead Letter Queues: The Court of Last Resort</h2>
+      <p>
+        In an aggregated API payload, this structure is represented as a dual-root envelope containing two primary keys: a success data capsule and a diagnostic errors registry.
+      </p>
+      
+      <div class="table-container" style="margin: 20px 0;">
+        <table class="vintage-table" style="width: 100%; border-collapse: collapse; border: 1.5px solid #2C2416; font-size: 0.85rem; background-color: #FAF6EF;">
+          <thead>
+            <tr style="border-bottom: 1.5px solid #2C2416; background-color: #C9A84C;">
+              <th style="padding: 8px; border-right: 1px solid #2C2416; text-align: left; color: #2C2416;">Field / Path</th>
+              <th style="padding: 8px; border-right: 1px solid #2C2416; text-align: left; color: #2C2416;">Value / Status</th>
+              <th style="padding: 8px; text-align: left; color: #2C2416;">Operational Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #2C2416;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>data.user.id</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">"108"</td>
+              <td style="padding: 6px;">Successfully resolved primary user identifier.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2C2416;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>data.user.name</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">"Aryabhata"</td>
+              <td style="padding: 6px;">Successfully resolved user profile name.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2C2416;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>data.user.profileImage</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">"https://cdn.example.com/assets/aryabhata.jpg"</td>
+              <td style="padding: 6px;">Successfully resolved static image URL.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2C2416;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>data.user.recentOrders</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">Array with transaction "TX-9901"</td>
+              <td style="padding: 6px;">Successfully resolved relational order history.</td>
+            </tr>
+            <tr style="border-bottom: 1.5px solid #2C2416;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>data.user.loyaltyPoints</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">null</td>
+              <td style="padding: 6px;">Gracefully set to null because the soft dependency failed.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2C2416; background-color: #FAF6EF;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>errors[0].path</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">["user", "loyaltyPoints"]</td>
+              <td style="padding: 6px;">Pinpoints the exact location of the partial failure within the data graph.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2C2416; background-color: #FAF6EF;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>errors[0].message</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">"Loyalty registry is unreachable."</td>
+              <td style="padding: 6px;">User-friendly, non-technical diagnostic message.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2C2416; background-color: #FAF6EF;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>errors[0].code</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">"DEPENDENCY_TIMEOUT"</td>
+              <td style="padding: 6px;">Machine-readable code for frontend routing decisions.</td>
+            </tr>
+            <tr style="background-color: #FAF6EF;">
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;"><code>errors[0].severity</code></td>
+              <td style="padding: 6px; border-right: 1px solid #2C2416; font-family: monospace;">"WARNING"</td>
+              <td style="padding: 6px;">Symmetrically classifies the error as a soft warning instead of a system crash.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+<h2 style="text-align: center; border-top: 1px solid #2C2416; border-bottom: 1px solid #2C2416; padding: 15px 0;">X. Dead Letter Queues: The Court of Last Resort</h2>
       <p>
         In asynchronous processing pipelines—relying on message brokers like RabbitMQ, Apache Kafka, or AWS SQS—errors present a unique challenge. While synchronous HTTP requests can return an error code immediately to the user, an asynchronous message consumer has no client waiting. 
       </p>
@@ -1046,7 +789,7 @@ export const idempotencyMiddleware = async (
       </p>
 
       <p>
-        The **Dead Letter Queue (DLQ)** pattern resolves this. Instead of retrying indefinitely, the primary queue limits the execution attempts of a single message to a maximum count (known as <code>maxReceiveCount</code>, typically 3 or 5).
+        The <strong>Dead Letter Queue (DLQ)</strong> pattern resolves this. Instead of retrying indefinitely, the primary queue limits the execution attempts of a single message to a maximum count (known as <code>maxReceiveCount</code>, typically 3 or 5).
       </p>
 
       <h3>1. The Message Lifecycle</h3>
@@ -1065,7 +808,7 @@ export const idempotencyMiddleware = async (
         The administrative machinery of the Mughal empire’s revenue system, the <em>diwani</em>, operated a similar system for handling anomalous tax shortfalls. In this framework, the local revenue officer (the <em>amalguzar</em> or <em>krori</em>) was expected to collect taxes according to a fixed assessment schedule (the <em>dastur-al-amal</em>). 
       </p>
       <p>
-        If a cultivator was unable to pay tax due to a temporary crop failure, the local officer could apply standard local mitigations—such as deferring the collection to the next season or offering a short-term agricultural loan (<em>taccavi</em>). This represents standard **local exception handling and retries**.
+        If a cultivator was unable to pay tax due to a temporary crop failure, the local officer could apply standard local mitigations—such as deferring the collection to the next season or offering a short-term agricultural loan (<em>taccavi</em>). This represents standard <strong>local exception handling and retries</strong>.
       </p>
       <p>
         However, if the tax shortfall was caused by a highly anomalous, unresolvable dispute—such as a contested boundary line between regional landlords (<em>zamindars</em>) or a systemic currency debasement—the local officer could not resolve the matter. If the officer sat on the file, the local revenue registry became clogged, halting the processing of all other ordinary tax filings. 
@@ -1138,35 +881,135 @@ export const idempotencyMiddleware = async (
         A production-grade backend request pipeline integrates all of these concepts into a layered, concentric defense-in-depth architecture. Each layer operates as a distinct fortification gate, filtering and containing failures before they propagate:
       </p>
 
-      <pre><code>[ Client Request ]
-       │
-       ▼
- 1. [ Input Validation Middleware ]  ──(Malformed)──&gt; [ HTTP 400 Bad Request ]
-       │ (Flawless Data Schema)
-       ▼
- 2. [ Authentication Middleware ]    ──(Invalid)────&gt; [ HTTP 401 Unauthorized ]
-       │ (Verified User Claims)
-       ▼
- 3. [ Idempotency Key Validator ]    ──(Duplicate)──&gt; [ Return Cached Response ]
-       │ (New Unique Transaction)
-       ▼
- 4. [ Bulkhead Partition Pool ]      ──(Starved)────&gt; [ HTTP 503 Pool Exhausted ]
-       │ (Guaranteed Execution Thread)
-       ▼
- 5. [ Circuit Breaker Wrapper ]      ──(Tripped)────&gt; [ Fallback Static Response ]
-       │ (Healthy Downstream Call)
-       ▼
- 6. [ Core Domain Service Execution ]
-       │ (State Mutation Invariants)
-       ▼
- 7. [ Global Error Handler Middleware ] &lt;──(Exception Bubble)── [ Internal Failure ]
-       │
-       ├─► [ Log Full Stack Trace Internally with Correlation ID ]
-       └─► [ Return Sanitized HTTP 500 JSON to Client ]
-</code></pre>
+      <!-- Symmetrical SVG Request Pipeline -->
+      <div class="svg-diagram-container" style="margin: 30px auto; text-align: center; max-width: 600px;">
+        <div class="svg-diagram-title" style="font-weight: bold; margin-bottom: 8px; color: #2C2416; font-size: 0.95rem;">Plate XXXIII: The Resilient Request Pipeline</div>
+        <svg class="svg-diagram" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Resilient Request Pipeline" style="width: 100%; border: 1.5px solid #2C2416; background-color: #FAF6EF; display: block; margin: 0 auto;">
+          <!-- Outer border -->
+          <rect x="5" y="5" width="590" height="490" fill="none" stroke="#2C2416" stroke-width="1.5"/>
 
-      <p>
-        This request pipeline operates as the software equivalent of a Rajput hill fort. Just as an invading force was forced to exhaust its resources at each successive gate (<em>pol</em>) while the defenders retreated in an orderly manner to secondary positions, the modern backend uses input validation to stop simple attacks, authentication to block unauthorized access, bulkheads to partition CPU cores, circuit breakers to bypass dead services, and global error handlers to secure the final citadel of system state.
+          <!-- Client Request starting point -->
+          <rect x="210" y="20" width="180" height="25" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="32.5" font-weight="bold" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Client HTTP Request</text>
+
+          <!-- Arrow down from start -->
+          <path d="M 300,45 L 300,60" stroke="#2C2416" stroke-width="1" fill="none"/>
+          <polygon points="297,55 300,60 303,55" fill="#2C2416"/>
+
+          <!-- Step 1: Input Validation -->
+          <rect x="150" y="60" width="300" height="32" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="76" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">1. Input Validation Middleware</text>
+
+          <path d="M 300,92 L 300,120" stroke="#2C2416" stroke-width="1" fill="none"/>
+          <polygon points="297,115 300,120 303,115" fill="#2C2416"/>
+          <text x="305" y="106" font-size="7.5" fill="#8FAF8A" font-weight="bold" text-anchor="start">Flawless Data Schema</text>
+
+          <!-- Step 2: Authentication -->
+          <rect x="150" y="120" width="300" height="32" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="136" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">2. Authentication Middleware</text>
+
+          <path d="M 300,152 L 300,180" stroke="#2C2416" stroke-width="1" fill="none"/>
+          <polygon points="297,175 300,180 303,175" fill="#2C2416"/>
+          <text x="305" y="166" font-size="7.5" fill="#8FAF8A" font-weight="bold" text-anchor="start">Verified User Claims</text>
+
+          <!-- Step 3: Idempotency Key -->
+          <rect x="150" y="180" width="300" height="32" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="196" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">3. Idempotency Key Validator</text>
+
+          <path d="M 300,212 L 300,240" stroke="#2C2416" stroke-width="1" fill="none"/>
+          <polygon points="297,235 300,240 303,235" fill="#2C2416"/>
+          <text x="305" y="226" font-size="7.5" fill="#8FAF8A" font-weight="bold" text-anchor="start">New Unique Request</text>
+
+          <!-- Step 4: Bulkhead Pool -->
+          <rect x="150" y="240" width="300" height="32" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="256" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">4. Bulkhead Partition Pool</text>
+
+          <path d="M 300,272 L 300,300" stroke="#2C2416" stroke-width="1" fill="none"/>
+          <polygon points="297,295 300,300 303,295" fill="#2C2416"/>
+          <text x="305" y="286" font-size="7.5" fill="#8FAF8A" font-weight="bold" text-anchor="start">Guaranteed Execution Thread</text>
+
+          <!-- Step 5: Circuit Breaker -->
+          <rect x="150" y="300" width="300" height="32" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="316" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">5. Circuit Breaker Wrapper</text>
+
+          <path d="M 300,332 L 300,360" stroke="#2C2416" stroke-width="1" fill="none"/>
+          <polygon points="297,355 300,360 303,355" fill="#2C2416"/>
+          <text x="305" y="346" font-size="7.5" fill="#8FAF8A" font-weight="bold" text-anchor="start">Healthy Downstream Call</text>
+
+          <!-- Step 6: Core Execution -->
+          <rect x="150" y="360" width="300" height="32" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="3"/>
+          <text x="300" y="376" font-weight="bold" font-size="9.5" fill="#2C2416" text-anchor="middle" dominant-baseline="central" fill="#2C2416">6. Core Domain Service Execution</text>
+
+          <!-- Exception bubble down to Global Error Handler -->
+          <path d="M 300,392 L 300,420" stroke="#D4A5A0" stroke-width="1.5" stroke-dasharray="2,2" fill="none"/>
+          <polygon points="297,415 300,420 303,415" fill="#D4A5A0"/>
+          <text x="305" y="406" font-size="7.5" fill="#D4A5A0" font-weight="bold" text-anchor="start">Exception Bubble</text>
+
+          <!-- Step 7: Global Error Handler Middleware -->
+          <rect x="150" y="420" width="300" height="32" fill="#FAF6EF" stroke="#D4A5A0" stroke-width="1.5" rx="3"/>
+          <text x="300" y="436" font-weight="bold" font-size="9.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">7. Global Error Handler Middleware</text>
+
+
+          <!-- RIGHT SIDE ERROR OUTPUTS -->
+
+          <!-- Step 1 Error -> HTTP 400 -->
+          <path d="M 450,76 L 470,76" stroke="#D4A5A0" stroke-width="1" fill="none"/>
+          <polygon points="465,73 470,76 465,79" fill="#D4A5A0"/>
+          <text x="460" y="70" font-size="6" fill="#D4A5A0" font-weight="bold" text-anchor="middle">Malformed</text>
+          
+          <rect x="470" y="60" width="125" height="32" fill="#FAF6EF" stroke="#D4A5A0" stroke-width="1.5" rx="3"/>
+          <text x="532.5" y="76" font-weight="bold" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">HTTP 400 Bad Request</text>
+
+          <!-- Step 2 Error -> HTTP 401 -->
+          <path d="M 450,136 L 470,136" stroke="#D4A5A0" stroke-width="1" fill="none"/>
+          <polygon points="465,133 470,136 465,139" fill="#D4A5A0"/>
+          <text x="460" y="130" font-size="6" fill="#D4A5A0" font-weight="bold" text-anchor="middle">Invalid</text>
+
+          <rect x="470" y="120" width="125" height="32" fill="#FAF6EF" stroke="#D4A5A0" stroke-width="1.5" rx="3"/>
+          <text x="532.5" y="136" font-weight="bold" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">HTTP 401 Unauthorized</text>
+
+          <!-- Step 3 Error -> Return Cached Response -->
+          <path d="M 450,196 L 470,196" stroke="#8FAF8A" stroke-width="1" fill="none"/>
+          <polygon points="465,193 470,196 465,199" fill="#8FAF8A"/>
+          <text x="460" y="190" font-size="6" fill="#8FAF8A" font-weight="bold" text-anchor="middle">Duplicate</text>
+
+          <rect x="470" y="180" width="125" height="32" fill="#FAF6EF" stroke="#8FAF8A" stroke-width="1.5" rx="3"/>
+          <text x="532.5" y="196" font-weight="bold" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Return Cached JSON</text>
+
+          <!-- Step 4 Error -> HTTP 503 -->
+          <path d="M 450,256 L 470,256" stroke="#D4A5A0" stroke-width="1" fill="none"/>
+          <polygon points="465,253 470,256 465,259" fill="#D4A5A0"/>
+          <text x="460" y="250" font-size="6" fill="#D4A5A0" font-weight="bold" text-anchor="middle">Starved</text>
+
+          <rect x="470" y="240" width="125" height="32" fill="#FAF6EF" stroke="#D4A5A0" stroke-width="1.5" rx="3"/>
+          <text x="532.5" y="256" font-weight="bold" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">HTTP 503 Pool Exhausted</text>
+
+          <!-- Step 5 Error -> Fallback response -->
+          <path d="M 450,316 L 470,316" stroke="#8FAF8A" stroke-width="1" fill="none"/>
+          <polygon points="465,313 470,316 465,319" fill="#8FAF8A"/>
+          <text x="460" y="310" font-size="6" fill="#8FAF8A" font-weight="bold" text-anchor="middle">Tripped</text>
+
+          <rect x="470" y="300" width="125" height="32" fill="#FAF6EF" stroke="#8FAF8A" stroke-width="1.5" rx="3"/>
+          <text x="532.5" y="316" font-weight="bold" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Fallback Response JSON</text>
+
+          <!-- LEFT SIDE: GLOBAL ERROR HANDLER ACTIONS -->
+          <!-- Arrow out of Global Error Handler to log -->
+          <path d="M 150,430 L 100,430 L 100,420" stroke="#D4A5A0" stroke-width="1" fill="none"/>
+          <polygon points="97,425 100,420 103,425" fill="#D4A5A0"/>
+          <rect x="25" y="380" width="110" height="35" fill="#FAF6EF" stroke="#D4A5A0" stroke-width="1" rx="3"/>
+          <text x="80" y="392" font-size="6.5" text-anchor="middle">Log Stack Trace</text>
+          <text x="80" y="404" font-weight="bold" font-size="7" fill="#D4A5A0" text-anchor="middle">(Correlation ID)</text>
+
+          <!-- Arrow out of Global Error Handler to client response -->
+          <path d="M 150,442 L 80,442 L 80,455" stroke="#D4A5A0" stroke-width="1" fill="none"/>
+          <polygon points="77,450 80,455 83,450" fill="#D4A5A0"/>
+          <rect x="25" y="455" width="110" height="20" fill="#FAF6EF" stroke="#D4A5A0" stroke-width="1" rx="3"/>
+          <text x="80" y="465" font-weight="bold" font-size="7" fill="#2C2416" text-anchor="middle">Return HTTP 500 JSON</text>
+
+        </svg>
+        <figcaption class="jost-italic" style="text-align: center; font-size: 0.85rem; margin-top: 5px;">Plate XXXIII: The multi-layered request execution lifecycle, representing successive defensive checkpoints guarding the core system state.</figcaption>
+      </div>
+This request pipeline operates as the software equivalent of a Rajput hill fort. Just as an invading force was forced to exhaust its resources at each successive gate (<em>pol</em>) while the defenders retreated in an orderly manner to secondary positions, the modern backend uses input validation to stop simple attacks, authentication to block unauthorized access, bulkheads to partition CPU cores, circuit breakers to bypass dead services, and global error handlers to secure the final citadel of system state.
       </p>
 
       <p>
