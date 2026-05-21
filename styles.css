@@ -2,7 +2,9 @@
    WES ANDERSON STYLE SYSTEM: THE GRAND BACKEND DIGITAL CHRONICLES
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,300;1,14..32,400&display=swap');/* --- Custom Properties: Editorial palette + diagram tokens --- */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* --- Custom Properties: Editorial palette + diagram tokens --- */
 :root {
   --bg-cream: #faf6ef;
   --color-charcoal: #2c2416;
@@ -29,8 +31,24 @@
   --diagram-plate-bg: var(--bg-code);
   --diagram-arrow: var(--accent-mustard);
 
---font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
---font-serif: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  /* Dynamic diagram components (Light Mode default) */
+  --diagram-canvas: #faf6ef;
+  --diagram-plate: #f5f0e8;
+  --diagram-node: #ffffff;
+  --diagram-sand: #f5f0e8;
+  --diagram-ink: #2c2416;
+  --diagram-rose: #d4a5a0;
+  --diagram-sage: #8faf8a;
+  --diagram-mustard: #c9a84c;
+  --diagram-coral: #d4a5a0;
+  --diagram-text-on-accent: #faf6ef;
+
+  /* Typography Pairing */
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Lora', 'Georgia', serif;
+  --font-title: 'Playfair Display', 'Georgia', serif;
+  --font-mono: 'Courier Prime', 'Courier New', monospace;
+
   --space-block: 2rem;
   --space-section: 2.5rem;
   --gap-pair-max: 1.5rem;
@@ -51,7 +69,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-cream: #1a1814;
-    --color-charcoal: #d4cfc8;
+    --color-charcoal: #e8e3d9;
 
     --accent-rose: #c4908b;
     --accent-sage: #7a9a75;
@@ -68,8 +86,20 @@
     --diagram-plate-bg: #2a2620;
     --diagram-arrow: var(--accent-mustard);
 
-    --shadow-flat: 4px 4px 0 rgba(0, 0, 0, 0.45);
-    --shadow-flat-hover: 7px 7px 0 rgba(0, 0, 0, 0.5);
+    /* Dynamic diagram components (Dark Mode override) */
+    --diagram-canvas: #1a1814;
+    --diagram-plate: #242018;
+    --diagram-node: #2a2620;
+    --diagram-sand: #2a2620;
+    --diagram-ink: #e8e3d9;
+    --diagram-rose: #c4908b;
+    --diagram-sage: #7a9a75;
+    --diagram-mustard: #d4b85a;
+    --diagram-coral: #c4908b;
+    --diagram-text-on-accent: #1a1814;
+
+    --shadow-flat: 4px 4px 0 rgba(0, 0, 0, 0.65);
+    --shadow-flat-hover: 7px 7px 0 rgba(0, 0, 0, 0.8);
   }
 }
 
@@ -112,7 +142,56 @@ body {
 }
 
 body::before {
-  content: none;
+  content: "";
+  position: fixed;
+  inset: 12px;
+  border: 1px solid var(--color-charcoal);
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.22;
+  transition: border-color 0.3s ease;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 18px;
+  border: 2px solid var(--color-charcoal);
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.8;
+  transition: border-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  body::before {
+    inset: 6px;
+  }
+  body::after {
+    inset: 10px;
+  }
+}
+
+::selection {
+  background-color: var(--accent-rose);
+  color: var(--text-on-accent);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-rose);
+  border: 3px solid var(--bg-cream);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-mustard);
 }
 
 /* --- Central column --- */
@@ -185,7 +264,7 @@ header.chapter-header {
 }
 
 header.chapter-header h1 {
-  font-family: var(--font-sans);
+  font-family: var(--font-title);
   font-size: clamp(1.75rem, 4vw, 2.8rem);
   font-weight: 700;
   line-height: 1.25;
@@ -252,7 +331,7 @@ p:last-child {
 }
 
 p.intro-paragraph::first-letter {
-  font-family: var(--font-serif);
+  font-family: var(--font-title);
   font-size: clamp(3.5rem, 8vw, 5rem);
   float: left;
   line-height: 0.85;
@@ -264,11 +343,19 @@ p.intro-paragraph::first-letter {
 }
 
 h2,
-h3,
+h3 {
+  font-family: var(--font-title);
+  color: var(--color-charcoal);
+  letter-spacing: 0.02em;
+  margin-top: var(--space-section);
+  margin-bottom: var(--space-block);
+  line-height: 1.35;
+}
+
 h4 {
   font-family: var(--font-sans);
   color: var(--color-charcoal);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   margin-top: var(--space-section);
   margin-bottom: var(--space-block);
   line-height: 1.35;
@@ -278,9 +365,22 @@ h2 {
   font-size: 1.8rem;
   text-align: center;
   padding: 20px 0;
-  border-top: 1px solid var(--accent-rose);
-  border-bottom: 1px solid var(--accent-rose);
+  border-top: 2px solid var(--color-charcoal);
+  border-bottom: 2px solid var(--color-charcoal);
   text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.container h2::before {
+  content: "❖  ";
+  color: var(--accent-mustard);
+  font-size: 1.2rem;
+}
+
+.container h2::after {
+  content: "  ❖";
+  color: var(--accent-mustard);
+  font-size: 1.2rem;
 }
 
 h3 {
@@ -409,25 +509,31 @@ aside.margin-card {
   margin: 0 0 var(--space-block) 1.75rem;
   padding: 20px 22px;
   background-color: var(--bg-code);
+  border: 2px solid var(--color-charcoal);
   border-radius: 4px;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-flat);
   font-size: 15px;
   line-height: 1.7;
   position: relative;
   z-index: 10;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+aside.margin-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-flat-hover);
 }
 
 aside.margin-card.aside {
-  border: 1px solid var(--accent-sage);
+  border: 2px solid var(--accent-sage);
 }
 
 aside.margin-card.caution {
-  border: 1px solid var(--accent-mustard);
+  border: 2px solid var(--accent-mustard);
 }
 
 aside.margin-card.security {
-  border: 1px solid var(--accent-rose);
+  border: 2px solid var(--accent-rose);
 }
 
 aside.margin-card .card-label,
@@ -465,12 +571,28 @@ aside.margin-card p {
 /* --- Code --- */
 pre {
   background-color: var(--bg-code);
-  border-left: 4px solid var(--accent-sage);
+  border: 2px solid var(--color-charcoal);
+  border-left: 6px solid var(--accent-sage);
   padding: 24px;
   margin: var(--space-block) 0;
-  border-radius: 0 4px 4px 0;
+  border-radius: 4px;
   overflow-x: auto;
   max-width: 100%;
+  box-shadow: var(--shadow-flat);
+  position: relative;
+}
+
+pre::before {
+  content: "SYSTEM DISPATCH";
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--color-charcoal);
+  opacity: 0.45;
 }
 
 pre code {
@@ -522,7 +644,7 @@ code {
 
 .toc-card {
   background-color: var(--bg-code);
-  border: 1px solid var(--color-charcoal);
+  border: 2px solid var(--color-charcoal);
   border-radius: 4px;
   padding: 25px;
   box-shadow: var(--shadow-flat);
@@ -535,6 +657,33 @@ code {
   position: relative;
   min-width: 0;
 }
+
+.toc-card::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  width: 24px;
+  height: 10px;
+  border: 1.5px solid var(--color-charcoal);
+  border-bottom: none;
+  opacity: 0.55;
+}
+
+.toc-card::after {
+  content: "♦";
+  position: absolute;
+  top: 10px;
+  right: 28px;
+  font-size: 8px;
+  color: var(--accent-mustard);
+  opacity: 0.8;
+}
+
+.toc-card:nth-child(4n+1) { border-top: 6px solid var(--accent-rose); }
+.toc-card:nth-child(4n+2) { border-top: 6px solid var(--accent-sage); }
+.toc-card:nth-child(4n+3) { border-top: 6px solid var(--accent-mustard); }
+.toc-card:nth-child(4n+4) { border-top: 6px solid var(--accent-blue); }
 
 .toc-card:hover {
   transform: translate(-3px, -3px);
@@ -583,7 +732,7 @@ code {
 .table-container {
   overflow-x: auto;
   margin: var(--space-block) 0;
-  border: 1px solid var(--color-charcoal);
+  border: 2px solid var(--color-charcoal);
   border-radius: 4px;
   box-shadow: var(--shadow-flat);
   max-width: 100%;
@@ -600,7 +749,7 @@ table {
 th,
 td {
   padding: 14px 18px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-charcoal);
   font-family: var(--font-serif);
   font-size: 0.95rem;
   line-height: var(--line-height-prose);
@@ -613,30 +762,18 @@ th {
   font-family: var(--font-sans);
   text-transform: uppercase;
   font-size: 0.8rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   font-weight: 700;
-  border-bottom: 2px solid var(--color-charcoal);
+  border-bottom: 3px double var(--color-charcoal);
 }
 
 tr:nth-child(even) {
   background-color: var(--bg-cream);
 }
 
-/* --- Diagram plates: fixed Wes Anderson light canvas (always legible) --- */
+/* --- Diagram plates --- */
 figure,
 .svg-diagram-container {
-  --diagram-canvas: #faf6ef;
-  --diagram-plate: #f5f0e8;
-  --diagram-node: #ffffff;
-  --diagram-sand: #f5f0e8;
-  --diagram-ink: #2c2416;
-  --diagram-rose: #d4a5a0;
-  --diagram-sage: #8faf8a;
-  --diagram-mustard: #c9a84c;
-  --diagram-coral: #d4a5a0;
-  --diagram-text-on-accent: #faf6ef;
-  --diagram-arrow: #c9a84c;
-
   /* Remap legacy SVG variable names inside the plate */
   --color-charcoal: var(--diagram-ink);
   --color-navy: var(--diagram-ink);
@@ -711,88 +848,301 @@ figure .svg-diagram-title {
 }
 
 .svg-diagram-container .svg-diagram text,
-figure .svg-diagram text {
-  font-family: var(--font-sans);
+figure .svg-diagram text,
+.vintage-diagram text {
+  font-family: 'Jost', var(--font-sans);
 }
 
-/* Default ink unless SVG specifies accent-on-color fills */
-.svg-diagram-container .svg-diagram text:not([fill]),
-.svg-diagram-container .svg-diagram text[fill="var(--color-navy)"],
-.svg-diagram-container .svg-diagram text[fill="var(--color-charcoal)"],
-.svg-diagram-container .svg-diagram text[fill="#2C2416"],
-.svg-diagram-container .svg-diagram text[fill="#2c2416"] {
-  fill: var(--diagram-ink);
+/* Symmetrical SVG Font-Family Mapping (Size-Safe) */
+.svg-diagram text[font-family*="mono" i],
+.vintage-diagram text[font-family*="mono" i],
+.svg-diagram text[font-family*="Mono" i],
+.vintage-diagram text[font-family*="Mono" i],
+.svg-diagram text.mono,
+.vintage-diagram text.mono {
+  font-family: 'JetBrains Mono', var(--font-mono) !important;
 }
 
-.svg-diagram-container .svg-diagram text[fill="var(--bg-cream)"],
-.svg-diagram-container .svg-diagram text[fill="#FAF6EF"],
-.svg-diagram-container .svg-diagram text[fill="#faf6ef"] {
-  fill: var(--diagram-text-on-accent);
+.svg-diagram text[font-family*="Playfair" i],
+.vintage-diagram text[font-family*="Playfair" i],
+.svg-diagram text[font-family*="serif" i]:not([font-family*="sans" i]),
+.vintage-diagram text[font-family*="serif" i]:not([font-family*="sans" i]) {
+  font-family: 'Playfair Display', var(--font-title) !important;
 }
 
-.svg-diagram text.mono {
-  font-family: var(--font-mono);
-  font-size: 11px;
+.svg-diagram text[font-family*="Jost" i],
+.svg-diagram text[font-family*="sans" i],
+.vintage-diagram text[font-family*="Jost" i],
+.vintage-diagram text[font-family*="sans" i] {
+  font-family: 'Jost', var(--font-sans) !important;
 }
 
-/* Node fills on the light plate */
-.svg-diagram-container .svg-diagram rect[fill="var(--bg-cream)"],
-.svg-diagram-container .svg-diagram rect[fill="var(--bg-node)"],
+.svg-diagram text:not([font-family]),
+.vintage-diagram text:not([font-family]) {
+  font-family: 'Jost', var(--font-sans);
+}
+
+/* 1. General ink color override for lines, paths, strokes */
+.svg-diagram-container .svg-diagram [stroke="#2C2416"],
+.svg-diagram-container .svg-diagram [stroke="#2c2416"],
+.svg-diagram-container .svg-diagram [stroke="#2C2C2C"],
+.svg-diagram-container .svg-diagram [stroke="#2c2c2c"],
+.svg-diagram-container .svg-diagram [stroke="var(--color-charcoal)"],
+.svg-diagram-container .svg-diagram [stroke="var(--color-navy)"],
+figure .svg-diagram [stroke="#2C2416"],
+figure .svg-diagram [stroke="#2c2416"],
+figure .svg-diagram [stroke="#2C2C2C"],
+figure .svg-diagram [stroke="#2c2c2c"],
+figure .svg-diagram [stroke="var(--color-charcoal)"],
+figure .svg-diagram [stroke="var(--color-navy)"],
+.vintage-diagram [stroke="#2C2416"],
+.vintage-diagram [stroke="#2c2416"],
+.vintage-diagram [stroke="#2C2C2C"],
+.vintage-diagram [stroke="#2c2c2c"],
+.vintage-diagram [stroke="var(--color-charcoal)"],
+.vintage-diagram [stroke="var(--color-navy)"] {
+  stroke: var(--diagram-ink) !important;
+}
+
+/* 2. Overrides for cream elements fill (to responsive node bg) */
 .svg-diagram-container .svg-diagram rect[fill="#FAF6EF"],
-.svg-diagram-container .svg-diagram rect[fill="#faf6ef"] {
-  fill: var(--diagram-node);
+.svg-diagram-container .svg-diagram rect[fill="#faf6ef"],
+.svg-diagram-container .svg-diagram rect[fill="#ffffff"],
+.svg-diagram-container .svg-diagram rect[fill="#FFFFFF"],
+.svg-diagram-container .svg-diagram circle[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram circle[fill="#faf6ef"],
+.svg-diagram-container .svg-diagram circle[fill="#ffffff"],
+.svg-diagram-container .svg-diagram circle[fill="#FFFFFF"],
+.svg-diagram-container .svg-diagram path[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram path[fill="#faf6ef"],
+.svg-diagram-container .svg-diagram path[fill="#ffffff"],
+.svg-diagram-container .svg-diagram path[fill="#FFFFFF"],
+.svg-diagram-container .svg-diagram polygon[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram polygon[fill="#faf6ef"],
+.svg-diagram-container .svg-diagram polygon[fill="#ffffff"],
+.svg-diagram-container .svg-diagram polygon[fill="#FFFFFF"],
+.svg-diagram-container .svg-diagram ellipse[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram ellipse[fill="#faf6ef"],
+.svg-diagram-container .svg-diagram ellipse[fill="#ffffff"],
+.svg-diagram-container .svg-diagram ellipse[fill="#FFFFFF"],
+figure .svg-diagram rect[fill="#FAF6EF"],
+figure .svg-diagram rect[fill="#faf6ef"],
+figure .svg-diagram rect[fill="#ffffff"],
+figure .svg-diagram rect[fill="#FFFFFF"],
+figure .svg-diagram circle[fill="#FAF6EF"],
+figure .svg-diagram circle[fill="#faf6ef"],
+figure .svg-diagram circle[fill="#ffffff"],
+figure .svg-diagram circle[fill="#FFFFFF"],
+figure .svg-diagram path[fill="#FAF6EF"],
+figure .svg-diagram path[fill="#faf6ef"],
+figure .svg-diagram path[fill="#ffffff"],
+figure .svg-diagram path[fill="#FFFFFF"],
+figure .svg-diagram polygon[fill="#FAF6EF"],
+figure .svg-diagram polygon[fill="#faf6ef"],
+figure .svg-diagram polygon[fill="#ffffff"],
+figure .svg-diagram polygon[fill="#FFFFFF"],
+figure .svg-diagram ellipse[fill="#FAF6EF"],
+figure .svg-diagram ellipse[fill="#faf6ef"],
+figure .svg-diagram ellipse[fill="#ffffff"],
+figure .svg-diagram ellipse[fill="#FFFFFF"],
+.vintage-diagram rect[fill="#FAF6EF"],
+.vintage-diagram rect[fill="#faf6ef"],
+.vintage-diagram rect[fill="#ffffff"],
+.vintage-diagram rect[fill="#FFFFFF"],
+.vintage-diagram circle[fill="#FAF6EF"],
+.vintage-diagram circle[fill="#faf6ef"],
+.vintage-diagram circle[fill="#ffffff"],
+.vintage-diagram circle[fill="#FFFFFF"],
+.vintage-diagram path[fill="#FAF6EF"],
+.vintage-diagram path[fill="#faf6ef"],
+.vintage-diagram path[fill="#ffffff"],
+.vintage-diagram path[fill="#FFFFFF"],
+.vintage-diagram polygon[fill="#FAF6EF"],
+.vintage-diagram polygon[fill="#faf6ef"],
+.vintage-diagram polygon[fill="#ffffff"],
+.vintage-diagram polygon[fill="#FFFFFF"],
+.vintage-diagram ellipse[fill="#FAF6EF"],
+.vintage-diagram ellipse[fill="#faf6ef"],
+.vintage-diagram ellipse[fill="#ffffff"],
+.vintage-diagram ellipse[fill="#FFFFFF"],
+.svg-diagram-container .svg-diagram [fill="var(--bg-cream)"],
+.svg-diagram-container .svg-diagram [fill="var(--bg-node)"] {
+  fill: var(--diagram-node) !important;
 }
 
-.svg-diagram-container .svg-diagram rect[fill="var(--bg-sand)"],
+/* 3. Overrides for sand elements fill (to responsive sand/plate bg) */
 .svg-diagram-container .svg-diagram rect[fill="#F5F0E8"],
-.svg-diagram-container .svg-diagram rect[fill="#f5f0e8"] {
-  fill: var(--diagram-sand);
+.svg-diagram-container .svg-diagram rect[fill="#f5f0e8"],
+.svg-diagram-container .svg-diagram circle[fill="#F5F0E8"],
+.svg-diagram-container .svg-diagram circle[fill="#f5f0e8"],
+.svg-diagram-container .svg-diagram path[fill="#F5F0E8"],
+.svg-diagram-container .svg-diagram path[fill="#f5f0e8"],
+.svg-diagram-container .svg-diagram polygon[fill="#F5F0E8"],
+.svg-diagram-container .svg-diagram polygon[fill="#f5f0e8"],
+.svg-diagram-container .svg-diagram ellipse[fill="#F5F0E8"],
+.svg-diagram-container .svg-diagram ellipse[fill="#f5f0e8"],
+figure .svg-diagram rect[fill="#F5F0E8"],
+figure .svg-diagram rect[fill="#f5f0e8"],
+figure .svg-diagram circle[fill="#F5F0E8"],
+figure .svg-diagram circle[fill="#f5f0e8"],
+figure .svg-diagram path[fill="#F5F0E8"],
+figure .svg-diagram path[fill="#f5f0e8"],
+figure .svg-diagram polygon[fill="#F5F0E8"],
+figure .svg-diagram polygon[fill="#f5f0e8"],
+figure .svg-diagram ellipse[fill="#F5F0E8"],
+figure .svg-diagram ellipse[fill="#f5f0e8"],
+.vintage-diagram rect[fill="#F5F0E8"],
+.vintage-diagram rect[fill="#f5f0e8"],
+.vintage-diagram circle[fill="#F5F0E8"],
+.vintage-diagram circle[fill="#f5f0e8"],
+.vintage-diagram path[fill="#F5F0E8"],
+.vintage-diagram path[fill="#f5f0e8"],
+.vintage-diagram polygon[fill="#F5F0E8"],
+.vintage-diagram polygon[fill="#f5f0e8"],
+.vintage-diagram ellipse[fill="#F5F0E8"],
+.vintage-diagram ellipse[fill="#f5f0e8"],
+.svg-diagram-container .svg-diagram [fill="var(--bg-sand)"] {
+  fill: var(--diagram-sand) !important;
 }
 
-/* Strokes & arrows: always visible on cream canvas */
+/* 4. Text fill overrides (ink or high-contrast text on accent) */
+.svg-diagram-container .svg-diagram text[fill="#2C2416"],
+.svg-diagram-container .svg-diagram text[fill="#2c2416"],
+.svg-diagram-container .svg-diagram text[fill="#2C2C2C"],
+.svg-diagram-container .svg-diagram text[fill="#2c2c2c"],
+.svg-diagram-container .svg-diagram text[fill="var(--color-charcoal)"],
+.svg-diagram-container .svg-diagram text[fill="var(--color-navy)"],
+figure .svg-diagram text[fill="#2C2416"],
+figure .svg-diagram text[fill="#2c2416"],
+figure .svg-diagram text[fill="#2C2C2C"],
+figure .svg-diagram text[fill="#2c2c2c"],
+figure .svg-diagram text[fill="var(--color-charcoal)"],
+figure .svg-diagram text[fill="var(--color-navy)"],
+.vintage-diagram text[fill="#2C2416"],
+.vintage-diagram text[fill="#2c2416"],
+.vintage-diagram text[fill="#2C2C2C"],
+.vintage-diagram text[fill="#2c2c2c"],
+.vintage-diagram text[fill="var(--color-charcoal)"],
+.vintage-diagram text[fill="var(--color-navy)"],
+.svg-diagram-container .svg-diagram text:not([fill]),
+figure .svg-diagram text:not([fill]),
+.vintage-diagram text:not([fill]) {
+  fill: var(--diagram-ink) !important;
+}
+
+.svg-diagram-container .svg-diagram text[fill="#FAF6EF"],
+.svg-diagram-container .svg-diagram text[fill="#faf6ef"],
+.svg-diagram-container .svg-diagram text[fill="#ffffff"],
+.svg-diagram-container .svg-diagram text[fill="#FFFFFF"],
+.svg-diagram-container .svg-diagram text[fill="var(--bg-cream)"],
+figure .svg-diagram text[fill="#FAF6EF"],
+figure .svg-diagram text[fill="#faf6ef"],
+figure .svg-diagram text[fill="#ffffff"],
+figure .svg-diagram text[fill="#FFFFFF"],
+figure .svg-diagram text[fill="var(--bg-cream)"],
+.vintage-diagram text[fill="#FAF6EF"],
+.vintage-diagram text[fill="#faf6ef"],
+.vintage-diagram text[fill="#ffffff"],
+.vintage-diagram text[fill="#FFFFFF"],
+.vintage-diagram text[fill="var(--bg-cream)"] {
+  fill: var(--diagram-text-on-accent) !important;
+}
+
+/* 5. Custom arrows and lines */
 .svg-diagram-container .svg-diagram line,
 .svg-diagram-container .svg-diagram path,
 .svg-diagram-container .svg-diagram polyline,
-.svg-diagram-container .svg-diagram polygon {
+.svg-diagram-container .svg-diagram polygon,
+figure .svg-diagram line,
+figure .svg-diagram path,
+figure .svg-diagram polyline,
+figure .svg-diagram polygon,
+.vintage-diagram line,
+.vintage-diagram path,
+.vintage-diagram polyline,
+.vintage-diagram polygon {
   stroke-opacity: 1;
 }
 
-.svg-diagram-container .svg-diagram [stroke="var(--color-navy)"],
-.svg-diagram-container .svg-diagram [stroke="var(--color-charcoal)"] {
-  stroke: var(--diagram-ink);
-}
-
 .svg-diagram-container .svg-diagram [stroke="var(--color-mustard)"],
-.svg-diagram-container .svg-diagram [stroke="var(--accent-mustard)"] {
-  stroke: var(--diagram-mustard);
+.svg-diagram-container .svg-diagram [stroke="var(--accent-mustard)"],
+figure .svg-diagram [stroke="var(--color-mustard)"],
+figure .svg-diagram [stroke="var(--accent-mustard)"],
+.vintage-diagram [stroke="var(--color-mustard)"],
+.vintage-diagram [stroke="var(--accent-mustard)"],
+.svg-diagram-container .svg-diagram [stroke="#C9A84C"],
+.svg-diagram-container .svg-diagram [stroke="#c9a84c"],
+figure .svg-diagram [stroke="#C9A84C"],
+figure .svg-diagram [stroke="#c9a84c"],
+.vintage-diagram [stroke="#C9A84C"],
+.vintage-diagram [stroke="#c9a84c"] {
+  stroke: var(--diagram-mustard) !important;
 }
 
 .svg-diagram-container .svg-diagram [stroke="var(--color-mint)"],
 .svg-diagram-container .svg-diagram [stroke="var(--color-coral)"],
-.svg-diagram-container .svg-diagram [stroke="var(--color-pink)"] {
-  stroke: var(--diagram-ink);
+.svg-diagram-container .svg-diagram [stroke="var(--color-pink)"],
+figure .svg-diagram [stroke="var(--color-mint)"],
+figure .svg-diagram [stroke="var(--color-coral)"],
+figure .svg-diagram [stroke="var(--color-pink)"],
+.vintage-diagram [stroke="var(--color-mint)"],
+.vintage-diagram [stroke="var(--color-coral)"],
+.vintage-diagram [stroke="var(--color-pink)"] {
+  stroke: var(--diagram-ink) !important;
 }
 
 .svg-diagram-container .svg-diagram [fill="var(--color-mustard)"],
 .svg-diagram-container .svg-diagram [fill="var(--accent-mustard)"],
-.svg-diagram-container .svg-diagram [fill="var(--diagram-arrow)"] {
-  fill: var(--diagram-mustard);
+.svg-diagram-container .svg-diagram [fill="var(--diagram-arrow)"],
+figure .svg-diagram [fill="var(--color-mustard)"],
+figure .svg-diagram [fill="var(--accent-mustard)"],
+figure .svg-diagram [fill="var(--diagram-arrow)"],
+.vintage-diagram [fill="var(--color-mustard)"],
+.vintage-diagram [fill="var(--accent-mustard)"],
+.vintage-diagram [fill="var(--diagram-arrow)"],
+.svg-diagram-container .svg-diagram [fill="#C9A84C"],
+.svg-diagram-container .svg-diagram [fill="#c9a84c"],
+figure .svg-diagram [fill="#C9A84C"],
+figure .svg-diagram [fill="#c9a84c"],
+.vintage-diagram [fill="#C9A84C"],
+.vintage-diagram [fill="#c9a84c"] {
+  fill: var(--diagram-mustard) !important;
 }
 
-/* Labels on Wes Anderson accent nodes (sage / rose / mustard) */
+/* 6. Labels on Wes Anderson accent nodes (sage / rose / mustard) */
 .svg-diagram-container .svg-diagram rect[fill="#8FAF8A"] + text,
 .svg-diagram-container .svg-diagram rect[fill="#D4A5A0"] + text,
 .svg-diagram-container .svg-diagram rect[fill="var(--color-mint)"] + text,
 .svg-diagram-container .svg-diagram rect[fill="var(--color-pink)"] + text,
 .svg-diagram-container .svg-diagram rect[fill="var(--color-coral)"] + text,
-.svg-diagram-container .svg-diagram rect[fill="var(--color-mustard)"] + text {
+.svg-diagram-container .svg-diagram rect[fill="var(--color-mustard)"] + text,
+figure .svg-diagram rect[fill="#8FAF8A"] + text,
+figure .svg-diagram rect[fill="#D4A5A0"] + text,
+figure .svg-diagram rect[fill="var(--color-mint)"] + text,
+figure .svg-diagram rect[fill="var(--color-pink)"] + text,
+figure .svg-diagram rect[fill="var(--color-coral)"] + text,
+figure .svg-diagram rect[fill="var(--color-mustard)"] + text,
+.vintage-diagram rect[fill="#8FAF8A"] + text,
+.vintage-diagram rect[fill="#D4A5A0"] + text,
+.vintage-diagram rect[fill="var(--color-mint)"] + text,
+.vintage-diagram rect[fill="var(--color-pink)"] + text,
+.vintage-diagram rect[fill="var(--color-coral)"] + text,
+.vintage-diagram rect[fill="var(--color-mustard)"] + text {
   fill: var(--diagram-text-on-accent) !important;
 }
 
 .svg-diagram-container .svg-diagram rect[fill="#FAF6EF"] + text,
 .svg-diagram-container .svg-diagram rect[fill="#F5F0E8"] + text,
 .svg-diagram-container .svg-diagram rect[fill="var(--bg-cream)"] + text,
-.svg-diagram-container .svg-diagram rect[fill="var(--bg-node)"] + text {
+.svg-diagram-container .svg-diagram rect[fill="var(--bg-node)"] + text,
+figure .svg-diagram rect[fill="#FAF6EF"] + text,
+figure .svg-diagram rect[fill="#F5F0E8"] + text,
+figure .svg-diagram rect[fill="var(--bg-cream)"] + text,
+figure .svg-diagram rect[fill="var(--bg-node)"] + text,
+.vintage-diagram rect[fill="#FAF6EF"] + text,
+.vintage-diagram rect[fill="#F5F0E8"] + text,
+.vintage-diagram rect[fill="var(--bg-cream)"] + text,
+.vintage-diagram rect[fill="var(--bg-node)"] + text {
   fill: var(--diagram-ink) !important;
 }
 

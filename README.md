@@ -27,6 +27,16 @@ Comprehensive notes on backend fundamentals, HTTP, routing, serialization, layer
 | 13 | [🧵 The Silent Loom: Asynchronous Task Queues](./13_Background_Jobs.md) | Producers, brokers, worker scaling, visibility timeouts, at-least-once delivery, idempotency rules |
 | 14 | [🔍 The Inverted Library: Full-Text Search](./14_Full_Text_Search.md) | Relational LIKE bottlenecks, inverted indices, BM25 scoring algorithm, Distributed Lucene sharding |
 | 15 | [🛡️ The Resilient Bastion: Error Handling](./15_Error_Handling.md) | Logic/DB/API failures, readiness/liveness health checks, OWASP secure authentication bounds, global middleware handlers |
+| 16 | [⚙️ The Genetic Code: Configuration](./16_Configuration_Management.md) | Environment variables, Twelve-Factor App guidelines, secret separation, envelope encryption, dynamic config reloading, S3 and Vault integration |
+| 17 | [📊 The Watchtower: Observability](./17_Logging_Observability.md) | Metrics, structured JSON logs, tracing (OpenTelemetry, spans, DAGs), log levels, StatsD vs Prometheus, ELK stack pipelines, Waqia-Navis historical parallel |
+| 18 | [🔌 The Orderly Departure: Graceful Shutdown](./18_Graceful_Shutdown.md) | POSIX signal handling (SIGTERM vs SIGKILL), Kubernetes lifecycle hooks, connection draining, database transaction pool teardown topological sort, Chola Navy tactical parallel |
+| 19 | [🛡️ The Paranoid Sentinel: Injection Attacks](./19_Backend_Security_Injection.md) | SQL injection mechanics, AST alteration, OS command injection, Directory Traversal, unsafe eval execution, sanitization and secure coding baselines |
+| 20 | [🏰 The Castle Moat: Security Mitigation](./20_Backend_Security_Mitigation.md) | Parameterized queries, ORM safety boundaries, input schema validation, principal of least privilege, rate limiting, secure header hardening (CSP, HSTS) |
+| 21 | [⏱️ The Clockwork Limit: Performance](./21_Performance_Measurement.md) | Benchmarking methodologies, load testing tools (k6, autocannon), CPU profiling, memory leak detection, heap snapshot analysis, latency distribution percentiles |
+| 22 | [💾 The Expanded Horizon: Scaling & Caching](./22_Database_Caching_Scaling.md) | Storage physics and hardware latency scales, PgBouncer pooling modes, primary-replica replication lag, thundering herds, consistent hashing sharding, Kallanai Dam metaphor |
+| 23 | [⚖️ The Stateless Distributed Web: Balancing](./23_Stateless_Load_Balancing.md) | Stateless session state clusters, JWT signature verification, OSI Layer 4 vs Layer 7 load balancing, health probes, write-to-read sticky routing middleware, Kumbh Mela flow dispatching |
+| 24 | [☁️ The Borderless Machine: CDNs & Queues](./24_CDNs_Queues_Serverless.md) | CDN edge caching, serverless lambda architectures, message broker flow control, horizontal autoscaling thresholds, distributed system orchestration |
+| 25 | [🧵 The Clockwork Thread: Concurrency](./25_Concurrency_Parallelism_IO.md) | CPU core execution pipelines, processes vs OS threads, synchronous/asynchronous task processing, blocking vs non-blocking I/O multiplexing, libuv event loop phases, microtasks |
 
 ---
 
@@ -75,4 +85,16 @@ flowchart TD
 
 ---
 
-Curated & Written by harshit and some llms in the Year of 2026.
+## 🎭 Symmetrical Wes Anderson Editorial System
+
+The entire digital book features a publication-grade, vintage **Wes Anderson** visual design system, combining beautiful literary layout aesthetics with robust, contrast-aware responsive scaling:
+
+* **Typographical Pairing**: High-contrast, editorial **Playfair Display** for headers, highly readable book-serif **Lora** for body paragraphs, tactile **Courier Prime** for monospaced elements/code, and geometric **Inter** for small metadata.
+* **Symmetrical Viewport Framing**: A thin, elegant border frame outlines the window (`body::after`), creating a polished, book-like symmetry on both desktop and mobile screens.
+* **Responsive SVG Diagrams**: All 25 chapters feature custom SVG diagrams that are dynamically themed. Hardcoded inline styles have been pruned, and CSS attribute-matching selectors automatically map hex properties (like `#FAF6EF`, `#2C2416`, `#ffffff`) to dynamic system variables. Standard elements render via geometric **Jost**, and code labels render via **JetBrains Mono**, preventing text overlapping or bounds alignment issues.
+* **Tactile Aside Cards**: Margin notes are built with solid, category-colored 2px flat borders and offset shadows (`box-shadow: var(--shadow-flat)`) that responsive-lift on mouse hover with smooth CSS transitions.
+* **Perfect Light/Dark Contrast**: Every element, including all diagrams, notes, scrollbars, selection highlights, and tables, seamlessly adjusts between light cream and deep charcoal-brown settings with flawless visual accessibility.
+
+---
+
+Curated & Written by Harshit and AI Scribes in the Year of 2026.
