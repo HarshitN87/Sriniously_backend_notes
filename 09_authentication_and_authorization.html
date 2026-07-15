@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter IX: Authentication &amp; Authorization — Sriniously Backend</title>
-  <meta name="description" content="A publication-quality, Wes Anderson-themed field guide on backend authentication, stateful sessions, stateless JWT signatures, cryptographic key exchanges, and the Shreni guild ledger.">
-  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <meta name="description" content="A field guide on backend authentication, stateful sessions, stateless JWTs, cryptographic key exchanges, and the Shreni guild ledger.">
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
@@ -47,7 +46,7 @@
     <header class="chapter-header" id="chapter-header-vintage">
       <div class="chapter-number" id="chapter-roman-numeral">Chapter the Ninth</div>
       <h1 id="chapter-main-title">Authentication &amp; Authorization</h1>
-      <div class="chapter-epigraph" id="chapter-epigraph-quote">"On the cryptographic distinction between proving identity and asserting privilege, the structural trade-offs of session stores and token chains, and what the tragedy of Shakuntala’s lost signet ring teaches the architect about stateless revocation."</div>
+      <div class="chapter-epigraph" id="chapter-epigraph-quote">"On the cryptographic distinction between proving identity and asserting privilege, the structural trade-offs of session stores and token chains, and what the tragedy of Shakuntala's lost signet ring teaches the architect about stateless revocation."</div>
 
       <div class="divider-symmetrical" id="header-divider-symmetrical">
         <span class="divider-symbol">♦ ✦ ♦</span>
@@ -56,62 +55,42 @@
 
     <main id="chapter-content-body">
       <p class="intro-paragraph" id="paragraph-intro-shakuntala">
-        In the monumental classical dramatic tradition of ancient India, there is a legendary story that has survived across two millennia—the tragedy of Shakuntala and King Dushyanta, immortalized by the poet Kalidasa in the fourth century CE.<a href="#fn1" id="fnref1">¹</a> The King, visiting a serene forest hermitage, falls deeply in love with the maiden Shakuntala and marries her in secret. When the time comes for him to return to his palace in the capital, he is faced with a logical synchronization challenge. How will the palace guards, the high priests, and the royal administration verify her identity when she eventually arrives at the city walls?
+        In the classical Sanskrit tradition, Kalidasa's <em>Abhijnanashakuntalam</em> tells the story of King Dushyanta and Shakuntala.<a href="#fn1" id="fnref1">¹</a> The King marries Shakuntala in secret at a forest hermitage, then returns to his palace. When she eventually arrives at the city gates, the guards and administrators must verify her identity.
       </p>
 
       <p id="paragraph-signet-ring-analogy">
-        Dushyanta does not run a stateful session registry. He does not send a royal courier back to Pataliputra to log her name in the physical marriage ledgers in the palace archives. Instead, he opts for a <strong>Stateless Token-Based Authentication System</strong>. He takes his personal, gold-chased signet ring (<em>Anguliyaka</em>), carved with the unique royal crest, and slides it onto Shakuntala’s finger. This ring is a cryptographic masterpiece. It is a stateless, tamper-proof, and universally recognizable token of authenticity. Any guard in the kingdom can inspect the physical carving on the ring and verify the signature without needing to send a runner back to the central palace database.
+        Dushyanta's solution is elegant: he gives her his personal signet ring, carved with the royal crest. Any guard in the kingdom can inspect the ring and verify its authenticity without sending a messenger back to the palace. This is, in essence, a <strong>Stateless Token-Based Authentication System</strong> — the ring carries its own proof.
       </p>
 
       <blockquote class="vintage-quote">
-        "The signet ring is the ancient prototype of the stateless JSON Web Token. The gold band carries the credential, and the intricate engraving represents the cryptographic signature, verified locally without dynamic state retrieval."
+        "The signet ring is the ancient prototype of the stateless JSON Web Token. The gold band carries the credential, and the engraving represents the cryptographic signature, verified locally without querying a central registry."
       </blockquote>
 
       <p id="paragraph-shakuntala-loss">
-        But then comes the tragedy. On her journey to the capital, while crossing the rushing waters of the Shachi tirtha river, Shakuntala bends down to pray. The signet ring slips from her finger, falls into the dark currents, and is immediately swallowed by a large fish.
-      </p>
-
-      <p id="paragraph-court-rejection">
-        When Shakuntala arrives at the royal court, she stands before Dushyanta. She presents her claims. But because a powerful curse has wiped the King's memory, he has no recollection of her. He searches his private, internal mental database—his active session cache—and finds nothing. He demands proof. He asks for the signet ring.
-      </p>
-
-      <p id="paragraph-no-token">
-        Shakuntala reaches for her hand, but her finger is bare. The stateless token is gone. Because the King has no stateful registry in the palace, and because the stateless token has been lost, Dushyanta has no way to verify her identity. He rejects her claims, casts her out of the court, and she collapses in tears outside the palace gates.
+        But tragedy strikes. While crossing a river, the ring slips from Shakuntala's finger and is swallowed by a fish. When she reaches the court, Dushyanta — his memory wiped by a curse — finds no record of her in his mind. He demands proof. Her finger is bare. With no central registry and no token, she is turned away.
       </p>
 
       <p id="paragraph-ring-recovery">
-        The ring is eventually recovered. A fisherman catches the fish, cuts it open, finds the signet ring, and presents it to the King. The moment Dushyanta holds the ring, the physical token restores his memory, and he is struck by overwhelming grief at his own administrative failure.
+        The ring is eventually recovered by a fisherman and returned to the King. Upon holding it, Dushyanta's memory is restored, and he is overcome with grief at his own administrative failure.
       </p>
 
       <p id="paragraph-metaphor-summary">
-        This classical drama is the ultimate mythological metaphor for the structural design trade-offs of <strong>Stateful Sessions</strong> versus <strong>Stateless Tokens</strong>, and the absolute hazard of <strong>Token Revocation Failure</strong>.
-      </p>
-
-      <p id="paragraph-dushyanta-dilemma">
-        When a web server is designed, the architect is constantly faced with Dushyanta's dilemma:
-      </p>
-
-      <p id="paragraph-dilemma-details">
-        Should the system maintain an active, stateful registry of every logged-in user in a central database, checking the ledger on every single incoming request? Or should it hand the user a stateless, cryptographic token—a digital signet ring—that they carry in their browser, allowing the servers to verify their identity without querying the database?
+        This drama is the ultimate metaphor for the trade-offs between <strong>Stateful Sessions</strong> and <strong>Stateless Tokens</strong>, and the danger of <strong>Token Revocation Failure</strong>. Should a system maintain a central registry of every logged-in user, checked on every request? Or should it hand each user a cryptographic token they carry themselves, letting servers verify identity without any database lookup?
       </p>
 
       <p id="paragraph-dilemma-tradeoffs">
-        If the stateless token is chosen, the system buys massive, horizontal scalability. But if a user’s token is stolen, or if the administrator needs to log them out immediately because their account was compromised, how can a digital ring swimming in the wild be revoked, when the servers have no central registry to cancel it?
+        The stateless approach buys massive scalability. But if a token is stolen, how do you revoke a credential that exists only in the wild, with no central registry to cancel it?
       </p>
 
       <h2 id="section-authn-vs-authz">I. Authentication vs. Authorization: The Boundary Line</h2>
 
-      <p id="paragraph-pillars-distinction">
-        Before inspecting the engineering implementations, a strict semantic distinction must be established between the two load-bearing pillars of server security: <strong>Authentication</strong> and <strong>Authorization</strong>.
-      </p>
-
       <aside class="margin-card aside" id="margin-card-auth-analogy">
         <span class="card-label">ASIDE</span>
-        Think of Authentication as the outer gate keeper verifying the seal on a passport, while Authorization is the chamberlain verifying if the traveler's clearance matches the specific vault they are trying to enter.
+        Think of Authentication as the outer gatekeeper verifying the seal on a passport, while Authorization is the chamberlain checking whether the traveler's clearance matches the specific vault they are trying to enter.
       </aside>
 
-      <p id="paragraph-synonym-error">
-        Many developers treat these terms as interchangeable synonyms. This is a severe conceptual error that leads to fragile, insecure codebase designs.
+      <p id="paragraph-pillars-distinction">
+        Before examining the engineering, a strict distinction must be established between the two pillars of server security: <strong>Authentication</strong> and <strong>Authorization</strong>. Many developers treat these as interchangeable synonyms — a conceptual error that leads to fragile, insecure designs.
       </p>
 
       <div class="table-container" id="table-container-auth-matrix">
@@ -127,203 +106,143 @@
             <tr>
               <td><strong>Core Question</strong></td>
               <td>"Who are you? Are you truly who you claim to be?"</td>
-              <td>"What are you allowed to do? Do you have permission?"</td>
+              <td>"What are you allowed to do?"</td>
             </tr>
             <tr>
               <td><strong>Verification Method</strong></td>
-              <td>Passwords, Passkeys, TOTP (MFA), JWT signatures, TLS Client Certificates.</td>
-              <td>Roles (RBAC), attributes (ABAC), ACL matrices, capability tokens.</td>
+              <td>Passwords, passkeys, TOTP (MFA), JWT signatures, TLS client certificates.</td>
+              <td>Roles (RBAC), attributes (ABAC), ACLs, capability tokens.</td>
             </tr>
             <tr>
               <td><strong>Execution Phase</strong></td>
-              <td>Pre-execution boundary (Edge Middleware / API Gateway).</td>
-              <td>Mid-execution (Controller/Service domain policy evaluation).</td>
+              <td>Edge — API Gateway or middleware, before the request reaches application logic.</td>
+              <td>Mid-execution — inside the controller or service layer.</td>
             </tr>
             <tr>
-              <td><strong>Standard Failure Response</strong></td>
-              <td><span class="concept-token">401 Unauthorized</span> (Authentication failed / missing credentials).</td>
-              <td><span class="concept-token">403 Forbidden</span> (Authenticated, but permission denied).</td>
+              <td><strong>Failure Response</strong></td>
+              <td><span class="concept-token">401 Unauthorized</span> — credentials missing or invalid.</td>
+              <td><span class="concept-token">403 Forbidden</span> — authenticated, but lacking permission.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <p id="paragraph-authn-definition">
-        Authentication (AuthN) is the act of verifying a claimed identity. When a user logs in by submitting a username and a password, or by presenting a cryptographic signature from a physical YubiKey passkey, they are proving that they are the unique owner of that account. If the check succeeds, the system establishes their identity and attaches a unique identifier (such as user ID 42) to the request context.
+        <strong>Authentication (AuthN)</strong> is the act of verifying a claimed identity. When a user logs in with a password or a cryptographic passkey, they are proving they own that account. If the check succeeds, the system attaches a unique user ID to the request context.
       </p>
 
       <p id="paragraph-authz-definition">
-        Authorization (AuthZ) is the act of evaluating privilege. Once the system knows the user is ID 42, it must decide if they are allowed to execute the specific action they have requested.
-      </p>
-      
-      <p id="paragraph-authz-example">
-        If user 42 attempts to delete an invoice, the authorization engine evaluates their permissions: Is user 42 an administrator? Do they own this specific invoice? Has their account been flagged as suspended by the billing department? Even if their authentication is 100% valid (proven by their signet ring), the authorization check will return a <span class="concept-token">403 Forbidden</span> response if they do not have the privilege to modify that resource.
+        <strong>Authorization (AuthZ)</strong> is the act of evaluating privilege. Once the system knows the user is, say, user 42, it must decide whether user 42 is allowed to perform the requested action. Even a perfectly authenticated user can be denied — for example, a regular user trying to delete another user's invoice will receive a <span class="concept-token">403 Forbidden</span>.
       </p>
 
       <p id="paragraph-access-control-models">
-        Authorization mechanisms generally fall into three structural paradigms:
+        Authorization generally follows three structural paradigms:
       </p>
 
       <h3 id="section-rbac-technical">1. Role-Based Access Control (RBAC)</h3>
       <p id="paragraph-rbac-desc">
-        A two-tier delegation system where users are assigned to Roles (e.g., <span class="concept-token">Editor</span>, <span class="concept-token">Administrator</span>, <span class="concept-token">Billing</span>), and those Roles are assigned specific Permissions (e.g., <span class="concept-token">invoice:delete</span>, <span class="concept-token">user:create</span>).
-      </p>
-      <p id="paragraph-rbac-math">
-        Mathematically, this can be modeled as sets and relations. Let \( U \) represent the set of Users, \( R \) the set of Roles, and \( P \) the set of Permissions. The user-to-role assignment relation \( \text{UA} \) and the role-to-permission assignment relation \( \text{PA} \) are defined as:
-        \[ \text{UA} \subseteq U \times R \]
-        \[ \text{PA} \subseteq R \times P \]
-        A user \( u \in U \) is authorized to execute a permission \( p \in P \) if and only if there exists a role \( r \in R \) such that the user is assigned that role, and the role is assigned that permission:
-        \[ \text{Authorized}(u, p) \iff \exists r \in R \text{ such that } (u, r) \in \text{UA} \land (r, p) \in \text{PA} \]
+        Users are assigned to <strong>Roles</strong> (e.g., <span class="concept-token">Editor</span>, <span class="concept-token">Administrator</span>), and each role carries a set of <strong>Permissions</strong> (e.g., <span class="concept-token">invoice:delete</span>). A user inherits every permission attached to their role. This is simple to implement and fast to query.
       </p>
       <p id="paragraph-rbac-hierarchical">
-        In more complex production environments, roles are not flat but structured as a hierarchical lattice (Hierarchical RBAC). A partial order relation \( \ge \) is established on the set \( R \). For instance, if \( r_{\text{admin}} \ge r_{\text{editor}} \ge r_{\text{viewer}} \), then the role \( r_{\text{admin}} \) automatically inherits all permissions mapped to \( r_{\text{editor}} \) and \( r_{\text{viewer}} \).
+        In complex environments, roles can be hierarchical. An <span class="concept-token">Admin</span> role automatically inherits all permissions of <span class="concept-token">Editor</span>, which inherits all permissions of <span class="concept-token">Viewer</span>.
       </p>
       <p id="paragraph-rbac-limitation">
-        While RBAC is extremely simple to implement and fast to query (requiring simple joins or set intersection checks in memory), it suffers from a systemic design flaw known as <strong>Role Explosion</strong>. 
-      </p>
-      <p id="paragraph-role-explosion-ex">
-        Consider a scenario where permissions must be restricted by department, geographic location, and resource ownership. Under a pure RBAC model, the administrator is forced to create distinct roles for every permutation: <span class="concept-token">Editor_DepartmentA_US</span>, <span class="concept-token">Editor_DepartmentB_UK</span>, <span class="concept-token">Viewer_DepartmentA_IN</span>. The cardinality of the role set \( |R| \) explodes exponentially, rendering role mapping tables unmaintainable and highly prone to security misconfigurations.
+        RBAC's weakness is <strong>Role Explosion</strong>. When permissions must vary by department, region, and resource ownership, administrators are forced to create a distinct role for every combination — <span class="concept-token">Editor_DepartmentA_US</span>, <span class="concept-token">Editor_DepartmentB_UK</span>, and so on. The number of roles grows uncontrollably, making the system unmaintainable and prone to misconfiguration.
       </p>
 
       <h3 id="section-abac-technical">2. Attribute-Based Access Control (ABAC)</h3>
       <p id="paragraph-abac-desc">
-        To solve the limits of RBAC, Attribute-Based Access Control decouples privileges from static roles, moving authorization to a dynamic, policy-driven evaluation of attributes. ABAC evaluates attributes across four distinct dimensions at the exact millisecond the request is executed:
+        To escape Role Explosion, ABAC evaluates privileges dynamically by inspecting attributes across four dimensions at the moment the request is made:
       </p>
       <ul>
-        <li><strong>Subject Attributes</strong>: Attributes describing the user agent initiating the request (e.g., security clearance, department, job title, age, account status, authentication method strength).</li>
-        <li><strong>Resource Attributes</strong>: Attributes describing the object being accessed (e.g., owner ID, creation date, security classification level, department ownership, file type).</li>
-        <li><strong>Action Attributes</strong>: Attributes describing the operation being attempted (e.g., HTTP verbs, read, write, delete, approve, export).</li>
-        <li><strong>Environment Attributes</strong>: Attributes describing the technical and physical context of the request (e.g., client IP address CIDR block, current time of day, geographic region, network route safety, active system threat level).</li>
+        <li><strong>Subject Attributes</strong>: The user's department, job title, account status, clearance level.</li>
+        <li><strong>Resource Attributes</strong>: The object's owner, creation date, classification level, file type.</li>
+        <li><strong>Action Attributes</strong>: The operation being attempted — read, write, delete, export.</li>
+        <li><strong>Environment Attributes</strong>: The client's IP range, current time, geographic region, network security level.</li>
       </ul>
-      <p id="paragraph-abac-math">
-        Let \( S, Re, A, E \) represent the attribute state spaces of the Subject, Resource, Action, and Environment respectively. An ABAC policy \( \Pi \) is a boolean function that maps the combined attribute space to an authorization decision:
-        \[ \Pi(S, Re, A, E) \to \{\text{Allow}, \text{Deny}\} \]
-        This evaluation is performed dynamically at runtime, typically using dedicated policy execution engines (such as Open Policy Agent using the Rego declarative policy language, or custom relational database query predicates).
+      <p id="paragraph-abac-example">
+        For example: "A user can edit an invoice only if they belong to Finance, the invoice status is <em>draft</em>, the request comes from within the corporate network, and it is during business hours (09:00–17:00 UTC)."
       </p>
-      
-      <p id="paragraph-abac-rego-example">
-        A concrete production example of an ABAC policy written in declarative format would require that: "A subject can edit a financial invoice resource if and only if they belong to the Finance department, the invoice's status is draft, and the request is initiated from within the corporate network CIDR block during standard business hours (09:00 to 17:00 UTC)."
-      </p>
-
-      <pre><code class="language-javascript">// PSEUDO-CODE FOR ABAC POLICY EVALUATION
-function evaluateABAC(subject, resource, action, environment) {
-  if (action === 'edit' &amp;&amp; resource.type === 'invoice') {
-    const isFinance = subject.department === 'Finance';
-    const isDraft = resource.status === 'draft';
-    const isCorpNetwork = ipRangeCheck(environment.ipAddress, '10.0.0.0/8');
-    const isWorkingHours = environment.time &gt;= '09:00' &amp;&amp; environment.time &lt;= '17:00';
-    
-    return isFinance &amp;&amp; isDraft &amp;&amp; isCorpNetwork &amp;&amp; isWorkingHours;
-  }
-  return false;
-}</code></pre>
 
       <aside class="margin-card caution" id="margin-card-abac-performance">
         <span class="card-label">CAUTION</span>
-        Because ABAC requires parsing multiple dynamic attributes and evaluating nested rules at runtime, its computational complexity is higher than simple RBAC set intersections. Subsecond API latency requirements necessitate caching attribute sets in high-speed, local caches (like Redis or in-process memory maps) and optimizing SQL join paths.
+        Because ABAC evaluates multiple dynamic attributes at runtime, it is more computationally expensive than RBAC. Subsecond API latency requirements demand caching attribute sets in fast in-memory stores and optimizing database query paths.
       </aside>
 
       <h3 id="section-vijayanagara-analogy">3. The Hampi Gate Check: An Indian Systems Analogy</h3>
       <p id="paragraph-hampi-intro">
-        To ground these abstract security concepts, consider the defense and revenue administration of the legendary <strong>Vijayanagara Empire</strong> (fourteenth to seventeenth centuries CE) at its fortified capital, Hampi. The city was protected by seven concentric rings of massive granite walls, with access controlled by heavily guarded gateways (such as Bhima's Gate, Singarada Gate, and the Domed Gate). 
-      </p>
-      <p id="paragraph-hampi-gates">
-        To govern movement and collect customs taxes (<em>shulka</em>), the imperial administration deployed a sophisticated, physical access control system using stamped pass tokens, historically referred to as <strong>Mudras</strong>. 
+        These abstract concepts have a striking real-world parallel in the <strong>Vijayanagara Empire</strong> (fourteenth–seventeenth centuries CE). The fortified capital, Hampi, was protected by seven concentric walls with heavily guarded gateways. Access was controlled using stamped pass tokens called <strong>Mudras</strong>.
       </p>
       <p id="paragraph-hampi-rbac">
-        The guard officers at the gates (<em>Dvarapalas</em>) performed both role-based and attribute-based security checks. A permanent, stamped metal <em>Mudra</em> (bronze or iron) was issued to military commanders (<strong>Nayakas</strong>) and high-ranking administrative emissaries (<strong>Dutas</strong>). This token established their role (RBAC). The moment a guard verified the cast symbol on the token, the gate was opened, granting access to secure inner zones like the royal enclosure or military barracks based strictly on the role-permission mapping.
+        Permanent stamped metal Mudras were issued to military commanders and officials. When a guard verified the cast symbol, the gate opened — a simple role-based check. The token mapped directly to a known permission set.
       </p>
       <p id="paragraph-hampi-abac">
-        However, for merchants (<strong>Vartakas</strong>) and foreign traders importing goods into the city's bazaars, a static role check was insufficient. The <em>Dvarapalas</em> executed a dynamic, multi-attribute policy check (ABAC) using ephemeral, stamped clay or palm-leaf tokens:
+        For merchants and foreign traders, a static role check was insufficient. Gatekeepers performed a dynamic, multi-attribute check using ephemeral clay or palm-leaf tokens:
       </p>
       <ul>
-        <li><strong>Subject Attributes</strong>: The merchant’s registered guild membership (Shreni), their country of origin, and their tax exemption certificates.</li>
-        <li><strong>Resource Attributes</strong>: The specific cargo being transported. War horses imported from Persia or diamonds from the Kollur mines required specific royal permits, whereas local agricultural grain did not.</li>
-        <li><strong>Action Attributes</strong>: Attempting to sell in the municipal market (requiring license trade validation) vs. passing through to outer trading posts.</li>
-        <li><strong>Environment Attributes</strong>: The gate of entry (specific goods were restricted to designated gates for tax measurement), the time of day (no merchant entry was permitted after the evening temple drums signaled sunset), and seasonal water levels of the Tungabhadra river irrigation canals (which closed low-lying gates to prevent flooding and smuggling).</li>
+        <li><strong>Subject</strong>: The merchant's guild membership, country of origin, tax exemption status.</li>
+        <li><strong>Resource</strong>: The cargo type — war horses required royal permits, local grain did not.</li>
+        <li><strong>Action</strong>: Selling in the municipal market (requiring a trade license) vs. merely passing through.</li>
+        <li><strong>Environment</strong>: Which gate was used (some goods were restricted to designated entrances), time of day (no merchant entry after the evening temple drums), and seasonal river levels that could close low-lying gates.</li>
       </ul>
       <p id="paragraph-hampi-token-security">
-        The clay pass token served as a stateless, signed credential. The frontier outpost chief (<em>Gadi-Nayaka</em>) stamped the clay with their unique signet and painted a daily-changing vegetable-dye mark on the side. This dye mark acted as an ephemeral cryptographic signature, preventing replay attacks using old tokens. The local gatekeeper at the Hampi walls validated the signature and claims on the token locally, without needing to send a physical runner back to the frontier post—completely bypassing the massive latency of animal-based communications.
+        The frontier chief stamped the clay with their unique signet and painted a daily-changing dye mark on the side — an ephemeral signature preventing reuse of old tokens. The local gatekeeper validated everything from the token itself, without sending a runner back to the frontier post, completely bypassing the latency of animal-based communication.
       </p>
 
-      <h2 id="section-password-cryptography">II. Password Hashing Cryptography: The Cryptographic Vault</h2>
+      <h2 id="section-password-cryptography">II. Password Hashing: The Cryptographic Vault</h2>
 
       <p id="paragraph-password-hashing-intro">
-        Before establishing sessions or issuing tokens, the backend server must securely verify the credentials submitted by a user. Passwords must never be stored in cleartext, nor should they be protected using reversible encryption. They must be stored as one-way, cryptographically secure, collision-resistant hashes.
+        Before establishing sessions or issuing tokens, the backend must securely verify credentials. Passwords must never be stored in cleartext, nor protected with reversible encryption. They must be stored as <strong>one-way, cryptographically secure hashes</strong>.
       </p>
       <p id="paragraph-hash-vs-encrypt">
-        A fundamental security boundary exists between hashing and encryption:
+        The key distinction: <strong>encryption</strong> is reversible (data can be decrypted with the right key), while <strong>hashing</strong> is a one-way transformation. Given a hash, it is computationally impossible to reconstruct the original password.
       </p>
-      <blockquote class="vintage-quote">
-        "Encryption is a two-way function designed for confidentiality, where data is transformed using an encryption key and recovered using a matching decryption key. Hashing is a one-way mathematical function \( f: \{0, 1\}^* \to \{0, 1\}^d \) designed for integrity and non-reversibility, where it is computationally impossible to reconstruct the input message from the output hash."
-      </blockquote>
 
       <h3 id="section-why-not-sha">1. The Fast-Hash Vulnerability</h3>
       <p id="paragraph-why-not-sha-desc">
-        A common beginner mistake is to store passwords using standard cryptographic hash functions such as MD5, SHA-1, or SHA-256. These algorithms were designed for file integrity verification and digital signatures. They are engineered to be extremely fast and computationally cheap, running in microseconds.
+        A common beginner mistake is to hash passwords with MD5, SHA-1, or SHA-256. These algorithms were designed for file integrity checks and digital signatures — they are engineered to be extremely fast, running in microseconds.
       </p>
-      <p id="paragraph-gpu-cracking-math">
-        This high throughput is catastrophic for password security. A modern graphics processing unit (GPU) cluster or a custom Application-Specific Integrated Circuit (ASIC) can calculate billions of SHA-256 hashes per second. If an attacker steals the user database containing SHA-256 hashes, they can perform a brute-force dictionary attack across trillions of combinations at negligible cost. To defend against GPU/ASIC-accelerated cracking, password hashing algorithms must be <strong>intentionally slow</strong> and <strong>resource-heavy</strong>, scaling computational cost through time, memory, and parallelism parameters.
+      <p id="paragraph-gpu-cracking">
+        This speed is catastrophic for password security. A modern GPU cluster can calculate billions of SHA-256 hashes per second. If an attacker steals the database, they can brute-force through trillions of password combinations at negligible cost. Password hashing algorithms must therefore be <strong>intentionally slow</strong> and <strong>resource-heavy</strong>, with adjustable computational cost.
       </p>
 
-      <h3 id="section-bcrypt">2. Bcrypt: The Blowfish Key Schedule</h3>
+      <h3 id="section-bcrypt">2. Bcrypt</h3>
       <p id="paragraph-bcrypt-intro">
-        Invented by Niels Provos and David Mazières in 1999, Bcrypt is based on the Blowfish symmetric block cipher. It utilizes a modified key setup algorithm called <strong>Eksblowfish</strong> (Expensive Key Setup), which forces the setup of the internal S-boxes and subkeys to take a parameterizable number of iterations.
-      </p>
-      <p id="paragraph-bcrypt-work-factor">
-        The primary configuration parameter for Bcrypt is the <strong>Work Factor</strong> (or cost), denoted as \( k \). The algorithm executes \( 2^k \) iterations of the Eksblowfish key schedule. Every increment of \( k \) exactly doubles the execution time, allowing system administrators to increase the computational cost of hashing as hardware performance improves over time.
+        Invented by Niels Provos and David Mazières in 1999, Bcrypt is based on the Blowfish cipher. Its core mechanism is a <strong>Work Factor</strong> (or cost) parameter. Every increment of this value doubles the execution time, letting administrators increase hashing cost as hardware improves.
       </p>
       <p id="paragraph-bcrypt-salt">
-        Bcrypt automatically handles salt generation. A cryptographically secure 128-bit salt is generated using a CSPRNG and prepended to the final hash string. This salt ensures that identical passwords generate completely different hashes, neutralizing precomputed <strong>Rainbow Table</strong> attacks.
+        Bcrypt automatically generates a cryptographically secure 128-bit salt and prepends it to the final hash. This ensures identical passwords produce completely different hashes, defeating precomputed Rainbow Table attacks. The output is a standardized string containing the algorithm version, cost, salt, and hash.
       </p>
-      <p id="paragraph-bcrypt-string-format">
-        The output is formatted as a standardized string containing the algorithm version, cost, salt, and hash:
-      </p>
-      <pre><code class="language-text">$2b$12$FPtC6qQnU7jFvN0s8D9bZe5e8ZqH6B4K5W7qR8yF8uG9vH0wI1xY2
-  └──┘ └┘ └──────────────────────┘└──────────────────────────┘
-  Ver Cost        Salt (22 chars)        Hash (31 chars)</code></pre>
       <p id="paragraph-bcrypt-limitation">
-        A critical limitation of Bcrypt is that it strictly truncates input passwords at <strong>72 bytes</strong>. Any characters beyond the 72nd byte are completely ignored by the Eksblowfish key schedule. 
+        A critical limitation: Bcrypt truncates input passwords at <strong>72 bytes</strong>. Characters beyond that point are silently ignored.
       </p>
       <aside class="margin-card security" id="margin-card-bcrypt-truncation">
         <span class="card-label">SECURITY</span>
-        To support long passphrases (which can easily exceed 72 bytes in modern security models) without triggering silent truncation, developers must pre-hash the password using a fast cryptographic hash like SHA-256 before passing it to the Bcrypt library. This maps any arbitrary input length to a uniform 32-byte (256-bit) binary value.
+        To support long passphrases without silent truncation, pre-hash the password with a fast hash like SHA-256 before passing it to Bcrypt. This maps any input length to a uniform 32-byte value.
       </aside>
 
-      <h3 id="section-pbkdf2">3. PBKDF2: Password-Based Key Derivation Function 2</h3>
+      <h3 id="section-pbkdf2">3. PBKDF2</h3>
       <p id="paragraph-pbkdf2-intro">
-        Formalized in RFC 2898, PBKDF2 is a standard key derivation function that applies a pseudorandom function (typically HMAC-SHA256) to the input password along with a salt over a high number of iterations.
+        PBKDF2 (Password-Based Key Derivation Function 2), formalized in RFC 2898, applies a pseudorandom function (typically HMAC-SHA256) to the password and salt over a high number of iterations. Each iteration feeds the previous output back into the function, making brute-force increasingly expensive.
       </p>
-      <p id="paragraph-pbkdf2-math">
-        Let \( P \) be the password, \( S \) the salt, \( c \) the iteration count, and \( \text{dkLen} \) the desired length of the derived key. The algorithm computes blocks \( T_i \) of the derived key \( \text{DK} \):
-        \[ \text{DK} = T_1 \parallel T_2 \parallel \dots \parallel T_k \]
-        Where each block \( T_i \) is computed using the function \( F \):
-        \[ T_i = F(P, S, c, i) = U_1 \oplus U_2 \oplus \dots \oplus U_c \]
-        Where the first iteration \( U_1 \) is the hash of the salt concatenated with the block index, and subsequent iterations \( U_j \) hash the output of the previous step:
-        \[ U_1 = \text{PRF}(P, S \parallel \text{INT}(i)) \]
-        \[ U_j = \text{PRF}(P, U_{j-1}) \]
-      </p>
-      <p id="paragraph-pbkdf2-gpu-vuln">
-        While PBKDF2 is widely adopted and cryptographically sound, it has a major architectural weakness: it requires <strong>negligible memory</strong> to compute. It only needs a few bytes of CPU registers to hold the state variables. 
-      </p>
-      <p id="paragraph-pbkdf2-gpu-vuln-consequence">
-        Because of this tiny memory footprint, PBKDF2 is highly susceptible to parallelized GPU and ASIC acceleration. A modern high-performance GPU can allocate thousands of parallel execution cores to calculate PBKDF2 hashes simultaneously, since there is no memory bandwidth bottleneck to choke the processor.
+      <p id="paragraph-pbkdf2-weakness">
+        PBKDF2's major weakness: it requires <strong>negligible memory</strong> to compute. This makes it highly susceptible to parallelized GPU and ASIC cracking, since thousands of cores can run simultaneously without hitting any memory bottleneck.
       </p>
 
       <h3 id="section-argon2id">4. Argon2id: The Memory-Hard Standard</h3>
       <p id="paragraph-argon2-intro">
-        Released as the winner of the Password Hashing Competition in 2015 and formalized in RFC 9106, Argon2 is the absolute gold standard for modern password storage. It is explicitly designed to be <strong>memory-hard</strong>, forcing the hashing process to consume significant, parameterizable blocks of RAM. This memory requirement saturates hardware buses and renders GPU/ASIC acceleration highly inefficient and prohibitively expensive.
+        Winner of the Password Hashing Competition in 2015 and formalized in RFC 9106, Argon2 is the gold standard for modern password storage. It is explicitly designed to be <strong>memory-hard</strong>, forcing the hashing process to consume large, parameterizable blocks of RAM. This saturates hardware memory buses and renders GPU/ASIC cracking highly inefficient.
       </p>
       <p id="paragraph-argon2-variants">
-        Argon2 is implemented in three variants:
+        Argon2 comes in three variants:
       </p>
       <ul>
-        <li><strong>Argon2d (Data-Dependent)</strong>: Modifies memory access patterns based on the password input. This offers maximum resistance against GPU cracking attacks, but it introduces a vulnerability to side-channel cache timing attacks (since an attacker with local OS privileges can monitor CPU cache timing to infer memory access offsets).</li>
-        <li><strong>Argon2i (Data-Independent)</strong>: Uses password-independent memory access sequences. This is slower than Argon2d but completely immune to cache timing side-channel attacks, making it suitable for key derivation.</li>
-        <li><strong>Argon2id (Hybrid)</strong>: Employs a hybrid approach. It uses data-independent memory access for the first pass over memory (protecting against cache timing attacks) and data-dependent access for subsequent passes (maximizing GPU/ASIC resistance). It is the recommended standard for password storage.</li>
+        <li><strong>Argon2d</strong>: Modifies memory access patterns based on the password itself. Maximum GPU resistance, but vulnerable to cache timing side-channel attacks.</li>
+        <li><strong>Argon2i</strong>: Uses password-independent memory access patterns. Immune to cache timing attacks, but slower.</li>
+        <li><strong>Argon2id</strong> (recommended): A hybrid — data-independent access on the first pass, data-dependent on subsequent passes. Best of both worlds.</li>
       </ul>
       <p id="paragraph-argon2-params">
-        Argon2id's work factor is controlled by three independent parameters:
+        Argon2id's work is controlled by three independent parameters:
       </p>
       <div class="table-container" id="table-container-argon-params">
         <table>
@@ -331,132 +250,101 @@ function evaluateABAC(subject, resource, action, environment) {
             <tr>
               <th>Parameter</th>
               <th>Description</th>
-              <th>Production Value Range</th>
-              <th>Attack Vector Defense</th>
+              <th>Production Range</th>
+              <th>What It Defends Against</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Memory (\( m \))</strong></td>
-              <td>Memory block size in Kibibytes (KiB).</td>
-              <td>\( 65536 \text{ KiB} \) (64MB) to \( 262144 \text{ KiB} \) (256MB).</td>
+              <td><strong>Memory</strong></td>
+              <td>How much RAM the algorithm consumes per hash.</td>
+              <td>64 MB – 256 MB.</td>
               <td>Fills GPU cache, forcing slow off-chip RAM lookups.</td>
             </tr>
             <tr>
-              <td><strong>Time (\( t \))</strong></td>
-              <td>Number of sequential passes over the memory array.</td>
-              <td>\( 1 \) to \( 3 \) passes.</td>
+              <td><strong>Time (Passes)</strong></td>
+              <td>Number of sequential passes over the memory.</td>
+              <td>1 – 3 passes.</td>
               <td>Increases computation duration, raising GPU cost.</td>
             </tr>
             <tr>
-              <td><strong>Parallelism (\( p \))</strong></td>
-              <td>Number of parallel execution threads.</td>
-              <td>\( 2 \) to \( 8 \) threads.</td>
-              <td>Maps execution to available multi-core server hardware.</td>
+              <td><strong>Parallelism</strong></td>
+              <td>Number of parallel threads.</td>
+              <td>2 – 8 threads.</td>
+              <td>Leverages multi-core server hardware efficiently.</td>
             </tr>
           </tbody>
         </table>
       </div>
-      
-      <p id="paragraph-argon-math-block">
-        The memory hardness of Argon2id is achieved by allocating an array of \( B \) blocks, where each block is exactly 1024 bytes. The array is filled sequentially:
-        \[ B[i] = G\Big(B[i-1], B[j]\Big) \]
-        Where \( G \) is a compression function based on the Blake2b cryptographic hash, and \( B[j] \) is a previously computed block selected either data-independently (in the first pass) or data-dependently (in subsequent passes). An attacker cannot compute \( B[i] \) without holding the entire matrix of blocks in physical RAM, creating an insurmountable memory-bandwidth bottleneck for mass-parallel cracking rigs.
-      </p>
 
       <h3 id="section-argon-dos">5. Hashing as a Denial-of-Service Vector</h3>
       <p id="paragraph-argon-dos-desc">
-        While high password-hashing parameters protect passwords at rest, they introduce a high-risk system vulnerability: <strong>Authentication Endpoint Exhaustion</strong>.
+        Heavy password hashing introduces a vulnerability: <strong>Authentication Endpoint Exhaustion</strong>.
       </p>
       <p id="paragraph-argon-dos-mechanics">
-        Suppose the login endpoint `/api/login` utilizes Argon2id configured with a memory parameter \( m = 64\text{MB} \) and time parameter \( t = 3 \), consuming \( 150\text{ms} \) of CPU time and 64MB of RAM per check. If a malicious botnet floods the endpoint with 100 parallel requests per second carrying fake usernames and passwords, the application servers must execute the full Argon2id check for each request before realizing the credentials do not exist in the database.
-      </p>
-      <p id="paragraph-argon-dos-math">
-        The server cluster’s CPU and memory bounds will saturate immediately:
-        \[ \text{Memory Consumption} = 100 \text{ req/s} \times 64 \text{ MB} = 6.4 \text{ GB of RAM per second} \]
-        This memory allocation spike triggers the operating system's Out-Of-Memory (OOM) killer, crashing the server processes and triggering a complete service outage.
+        Suppose the login endpoint uses Argon2id configured with 64 MB of memory per check. If a botnet floods the endpoint with 100 login requests per second using fake credentials, the server must run the full Argon2id computation on each one — consuming 6.4 GB of RAM per second — before discovering the credentials are invalid. This triggers the operating system's Out-Of-Memory killer, crashing the service entirely.
       </p>
       <p id="paragraph-argon-dos-mitigation">
-        To defend against this vulnerability, the system architect must implement several protective layers:
+        Defensive layers include:
       </p>
       <ul>
-        <li><strong>IP-Rate Limiting at the Reverse Proxy</strong>: Limit the number of POST requests allowed to the `/api/login` route per unique IP using token bucket algorithms implemented in high-performance proxy layers (e.g., Nginx, Cloudflare).</li>
-        <li><strong>Username Throttling</strong>: Enforce a strict sliding window lock on a per-username basis, preventing database and CPU execution for parallel requests targeting the same account name.</li>
-        <li><strong>Worker Pool Isolation</strong>: Dedicate a separate thread pool or microservice to handle password validation. This prevents high authentication traffic from consuming the connection pools and event loop threads of the main API gateway.</li>
+        <li><strong>IP Rate Limiting</strong> at the reverse proxy — cap POST requests to the login route per unique IP.</li>
+        <li><strong>Username Throttling</strong> — lock out parallel attempts targeting the same account name.</li>
+        <li><strong>Worker Pool Isolation</strong> — dedicate a separate thread pool for password validation so authentication floods cannot starve the main API gateway.</li>
       </ul>
 
       <h2 id="section-stateful-sessions-deep">III. Stateful Sessions: The Traditional Registry</h2>
 
       <p id="paragraph-stateful-sessions-intro-deep">
-        Once the password has been successfully verified, the backend must establish a persistent session with the client. The classic administrative paradigm is <strong>Stateful Session Management</strong>.
+        Once the password is verified, the backend must establish a persistent session with the client. The classic approach is <strong>Stateful Session Management</strong>.
       </p>
       <p id="paragraph-stateful-ledger-analogy">
-        In this model, the server acts like a meticulous imperial scribe who records every transaction in a centralized, physical ledger. When the client submits valid credentials, the server generates a cryptographically secure, high-entropy string of bytes known as the <strong>Session ID</strong> (typically 32 bytes of randomness from a CSPRNG, represented in hex or base64).
+        The server acts like a meticulous scribe recording every transaction in a centralized ledger. When valid credentials arrive, the server generates a cryptographically secure random string — the <strong>Session ID</strong> (typically 32 bytes of randomness) — and writes it as a key in a centralized store like Redis, mapped to the user's identity, roles, and metadata. This entry also carries a TTL (time-to-live), after which it expires automatically.
       </p>
-      <p id="paragraph-stateful-redis-write">
-        The server writes this Session ID as a key in a centralized, high-performance database (such as a clustered Redis cache), mapping the key to a serialized JSON object containing user identity claims, roles, and device metadata:
-      </p>
-
-      <pre><code class="language-text">Key: "session:z8a9f2bc7d83ef0a1e0b5c11"
-Value: {
-  "userId": 42,
-  "roles": ["Editor"],
-  "username": "harshit",
-  "createdAt": 1774889200
-}
-TTL: 86400 seconds (24 hours)</code></pre>
 
       <h3 id="section-session-cookie-signing">1. Signed Cookie Mechanics</h3>
       <p id="paragraph-signed-cookies-desc">
-        To prevent session spoofing and tamper attacks, the Session ID is transmitted to the client's browser inside a signed HTTP cookie. 
+        To prevent session spoofing, the Session ID is transmitted inside a <strong>signed HTTP cookie</strong>. The server appends a cryptographic signature (an HMAC) calculated from the Session ID and a secret key known only to the server. When a request arrives, the server recalculates the signature. If it does not match the one attached to the cookie, the request is discarded as a forgery.
       </p>
-      <p id="paragraph-signed-cookies-hmac">
-        In a signed cookie architecture, the server does not transmit the raw session identifier directly. Instead, it appends a cryptographic signature to the cookie value, calculated using a secret key held only by the server:
-        \[ \text{Signed Cookie} = \text{SessionID} \parallel "." \parallel \text{HMAC-SHA256}(\text{SecretKey}, \text{SessionID}) \]
-        When a request arrives, the server extracts the cookie, splits the Session ID from the signature, and recalculates the HMAC. If the recalculated signature does not match the submitted signature, the server discards the request as a malicious forgery.
-      </p>
-      
+
       <aside class="margin-card security" id="margin-card-cookie-protection">
         <span class="card-label">SECURITY</span>
-        Cookie signing protects the session store database from connection exhaustion. If cookies were not signed, an attacker could flood the server with random, forged Session IDs, forcing the server to execute millions of pointless SQL or Redis read lookups, draining database resources. Signing allows the server to drop forged requests at the network interface boundary.
+        Cookie signing protects the session store from exhaustion attacks. Without signing, an attacker could flood the server with random forged Session IDs, forcing millions of pointless database lookups. Signing lets the server reject forgeries at the network boundary.
       </aside>
 
       <h3 id="section-redis-scaling">2. Clustered Shared Session Memory</h3>
       <p id="paragraph-redis-scaling-desc">
-        While stateful sessions are highly secure—permitting the server to terminate a session instantly by deleting the key from Redis—they hit a massive architectural wall when scaled horizontally across a cluster of 10 or 100 application servers behind a load balancer.
+        Stateful sessions are highly secure — the server can instantly terminate a session by deleting its key from Redis. But they hit an architectural wall when scaled horizontally across dozens or hundreds of application servers behind a load balancer.
       </p>
       <p id="paragraph-redis-latency-profile">
-        To prevent session synchronization errors, the architecture must migrate to a centralized Redis cluster. However, this introduces a mandatory network hop on every request:
-        \[ T_{\text{Stateful}} = T_{\text{NetworkHop}} + T_{\text{CacheLookup}} + T_{\text{Parsing}} \]
-        In a modern virtualized VPC, the round-trip network latency between the application server and the Redis node is typically \( 0.5\text{ms} \) to \( 1.5\text{ms} \). While this appears small, under a workload of 20,000 requests per second, the cumulative latency overhead consumes significant thread execution capacity and can trigger <strong>Socket Pool Exhaustion</strong> if the server runs out of TCP sockets to query the Redis cluster.
+        Every request now requires a network round-trip to the centralized Redis cluster. In a modern VPC, this adds 0.5 ms to 1.5 ms per request. At 20,000 requests per second, this cumulative latency consumes significant thread capacity and can exhaust the server's TCP socket pool.
       </p>
       <p id="paragraph-redis-eviction">
-        Furthermore, memory sizing calculations are critical. If the system maintains \( N = 5,000,000 \) concurrent active sessions, and each serialized session object requires \( 1\text{KB} \) of storage including Redis metadata overhead, the cluster must hold:
-        \[ \text{Memory}_{\text{Redis}} = 5,000,000 \times 1 \text{ KB} = 5 \text{ GB of persistent RAM} \]
-        The Redis cluster must be configured with a strict eviction policy, such as <span class="concept-token">volatile-lru</span> (Least Recently Used among keys with an active TTL), to prevent memory saturation from crashing the cache nodes.
+        Memory sizing is also critical. Five million concurrent sessions at 1 KB each requires 5 GB of persistent RAM in the Redis cluster. The cluster must be configured with a strict eviction policy (such as Least Recently Used with active TTLs) to prevent memory saturation from crashing the nodes.
+      </p>
 
       <h3 id="section-cookie-directives">3. Browser Security Boundaries</h3>
       <p id="paragraph-cookie-directives-desc">
-        Because cookies are stored automatically by the browser and transmitted on every single outgoing HTTP request to the target domain, they are a primary target for security exploits. Three load-bearing security parameters must be configured on the `Set-Cookie` header:
+        Because cookies are stored automatically by the browser and transmitted on every outgoing request, they are a primary attack target. Three security parameters must be configured on the <span class="concept-token">Set-Cookie</span> header:
       </p>
       <ul>
-        <li><strong>HttpOnly</strong>: Instructs the browser that the cookie must never be accessed by client-side scripting APIs (such as `document.cookie`). If an attacker successfully executes a Cross-Site Scripting (XSS) exploit, they can steal local storage tokens, but the signed session cookie remains completely invisible to their scripts inside the browser's protected C++ memory boundary.</li>
-        <li><strong>Secure</strong>: Instructs the browser to only transmit the cookie over encrypted <strong>HTTPS</strong> channels. This prevents the cookie from being leaked in cleartext when a user connects via an unencrypted public Wi-Fi access point, neutralizing packet sniffing and man-in-the-middle exploits.</li>
-        <li><strong>SameSite</strong>: The primary defense against <strong>Cross-Site Request Forgery (CSRF)</strong> attacks. SameSite controls whether the browser automatically appends cookies to cross-origin requests:
+        <li><strong>HttpOnly</strong>: Prevents client-side JavaScript from accessing the cookie. If an attacker executes an XSS exploit, they can steal local storage tokens, but the signed session cookie remains invisible to their scripts.</li>
+        <li><strong>Secure</strong>: Restricts cookie transmission to encrypted HTTPS channels only, preventing cleartext leakage over unencrypted Wi-Fi.</li>
+        <li><strong>SameSite</strong>: The primary defense against Cross-Site Request Forgery (CSRF). Controls whether the browser appends cookies to cross-origin requests:
           <ul>
-            <li>`SameSite=Strict`: The browser *never* appends the cookie if the request originates from a different domain. This is highly secure but degrades user experience (e.g., if a logged-in user clicks a link from a search engine to their dashboard, they will arrive unauthenticated).</li>
-            <li>`SameSite=Lax`: The browser blocks cookie transmission on cross-origin POST forms and AJAX requests, but allows it on safe, top-level navigations (such as clicking a standard `<a>` hyperlink). This is the standard production default, offering a balanced trade-off between security and usability.</li>
+            <li><span class="concept-token">Strict</span> — never sends the cookie on cross-origin requests. Most secure, but degrades user experience (a logged-in user clicking a link from a search engine arrives unauthenticated).</li>
+            <li><span class="concept-token">Lax</span> — blocks cookies on cross-origin POST forms and AJAX requests, but allows them on safe top-level navigations (clicking a regular hyperlink). This is the standard production default.</li>
           </ul>
         </li>
       </ul>
 
-      <h2 id="section-stateless-tokens-deep">IV. Stateless Tokens: JSON Web Tokens (JWT) vs. PASETO</h2>
+      <h2 id="section-stateless-tokens-deep">IV. Stateless Tokens: JWT vs. PASETO</h2>
 
       <p id="paragraph-stateless-tokens-intro">
-        To bypass the Redis lookup latency and database scaling limits of stateful session registries, modern distributed architectures implement <strong>JSON Web Tokens (JWT)</strong>, formalized in RFC 7519.
+        To eliminate the Redis lookup and database scaling limits of stateful sessions, modern distributed architectures use <strong>JSON Web Tokens (JWT)</strong>, formalized in RFC 7519.
       </p>
       <p id="paragraph-jwt-covenant">
-        Instead of maintaining a central record of logged-in users, the server serializes the user’s identity claims, signs them cryptographically, and hands the token to the client to hold. The client carries their own state on every request inside the `Authorization: Bearer <token>` header. The server verifies the signature mathematically, completely eliminating database reads.
+        Instead of maintaining a central record of logged-in users, the server serializes the user's identity claims, signs them cryptographically, and hands the token to the client. The client carries their own state on every request in the <span class="concept-token">Authorization: Bearer</span> header. The server verifies the signature mathematically — no database reads required.
       </p>
 
       <figure class="svg-diagram-container" id="diagram-container-jwt-structure" style="border: none; background: transparent; padding: 0; margin: 40px auto; text-align: center;">
@@ -469,19 +357,16 @@ TTL: 86400 seconds (24 hours)</code></pre>
           <rect x="30" y="35" width="560" height="60" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3" />
           <rect x="30" y="35" width="560" height="20" fill="#A8BFD0" stroke="#2C2416" stroke-width="1.5" />
           <text x="310" y="48" font-family="'Jost', sans-serif" font-weight="bold" font-size="8.5" fill="#2C2416" text-anchor="middle">THE COMPACT REPRESENTATION (CLIENT-SIDE STRAP)</text>
-          
-          <!-- Token String broken in parts with distinct colors -->
-          <!-- Header (Rose) -->
+
+          <!-- Token String -->
           <text x="40" y="75" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#D4A5A0" font-weight="bold">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</text>
           <text x="235" y="75" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#2C2416" font-weight="bold">.</text>
-          <!-- Payload (Sage) -->
           <text x="245" y="75" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#8FAF8A" font-weight="bold">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4iLCJhZG1pbiI6dHJ1ZX0</text>
           <text x="525" y="75" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#2C2416" font-weight="bold">.</text>
-          <!-- Signature (Mustard) -->
           <text x="40" y="87" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#C9A84C" font-weight="bold">dBbyGzixOT3W6W5tGkX1_NE_V6t4hO86_9kZ4Xz_8qY</text>
 
-          <!-- Decoded Core Parts -->
-          <!-- Header (Rose Box) -->
+          <!-- Decoded Parts -->
+          <!-- Header -->
           <rect x="30" y="130" width="160" height="110" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.2" rx="3" />
           <rect x="30" y="130" width="160" height="18" fill="#D4A5A0" stroke="#2C2416" stroke-width="1.2" />
           <text x="110" y="142" font-family="'Jost', sans-serif" font-weight="bold" font-size="8" fill="#2C2416" text-anchor="middle">1. HEADER (ALGORITHM)</text>
@@ -490,7 +375,7 @@ TTL: 86400 seconds (24 hours)</code></pre>
           <text x="50" y="189" font-family="'JetBrains Mono', monospace" font-size="6.5" fill="#2C2416" xml:space="preserve">"typ": "JWT"</text>
           <text x="40" y="201" font-family="'JetBrains Mono', monospace" font-size="6.5" fill="#2C2416" xml:space="preserve">}</text>
 
-          <!-- Payload (Sage Box) -->
+          <!-- Payload -->
           <rect x="210" y="130" width="200" height="110" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.2" rx="3" />
           <rect x="210" y="130" width="200" height="18" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.2" />
           <text x="310" y="142" font-family="'Jost', sans-serif" font-weight="bold" font-size="8" fill="#2C2416" text-anchor="middle">2. PAYLOAD (CLAIMS)</text>
@@ -501,7 +386,7 @@ TTL: 86400 seconds (24 hours)</code></pre>
           <text x="230" y="200" font-family="'JetBrains Mono', monospace" font-size="6.5" fill="#2C2416" xml:space="preserve">"exp": 1774889200</text>
           <text x="220" y="210" font-family="'JetBrains Mono', monospace" font-size="6.5" fill="#2C2416" xml:space="preserve">}</text>
 
-          <!-- Signature (Mustard Box) -->
+          <!-- Signature -->
           <rect x="430" y="130" width="160" height="110" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.2" rx="3" />
           <rect x="430" y="130" width="160" height="18" fill="#C9A84C" stroke="#2C2416" stroke-width="1.2" />
           <text x="510" y="142" font-family="'Jost', sans-serif" font-weight="bold" font-size="8" fill="#2C2416" text-anchor="middle">3. SIGNATURE (INTEGRITY)</text>
@@ -512,90 +397,49 @@ TTL: 86400 seconds (24 hours)</code></pre>
           <text x="440" y="209" font-family="'JetBrains Mono', monospace" font-size="6.5" fill="#2C2416">, secretKey )</text>
 
           <!-- Connection lines -->
-          <!-- Encoded Header -> Decoded Header -->
           <path d="M 130,95 Q 130,115 110,130" stroke="#D4A5A0" stroke-width="1" fill="none" stroke-dasharray="2,2" />
-          <!-- Encoded Payload -> Decoded Payload -->
           <path d="M 380,95 Q 380,115 310,130" stroke="#8FAF8A" stroke-width="1" fill="none" stroke-dasharray="2,2" />
-          <!-- Encoded Signature -> Decoded Signature -->
           <path d="M 230,95 Q 230,115 480,130" stroke="#C9A84C" stroke-width="1" fill="none" stroke-dasharray="2,2" />
         </svg>
         <figcaption style="font-family: 'Jost', sans-serif; font-size: 0.85rem; font-style: italic; margin-top: 12px; color: #2C2416; text-align: center;">Plate IX — Symmetrical Anatomy of a JSON Web Token</figcaption>
       </figure>
 
-      <h3 id="section-jwt-vulnerabilities">1. Architectural Exploits on JWTs</h3>
-      <p id="paragraph-jwt-vuln-intro">
-        Because JSON Web Tokens rely on client-supplied headers and are highly flexible, implementation bugs have historically compromised thousands of production environments:
-      </p>
+      <h3 id="section-jwt-vulnerabilities">1. Common JWT Exploits</h3>
 
       <h4>A. The "alg: none" Signature Bypass</h4>
       <p id="paragraph-alg-none-vuln">
-        The JWT specification mandates support for a <span class="concept-token">none</span> signing algorithm, designed for debugging inside isolated physical server environments. In a naive validation implementation, the library decodes the header, extracts the value of the `alg` claim, and switches its validation strategy dynamically:
-      </p>
-      <pre><code class="language-javascript">// VULNERABLE PARSING PATTERN
-const header = decodeHeader(token);
-if (header.alg === 'none') {
-  // Completely bypasses cryptographic signature verification!
-  return decodePayload(token); 
-}</code></pre>
-      <p id="paragraph-alg-none-exploit">
-        An attacker exploits this by taking a valid token, changing the payload claims (e.g., modifying `isAdmin: false` to `isAdmin: true`), updating the header to `{"alg": "none"}`, and omitting the signature segment entirely. The server accepts this forged payload as authentic, executing the request with administrative privileges.
+        The JWT spec includes a <span class="concept-token">none</span> algorithm, intended for debugging in isolated environments. A naive validation library reads the <span class="concept-token">alg</span> claim from the token header and dynamically switches its verification strategy. An attacker can exploit this by changing the payload (e.g., setting <span class="concept-token">isAdmin: true</span>), setting the header to <span class="concept-token">{"alg": "none"}</span>, and stripping the signature entirely. The server accepts the forged payload as authentic.
       </p>
 
-      <h4>B. Symmetric-to-Asymmetric Key Confusion Attacks</h4>
+      <h4>B. Symmetric-to-Asymmetric Key Confusion</h4>
       <p id="paragraph-key-confusion-exploit">
-        A more sophisticated exploit occurs when an asymmetric signing architecture is converted into a symmetric validation channel by a malicious payload.
-      </p>
-      <p id="paragraph-key-confusion-mechanics">
-        Consider a microservice configured to verify tokens signed with asymmetric <strong>RS256</strong> (RSA Public/Private key pair). The microservice possesses the central authentication server's <strong>Public Key</strong> to verify signatures. An attacker downloads this public key (which is intentionally exposed to the public via JSON Web Key Set endpoints).
-      </p>
-      <p id="paragraph-key-confusion-forge">
-        The attacker constructs a forged payload claiming admin rights. They sign this token using symmetric <strong>HMAC-SHA256 (HS256)</strong>, using the server's public key string as the raw, symmetric private secret key. The attacker submits the forged token carrying the header `{"alg": "HS256"}`.
-      </p>
-      <pre><code class="language-javascript">// VULNERABLE DOWNSTREAM CHECK
-const algorithm = decodedToken.header.alg;
-const key = (algorithm === 'HS256') ? publicRSAKeyString : publicRSAKey;
-jwt.verify(token, key, { algorithms: ['HS256', 'RS256'] });</code></pre>
-      <p id="paragraph-key-confusion-math">
-        When the naive library parses the token, it reads `alg: HS256`. It treats the public RSA key string as a raw symmetric secret key. It computes the HMAC-SHA256 of the token payload using the public key string as the secret. Because the attacker *also* computed their signature using that exact same public key string as the secret, the mathematical signatures match perfectly. The server trusts the token and grants access.
+        A more sophisticated attack targets systems using asymmetric RS256 (public/private key pairs). The attacker downloads the server's public key (intentionally exposed via a JWKS endpoint), then signs a forged token using symmetric HMAC-SHA256, using the public key string as the symmetric secret. If the library does not strictly enforce the allowed algorithm, it reads <span class="concept-token">alg: HS256</span> from the forged token and verifies the HMAC against the public key string — which matches, since both the attacker and the library used the same key. The server grants access.
       </p>
       <p id="paragraph-key-confusion-mitigation">
-        <strong>Mitigation</strong>: Key confusion and signature bypass exploits are eliminated by hardcoding the allowed algorithms list in the verification configuration. A verification server must never trust the algorithm declared in the client's token header:
+        <strong>Mitigation</strong>: Hardcode the allowed algorithm in your verification configuration. Never trust the algorithm declared in the client's token header.
       </p>
-      <pre><code class="language-javascript">// SECURE CONFIGURATION
-const verifiedPayload = jwt.verify(token, publicRSAKey, { 
-  algorithms: ['RS256'] // Enforce RS256 strictly. HS256 tokens will fail immediately!
-});</code></pre>
 
       <h3 id="section-paseto">2. PASETO: Platform-Agnostic Security Tokens</h3>
       <p id="paragraph-paseto-intro">
-        To address the systematic design flaws of JSON Web Tokens, cryptographers designed <strong>PASETO (Platform-Agnostic Security Tokens)</strong>. PASETO completely eliminates algorithm negotiation. The developer does not choose from a menu of hundreds of cryptographic permutations; instead, they choose a strict, non-negotiable <strong>Protocol Version</strong>.
+        PASETO was designed to eliminate JWT's systematic flaws. There is no algorithm negotiation — the developer chooses a strict, non-negotiable <strong>Protocol Version</strong>.
       </p>
       <p id="paragraph-paseto-structure">
-        A PASETO token is formatted as a period-separated string containing four elements:
+        A PASETO token is a period-separated string: <span class="concept-token">version.purpose.payload.footer</span>.
       </p>
-      <pre><code class="language-text">v4.local.eyJzdWIiOiIxMjM0NTY3ODkwIi... .Zm9vdGVy</code></pre>
       <ul>
-        <li><strong>Version</strong>: Explicitly declares the protocol standard version (e.g., `v4`).</li>
-        <li><strong>Purpose</strong>: Declares whether the token is encrypted or signed:
-          <ul>
-            <li>`local`: Symmetric encryption. Provides both confidentiality and integrity using Authenticated Encryption with Associated Data (AEAD).</li>
-            <li>`public`: Asymmetric digital signatures. Standardizes asymmetric validation using public/private key pairs.</li>
-          </ul>
-        </li>
-        <li><strong>Payload</strong>: The encrypted or signed claim payload.</li>
-        <li><strong>Footer</strong>: Optional unencrypted metadata (such as key IDs).</li>
+        <li><strong>Version</strong>: The protocol standard (e.g., <span class="concept-token">v4</span>).</li>
+        <li><strong>Purpose</strong>: Either <span class="concept-token">local</span> (symmetric encryption) or <span class="concept-token">public</span> (asymmetric signing).</li>
+        <li><strong>Payload</strong>: The encrypted or signed claims.</li>
+        <li><strong>Footer</strong>: Optional unencrypted metadata (e.g., key IDs).</li>
       </ul>
-      <p id="paragraph-paseto-cryptosystem">
-        The cryptographic suites for PASETO are tightly locked down to modern, high-speed, and secure primitives:
-      </p>
       <div class="table-container" id="table-container-paseto-suites">
         <table>
           <thead>
             <tr>
-              <th>Protocol Version</th>
+              <th>Protocol</th>
               <th>Purpose</th>
-              <th>Cryptographic Cipher Suite</th>
-              <th>Security Guarantees</th>
+              <th>Cryptographic Suite</th>
+              <th>Guarantees</th>
             </tr>
           </thead>
           <tbody>
@@ -608,119 +452,65 @@ const verifiedPayload = jwt.verify(token, publicRSAKey, {
             <tr>
               <td><strong>v4.public</strong></td>
               <td>Asymmetric Signing</td>
-              <td>Ed25519 (Edwards-curve Digital Signature Algorithm)</td>
-              <td>Authenticity, Non-Repudiation, Local Verification.</td>
+              <td>Ed25519 (Edwards-curve Digital Signatures)</td>
+              <td>Authenticity, Non-Repudiation.</td>
             </tr>
           </tbody>
         </table>
       </div>
       <p id="paragraph-pae-encoding">
-        Crucially, PASETO prevents <strong>Canonicalization Attacks</strong> (where boundary markers between joined strings are blurred to forge signatures) by employing <strong>Pre-Authentication Encoding (PAE)</strong>. Before signing or encrypting any data, PASETO encodes the exact byte length of every input parameter as an 8-byte little-endian integer before concatenating the inputs. This guarantees that parameters can never overlap or be parsed ambiguously by downstream services.
+        PASETO also prevents Canonicalization Attacks (where boundary markers between joined strings are blurred to forge signatures) by encoding the exact byte length of every input before concatenation — guaranteeing that parameters can never overlap or be parsed ambiguously.
+      </p>
 
-      <h2 id="section-cryptographic-rigor-math">V. Cryptographic Rigor: Key Exchanges &amp; Token Signatures</h2>
+      <h2 id="section-cryptographic-rigor-math">V. Cryptographic Rigor: How Signatures Work</h2>
 
       <p id="paragraph-crypto-math-intro">
-        To build robust token verification pipelines, the underlying mathematics and runtime complexities of symmetric and asymmetric signing algorithms must be examined.
+        To build robust token verification, the underlying mechanics of symmetric and asymmetric signing must be understood.
       </p>
 
       <h3 id="section-hmac-math">1. Symmetric Signing: HMAC-SHA256</h3>
       <p id="paragraph-hmac-details">
-        HMAC (Hash-based Message Authentication Code) is a symmetric cryptographic signing algorithm. Both the authentication server and the downstream validation servers must share a single private secret key. The formulation is designed to resist hash-extension attacks:
-        \[ \text{HMAC}(K, m) = \text{H}\Big((K' \oplus \text{opad}) \parallel \text{H}\big((K' \oplus \text{ipad}) \parallel m\big)\Big) \]
-        Where:
+        HMAC (Hash-based Message Authentication Code) is a symmetric signing algorithm — both the issuer and verifier share a single secret key. It works by hashing the message twice with the key mixed in using two different padding values (an inner padding and an outer padding). This nested structure prevents attackers from appending unauthorized data to a signed message, ensuring data integrity even if the underlying hash function has certain weaknesses.
       </p>
-      <ul>
-        <li>\(\text{H}\) is the cryptographic hash function (SHA-256).</li>
-        <li>\(K\) is the shared secret key. If \(K\) is longer than the SHA-256 block size (64 bytes), it is hashed to a 32-byte digest first. If it is shorter, it is padded with trailing zeros to 64 bytes, producing \(K'\).</li>
-        <li>\(\text{opad}\) is the outer padding byte value (\(0\text{x}5\text{C}\) repeated 64 times).</li>
-        <li>\(\text{ipad}\) is the inner padding byte value (\(0\text{x}3\text{6}\) repeated 64 times).</li>
-        <li>\(\oplus\) represents bitwise exclusive-OR (XOR), and \(\parallel\) represents string concatenation.</li>
-      </ul>
       <p id="paragraph-hmac-strength">
-        By nested-hashing the message with separate inner and outer keys derived from \(K\), HMAC mathematically prevents attackers from appending unauthorized data to a signed token, ensuring absolute data integrity.
+        The key limitation: every server that needs to verify tokens must possess the same secret key. If the key leaks from any single server, the entire system is compromised.
       </p>
 
       <h3 id="section-rsa-math">2. Asymmetric Signing: RSA-SHA256 (RS256)</h3>
       <p id="paragraph-rsa-details">
-        Asymmetric algorithms eliminate the key distribution risk of symmetric systems. The central authentication server holds a private key to sign tokens, while downstream microservices hold the matching public key to verify signatures. RSA's security is founded on the mathematical difficulty of factoring the product of two large prime numbers.
-      </p>
-      <p id="paragraph-rsa-keygen">
-        To generate an RSA key pair:
-      </p>
-      <ol>
-        <li>Select two distinct, high-entropy prime numbers \(p\) and \(q\).</li>
-        <li>Compute the modulus:
-          \[ n = p \cdot q \]
-          The bit length of \(n\) defines the key strength (typically 2048 or 4098 bits).
-        </li>
-        <li>Compute Euler's totient function:
-          \[ \phi(n) = (p-1)(q-1) \]
-        </li>
-        <li>Choose a public exponent \(e\) such that \(1 < e < \phi(n)\) and the greatest common divisor \(\gcd(e, \phi(n)) = 1\). The industry standard standard is \(e = 65537\) (\(0\text{x}10001\blank\)), which optimizes verification speeds.</li>
-        <li>Compute the private exponent \(d\) as the modular multiplicative inverse of \(e\) modulo \(\phi(n)\):
-          \[ d \equiv e^{-1} \pmod{\phi(n)} \]
-        </li>
-      </ol>
-      <p id="paragraph-rsa-signature-math">
-        The public key is the pair \((e, n)\), and the private key is \((d, n)\).
+        Asymmetric algorithms solve the key distribution problem. The authentication server holds a <strong>private key</strong> to sign tokens, while downstream services hold the matching <strong>public key</strong> to verify them. RSA's security rests on the mathematical difficulty of factoring the product of two very large prime numbers — a problem that is practically impossible to solve for key sizes of 2048 bits or larger.
       </p>
       <p id="paragraph-rsa-signing">
-        When signing a token payload \(m\), the server hashes the message and pads it using the PKCS#1 v1.5 padding standard to produce a padded integer \(M \in [0, n-1]\). The signature \(S\) is computed using modular exponentiation:
-        \[ S \equiv M^d \pmod n \]
-        To verify, downstream servers recover the padded hash \(M'\) using the public key:
-        \[ M' \equiv S^e \pmod n \]
-        The signature is accepted if and only if the recovered \(M'\) matches the independently calculated PKCS#1 v1.5 padded hash of the token header and payload.
+        Signing uses the private key to transform a hash of the token into a signature. Verification uses the public key to reverse the transformation and check whether the result matches the token's hash. If they match, the token is authentic.
       </p>
 
       <h3 id="section-ecc-math">3. Elliptic Curve Cryptography: ES256 &amp; Ed25519</h3>
       <p id="paragraph-ecc-details">
-        While RSA is highly secure, its 2048-bit to 4096-bit signatures consume significant network bandwidth and CPU cycles during modular exponentiation. Modern architectures prefer <strong>Elliptic Curve Cryptography (ECC)</strong>, which achieves identical security boundaries with dramatically smaller keys and signatures.
-      </p>
-      <p id="paragraph-ecdsa-details">
-        <strong>ECDSA (ES256)</strong> operates on the Weierstrass curve P-256 defined over a finite field:
-        \[ y^2 = x^3 - 3x + b \pmod p \]
-        ECDSA keys are 256 bits long, and signatures are exactly 64 bytes (512 bits) divided into two coordinate values, \( r \) and \( s \). However, ECDSA has a severe implementation flaw: its signature calculation requires a cryptographically random nonce value \( k \) for every signature. If the CSPRNG repeats even a single bit of \( k \) across two different signatures, an attacker can mathematically reconstruct the server's private key.
+        RSA signatures are large (256–512 bytes) and computationally expensive. <strong>Elliptic Curve Cryptography (ECC)</strong> achieves the same security level with dramatically smaller keys and faster operations. ECDSA (ES256) uses the NIST P-256 curve and produces 64-byte signatures — but it has a critical implementation risk: the signing process requires a random number for every signature. If the randomness ever repeats, the private key can be mathematically recovered.
       </p>
       <p id="paragraph-ed25519-details">
-        To address this, modern systems use <strong>Ed25519</strong> (RFC 8032), which utilizes a twisted Edwards curve:
-        \[ -x^2 + y^2 = 1 - \frac{121665}{121666}x^2y^2 \pmod{2^{255}-19} \]
-        Ed25519 utilizes <strong>deterministic signature generation</strong>, where the nonce \( k \) is derived via a SHA-512 hash of the private key combined with the message. This eliminates the risk of private key leakage due to entropy exhaustion in the OS random number generator.
+        <strong>Ed25519</strong> (RFC 8032) addresses this with <strong>deterministic signatures</strong> — the random number is derived from the private key and message via a hash, eliminating the risk of entropy failures leaking the private key.
       </p>
 
-      <h3 id="section-jwks">4. JSON Web Key Sets (JWKS) and key Rotation</h3>
+      <h3 id="section-jwks">4. JSON Web Key Sets (JWKS) and Key Rotation</h3>
       <p id="paragraph-jwks-desc">
-        To distribute public keys securely without hardcoding them in configuration files, authentication servers publish their active public keys at a standardized HTTP endpoint: `/.well-known/jwks.json`.
+        Authentication servers publish their active public keys at a standardized endpoint: <span class="concept-token">/.well-known/jwks.json</span>. The response contains an array of public keys, each tagged with a unique Key ID (<span class="concept-token">kid</span>).
       </p>
-      <p id="paragraph-jwks-json">
-        The response is a JSON object containing an array of public keys tagged with a unique Key ID (`kid`):
-      </p>
-      <pre><code class="language-json">{
-  "keys": [
-    {
-      "kty": "RSA",
-      "use": "sig",
-      "alg": "RS256",
-      "kid": "auth-key-v1-2026",
-      "n": "u1W2obg73...[Modulus]",
-      "e": "AQAB"
-    }
-  ]
-}</code></pre>
       <p id="paragraph-jwks-rotation-flow">
-        When a downstream service receives a token, it reads the `kid` in the header, looks up the corresponding public key in its local JWKS cache, and verifies the signature. If a token arrives with a new, unknown `kid`, the downstream service performs a single HTTP fetch to the JWKS endpoint to retrieve the newly rotated public keys.
+        When a downstream service receives a token, it reads the <span class="concept-token">kid</span> from the header, looks up the matching public key in its local cache, and verifies the signature. If the token carries an unknown <span class="concept-token">kid</span>, the service fetches the JWKS endpoint once to retrieve newly rotated keys.
       </p>
       <aside class="margin-card security" id="margin-card-jwks-cache">
         <span class="card-label">SECURITY</span>
-        To prevent the "JWKS Cache Exhaustion Denial of Service" exploit—where an attacker floods the server with forged tokens carrying randomized `kid` values, forcing the server to launch millions of parallel outbound HTTP requests to the JWKS endpoint—the downstream service must enforce a strict rate limiter on JWKS fetch operations and cache the results for a minimum of 24 hours.
+        To prevent JWKS Cache Exhaustion attacks — where an attacker floods the server with forged tokens carrying random <span class="concept-token">kid</span> values, forcing millions of outbound HTTP requests — downstream services must rate-limit JWKS fetches and cache results for at least 24 hours.
       </aside>
 
       <h2 id="section-revocation-paradox-deep">VI. The Revocation Paradox: Access vs. Refresh Tokens</h2>
 
       <p id="paragraph-revocation-intro">
-        The primary operational hazard of stateless authentication is the inability to revoke access instantly. Because the server does not track issued tokens, a valid token cannot be invalidated before its expiration timestamp (\( \text{exp} \)) passes.
+        The primary hazard of stateless authentication: the server cannot revoke a token before it expires, because the server does not track issued tokens.
       </p>
       <p id="paragraph-revocation-hybrid">
-        To resolve this performance-security paradox, modern enterprise architectures implement a <strong>Two-Token Hybrid Protocol</strong> consisting of short-lived <strong>Access Tokens</strong> and long-lived, stateful <strong>Refresh Tokens</strong>.
+        The solution is a <strong>Two-Token Hybrid Protocol</strong>: short-lived <strong>Access Tokens</strong> and long-lived, stateful <strong>Refresh Tokens</strong>.
       </p>
 
       <div class="svg-diagram-container" id="diagram-container-token-flow">
@@ -734,7 +524,7 @@ const verifiedPayload = jwt.verify(token, publicRSAKey, {
           <rect x="30" y="40" width="120" height="150" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3" />
           <rect x="30" y="40" width="120" height="25" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" />
           <text x="90" y="56" font-family="'Jost', sans-serif" font-weight="bold" font-size="9" fill="#2C2416" text-anchor="middle">CLIENT</text>
-          
+
           <rect x="40" y="80" width="100" height="30" fill="#FAF6EF" stroke="#2C2416" rx="2" />
           <text x="90" y="93" font-family="'Jost', sans-serif" font-size="7.5" fill="#2C2416" text-anchor="middle" font-weight="bold">Access JWT</text>
           <text x="90" y="103" font-family="'Playfair Display', serif" font-style="italic" font-size="6.5" fill="#2C2416" text-anchor="middle">(Stateless - 15m)</text>
@@ -761,28 +551,23 @@ const verifiedPayload = jwt.verify(token, publicRSAKey, {
           <text x="510" y="95" font-family="'Jost', sans-serif" font-size="7.5" fill="#2C2416" text-anchor="middle" font-weight="bold">Refresh Ledger</text>
           <text x="510" y="108" font-family="'JetBrains Mono', monospace" font-size="6.5" fill="#2C2416" text-anchor="middle">active_tokens</text>
 
-          <!-- Flow Arrows and Wires -->
-          <!-- Wire 1: Initial Login request -->
+          <!-- Flow Arrows -->
           <path d="M 150,85 L 240,85" stroke="#2C2416" stroke-width="1.2" fill="none" />
           <polygon points="235,82 240,85 235,88" fill="#C9A84C" />
           <text x="195" y="78" font-family="'Jost', sans-serif" font-size="6" fill="#2C2416" text-anchor="middle">1. /login credentials</text>
 
-          <!-- Wire 2: Write Refresh Token -->
           <path d="M 370,95 L 450,95" stroke="#2C2416" stroke-width="1.2" fill="none" />
           <polygon points="445,92 450,95 445,98" fill="#C9A84C" />
           <text x="410" y="88" font-family="'Jost', sans-serif" font-size="6" fill="#2C2416" text-anchor="middle">2. Save Refresh ID</text>
 
-          <!-- Wire 3: Return both tokens -->
           <path d="M 240,140 Q 195,120 150,140" stroke="#2C2416" stroke-width="1.2" fill="none" stroke-dasharray="3,2" />
           <polygon points="155,143 150,140 155,137" fill="#C9A84C" />
           <text x="195" y="125" font-family="'Jost', sans-serif" font-size="6" fill="#2C2416" text-anchor="middle">3. Return Tokens</text>
 
-          <!-- Wire 4: Refresh request -->
           <path d="M 150,165 L 240,165" stroke="#2C2416" stroke-width="1.2" fill="none" />
           <polygon points="235,162 240,165 235,168" fill="#C9A84C" />
           <text x="195" y="159" font-family="'Jost', sans-serif" font-size="6" fill="#2C2416" text-anchor="middle">4. /refresh cookie</text>
 
-          <!-- Wire 5: Lookup verification -->
           <path d="M 370,165 L 450,165" stroke="#2C2416" stroke-width="1.2" fill="none" />
           <polygon points="445,162 450,165 445,168" fill="#C9A84C" />
           <polygon points="375,162 370,165 375,168" fill="#C9A84C" />
@@ -791,156 +576,99 @@ const verifiedPayload = jwt.verify(token, publicRSAKey, {
       </div>
 
       <p id="paragraph-token-exchange-flow">
-        The hybrid architecture operates through a tightly orchestrated lifecycle:
+        The hybrid architecture operates as follows:
       </p>
       <ol>
-        <li><strong>The Access Token</strong>: A stateless, short-lived JWT (typically with a <strong>15-minute</strong> expiration window). It is stored in client memory (or in a secure, non-persistent session cookie) and sent in the headers of all downstream API requests. Application servers verify the signature locally and instantly.</li>
-        <li><strong>The Refresh Token</strong>: A long-lived, stateful token (typically with a <strong>7-day</strong> expiration window). It is stored securely as an HttpOnly, Lax cookie, and its matching unique ID is written to the centralized Redis session store database.</li>
-        <li><strong>The Silent Refresh</strong>: When the 15-minute access token expires, the client's web browser intercepts the failed request and makes a silent POST request to the `/api/refresh` endpoint, carrying the stateful Refresh Token in the cookie headers. The authentication server validates the Refresh Token against the Redis database. If it is active and has not been revoked, the server issues a brand-new 15-minute access JWT.</li>
+        <li><strong>Access Token</strong>: A stateless, short-lived JWT (typically <strong>15 minutes</strong>). Stored in client memory or a session cookie. Sent on all API requests. Servers verify the signature locally and instantly.</li>
+        <li><strong>Refresh Token</strong>: A long-lived, stateful token (typically <strong>7 days</strong>). Stored as an HttpOnly, Lax cookie. Its ID is recorded in the centralized Redis store.</li>
+        <li><strong>Silent Refresh</strong>: When the access token expires, the browser intercepts the failed request and sends a silent POST to <span class="concept-token">/api/refresh</span> with the refresh cookie. The server checks Redis — if the refresh token is still valid, it issues a new 15-minute access JWT.</li>
       </ol>
       <p id="paragraph-hybrid-benefit">
-        This dual-token system solves the revocation dilemma. If a user's account is compromised, the administrator simply deletes their active Refresh Token from the centralized Redis database. The attacker will retain access to the system for a maximum of 15 minutes (until the active access JWT expires). The moment the access token expires and the client attempts the refresh handshake, the database check fails, and the session is terminated instantly.
+        This solves the revocation problem. If an account is compromised, the administrator deletes the refresh token from Redis. The attacker retains access for at most 15 minutes. Once the access token expires and the refresh handshake fails, the session is dead.
       </p>
 
       <h3 id="section-rtr">1. Refresh Token Rotation (RTR) and Family Tracking</h3>
       <p id="paragraph-rtr-intro">
-        While the hybrid model is highly resilient, it is vulnerable if a Refresh Token is stolen from the client. To mitigate this threat vector, enterprise backends implement <strong>Refresh Token Rotation (RTR)</strong>.
-      </p>
-      <p id="paragraph-rtr-mechanics">
-        Under RTR, the authentication server issues a brand-new Refresh Token *every single time* the client performs a refresh operation. The server maintains a persistent <strong>token family tree</strong> in the database, mapping the linear descent of issued tokens:
-        \[ \text{RefreshParent} \to \text{RefreshChild}_1 \to \text{RefreshChild}_2 \]
-      </p>
-      <p id="paragraph-rtr-replay-attack">
-        If an attacker steals a valid Refresh Token (\( \text{RefreshChild}_1 \)) and submits it to `/api/refresh`, the server will verify it, write a new token (\( \text{RefreshChild}_2 \)) to the database, and return it to the attacker.
+        To further protect against stolen refresh tokens, enterprise systems implement <strong>Refresh Token Rotation</strong>: the server issues a brand-new refresh token on every single refresh operation, maintaining a <strong>token family tree</strong> that maps the chain of issued tokens.
       </p>
       <p id="paragraph-rtr-detection">
-        A few minutes later, the legitimate user’s client attempts to refresh using their cached token (\( \text{RefreshChild}_1 \)). The server intercepts this request and checks the database history. It detects a <strong>Double-Use Violation</strong>: the token \( \text{RefreshChild}_1 \) has already been used!
+        If an attacker steals a refresh token and uses it, the server issues a new one to the attacker. Minutes later, when the legitimate user tries to use their cached (now-stale) refresh token, the server detects a <strong>Double-Use Violation</strong> — this token has already been consumed.
       </p>
       <p id="paragraph-rtr-action">
-        The server immediately flags the token family as compromised. It deletes the *entire token family tree* from Redis, terminating every active access and refresh token associated with that account. The legitimate user is forced to log in again, and the attacker is instantly locked out, containing the breach immediately.
+        The server immediately flags the entire token family as compromised, deletes every token in the chain from Redis, and forces both the legitimate user and the attacker to re-authenticate. The breach is contained instantly.
       </p>
 
-      <h3 id="section-bloom-filters">2. Distributed Revocation Gates &amp; Bloom Filters</h3>
+      <h3 id="section-bloom-filters">2. Distributed Revocation with Bloom Filters</h3>
       <p id="paragraph-bloom-intro">
-        For high-security banking, enterprise medical, or industrial control APIs, a 15-minute window of unrevoked access is unacceptably wide. The gateway must check access token revocation instantly.
-      </p>
-      <p id="paragraph-bloom-db-problem">
-        Checking a blocklist database of revoked access tokens on every API request introduces the exact same database lookup latency that stateless tokens were designed to eliminate.
+        For high-security systems (banking, medical, industrial control), even a 15-minute unrevoked window is too wide. Access tokens must be checked against a revocation list on every request — but doing a database lookup on every request defeats the purpose of stateless tokens.
       </p>
       <p id="paragraph-bloom-solution">
-        To achieve sub-millisecond, memory-efficient validation, modern API gateways implement a <strong>Bloom Filter</strong> as a front-end revocation gate.
-      </p>
-      <blockquote class="vintage-quote">
-        "A Bloom filter is a space-efficient, probabilistic data structure used to test set membership. It can return false positives (stating an element is in the set when it is not), but it can never return false negatives (stating an element is not in the set when it is)."
-      </blockquote>
-      <p id="paragraph-bloom-math">
-        Let the Bloom filter represent a bit array of size \( m \), initialized with all bits set to 0. The filter uses \( k \) independent cryptographic hash functions \( h_1, h_2, \dots, h_k \), each mapping a revoked token ID (\( \text{jti} \)) to one of the \( m \) array positions.
-      </p>
-      <p id="paragraph-bloom-insert">
-        When an access token is revoked, its identifier \( x \) is inserted by hashing it through the \( k \) functions and setting the corresponding bits in the array to 1:
-        \[ \forall j \in [1, k], \quad \text{BitArray}[h_j(x)] = 1 \]
+        The solution is a <strong>Bloom Filter</strong>: a space-efficient, probabilistic data structure that sits in front of the database. It can tell you with certainty that a token is <em>not</em> revoked (a guaranteed negative), or that it <em>might</em> be revoked (a possible positive requiring a database check). It can never falsely declare a revoked token to be valid.
       </p>
       <p id="paragraph-bloom-check">
-        When a request arrives, the server checks if the incoming token’s \( \text{jti} \) is in the filter. It hashes the ID and checks if all corresponding bits are 1. If any bit is 0, the token is guaranteed to be valid, and the request is immediately authorized with <strong>zero database calls</strong>. If all bits are 1, the token is flagged as potentially revoked, and the gateway executes a fallback lookup in the Redis database to confirm revocation.
-      </p>
-      <p id="paragraph-bloom-false-positive-math">
-        The false-positive probability \( p \) is a function of the bit array size \( m \), the number of hash functions \( k \), and the number of inserted revoked keys \( n \):
-        \[ p \approx \left( 1 - e^{-kn/m} \right)^k \]
-        By sizing \( m \) dynamically based on the expected revocation volume during a token's 15-minute TTL, architects can ensure false-positive rates remain below \( 0.01\% \), achieving immediate revocation checks with negligible RAM consumption.
+        In practice, the vast majority of requests carry valid (non-revoked) tokens. The Bloom filter identifies these instantly with zero database calls, and only triggers a Redis lookup for the rare token that matches the revocation set. This achieves near-zero latency for legitimate traffic while catching every revoked token.
       </p>
 
-      <h2 id="section-federated-identity-deep">VII. Federated Identity: OAuth 2.0 &amp; OpenID Connect (OIDC)</h2>
+      <h2 id="section-federated-identity-deep">VII. Federated Identity: OAuth 2.0 &amp; OpenID Connect</h2>
 
       <p id="paragraph-federated-intro">
-        In distributed systems, servers must regularly collaborate across service boundaries, and clients must authorize third-party applications to access resources without disclosing their master passwords.
+        In distributed systems, clients often need to authorize third-party applications to access resources without sharing their passwords. This is where OAuth 2.0 and OpenID Connect come in.
       </p>
 
-      <h3 id="section-oauth">1. The OAuth 2.0 Delegation Protocol</h3>
+      <h3 id="section-oauth">1. OAuth 2.0</h3>
       <p id="paragraph-oauth-desc">
-        Formalized in RFC 6749, <strong>OAuth 2.0</strong> is an authorization framework designed specifically to delegate access permissions. Instead of exposing raw credentials to a third-party application, the user authenticates with a centralized Identity Provider (IdP). The IdP issues a scoped, temporary <strong>Access Token</strong> to the third-party application, permitting restricted access to secure endpoints.
+        Formalized in RFC 6749, <strong>OAuth 2.0</strong> is an authorization framework for delegating access. Instead of sharing credentials with a third-party app, the user authenticates with a centralized Identity Provider. The provider issues a scoped, temporary <strong>Access Token</strong> to the third-party app, granting limited access to specific resources.
       </p>
 
       <h3 id="section-pkce">2. Authorization Code Flow with PKCE</h3>
       <p id="paragraph-pkce-intro-deep">
-        Single-Page Applications (SPAs) and native mobile apps are vulnerable to <strong>Authorization Code Interception Attacks</strong>, where a malicious local application intercepts the temporary authorization code returned in the browser redirect. To neutralize this threat, RFC 7636 mandates the use of <strong>Proof Key for Code Exchange (PKCE)</strong>.
+        Single-Page Applications and mobile apps are vulnerable to <strong>Authorization Code Interception</strong>, where a malicious app intercepts the temporary authorization code in a browser redirect. PKCE (Proof Key for Code Exchange, RFC 7636) prevents this.
       </p>
       <p id="paragraph-pkce-flow-steps">
-        The PKCE protocol executes a secure mathematical handshake in five phases:
+        The protocol works in five steps:
       </p>
       <ol>
-        <li><strong>Generate the Code Verifier</strong>: The client application generates a cryptographically random, high-entropy string \( V \) (using characters in the range `[A-Z]`, `[a-z]`, `[0-9]`, `-`, `.`, `_`, `~`).</li>
-        <li><strong>Generate the Challenge</strong>: The client calculates the SHA-256 hash of the verifier string and encodes it using Base64URL to produce the Code Challenge \( C \):
-          \[ C = \text{Base64URL}(\text{SHA-256}(V)) \]
-        </li>
-        <li><strong>Send the Challenge</strong>: The client redirects the user to the authorization server, appending the challenge \( C \) and the hashing method `S256` to the query parameters.
-          <pre><code class="language-http">GET /authorize?client_id=app123&amp;response_type=code&amp;code_challenge=C&amp;code_challenge_method=S256 HTTP/1.1
-Host: identity.example.com</code></pre>
-        </li>
-        <li><strong>Submit the Code and Verifier</strong>: After the user logs in, the authorization server redirects the client with a short-lived authorization code. The client then sends a direct server-to-server POST request to exchange the code for tokens, transmitting the original raw Code Verifier \( V \) in the body:
-          <pre><code class="language-http">POST /token HTTP/1.1
-Host: identity.example.com
-Content-Type: application/x-www-form-urlencoded
-
-client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=authorization_code</code></pre>
-        </li>
-        <li><strong>Validate the Handshake</strong>: The authorization server hashes the submitted `code_verifier` \( V \) using SHA-256 and verifies that the output matches the `code_challenge` \( C \) sent in the initial request. If they align, it guarantees the client requesting the tokens is the exact same client that initiated the login, neutralizing interception vectors completely.</li>
+        <li>The client generates a random string called the <strong>Code Verifier</strong>.</li>
+        <li>It hashes the verifier with SHA-256 to produce a <strong>Code Challenge</strong>.</li>
+        <li>The client redirects the user to the authorization server, sending the Code Challenge (but not the verifier) in the request.</li>
+        <li>After login, the server redirects back with a short-lived authorization code. The client exchanges this code for tokens in a direct server-to-server call, sending the original Code Verifier in the request body.</li>
+        <li>The authorization server hashes the submitted verifier and checks it matches the challenge from step 3. If it matches, the client is proven to be the same one that initiated the login — interception of the authorization code alone is useless without the verifier.</li>
       </ol>
 
       <h3 id="section-oidc-deep">3. OpenID Connect (OIDC)</h3>
       <p id="paragraph-oidc-standard-deep">
-        OAuth 2.0 is strictly an <strong>Authorization</strong> framework. It issues keys, but it does not specify what identity details are printed on them. To standardize identity verification, the industry built <strong>OpenID Connect (OIDC)</strong> as an authentication layer directly on top of the OAuth 2.0 protocol.
-      </p>
-      <p id="paragraph-oidc-claims">
-        OIDC mandates the issuance of a standardized, signed JWT known as the <strong>ID Token</strong>. This token contains standardized user profile claims (such as `sub` for user ID, `iss` for issuer, `aud` for audience, `email`, and `profile`). OIDC also standardizes the `/userinfo` endpoint, ensuring that clients can request profile pictures, display names, and language preferences in a clean, language-agnostic format, forming the backbone of modern Single Sign-On (SSO) systems.
+        OAuth 2.0 handles authorization (what you can access) but not identity (who you are). <strong>OpenID Connect</strong> adds an authentication layer on top, mandating a signed <strong>ID Token</strong> containing standardized identity claims: user ID (<span class="concept-token">sub</span>), issuer (<span class="concept-token">iss</span>), audience (<span class="concept-token">aud</span>), email, and profile data. It also standardizes a <span class="concept-token">/userinfo</span> endpoint for retrieving profile details. OIDC is the backbone of modern Single Sign-On (SSO) systems.
       </p>
 
       <h3 id="section-m2m">4. Machine-to-Machine (M2M) Integrations</h3>
       <p id="paragraph-m2m-intro">
-        When two servers need to communicate directly without any human interaction (such as a billing service querying the Stripe payment gateway API), browser cookies and interactive OAuth redirects are unusable. These systems rely on <strong>API Key Authentication</strong> or the <strong>OAuth Client Credentials Grant</strong>.
+        When two servers communicate directly (e.g., a billing service calling a payment API), browser-based OAuth flows are unusable. These systems use <strong>API Key Authentication</strong> or the <strong>OAuth Client Credentials Grant</strong>.
       </p>
       <p id="paragraph-api-key-prefix">
-        Production-grade API keys must be constructed to support developer operations and prevent security leakage:
+        Production-grade API keys follow three rules:
       </p>
       <ul>
-        <li><strong>Prefix Identifiers</strong>: API keys must be prefixed with specific, standardized text sequences (e.g., `pk_live_` or `sk_test_`). This allows automated secret-scanning bots (such as GitHub Token Scanning) to easily parse repository commits and immediately flag leaked credentials.</li>
-        <li><strong>Hashing at Rest</strong>: Secure backends never store raw API keys in their databases. They store the <strong>SHA-256 hash</strong> of the API key. When a client submits their key inside the `Authorization: Bearer <key>` header, the server hashes the key locally and queries the database for the matching hash. If the database is compromised, the attacker only obtains the non-reversible hashes, keeping the active API keys secure.</li>
-        <li><strong>Constant-Time Comparison</strong>: During signature or API key verification, developers must never use standard string equality operators (such as `==` or `===`). Standard comparison functions abort on the first mismatched character, causing the execution time of the comparison to vary depending on how many characters match. An attacker can exploit this via <strong>Timing Attacks</strong>, measuring API response latencies to guess the API key character-by-character.
-          <p id="paragraph-constant-time-math">
-            To prevent timing exploits, the system must employ a constant-time comparison algorithm that always checks every single bit of the string, ensuring identical execution durations:
-            \[ \text{Time}_{\text{Compare}} = O(1) \]
-            This is implemented via bitwise XOR operations across all bytes of the compared arrays:
-          </p>
-          <pre><code class="language-javascript">function constantTimeCompare(a, b) {
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return result === 0;
-}</code></pre>
-        </li>
+        <li><strong>Prefix Identifiers</strong>: Keys must be prefixed with recognizable text (e.g., <span class="concept-token">sk_live_</span>, <span class="concept-token">pk_test_</span>). This lets automated secret-scanning bots detect leaked credentials in code repositories.</li>
+        <li><strong>Hashing at Rest</strong>: Never store raw API keys in the database. Store the SHA-256 hash. When a key arrives, hash it locally and compare against the stored hash. If the database leaks, attackers get only irreversible hashes.</li>
+        <li><strong>Constant-Time Comparison</strong>: Never use standard string equality (<span class="concept-token">==</span>) to compare keys. Standard comparison exits early on the first mismatched character, leaking timing information that an attacker can exploit character by character (a <strong>Timing Attack</strong>). Always use a constant-time comparison function that checks every byte regardless of matches.</li>
       </ul>
 
       <h2 id="section-shreni-ledger-deep">VIII. Ancient Indian Guild Administration: The Shreni Ledger</h2>
 
       <p id="paragraph-shreni-intro-deep">
-        While modern web architects view stateless verification and stateful registries as cutting-edge achievements of digital networks, the core challenge—proving identity and delegation of authority across wide distances without real-time database lookups—has ancient precedents. One of the most brilliant parallel designs occurred during the Mauryan and Gupta eras in ancient India, through the governance of the <strong>Shrenis</strong> (autonomous merchant and artisan guilds).<a href="#fn4" id="fnref4">⁴</a>
+        The challenge of proving identity and delegating authority across distances without real-time lookups is not a modern one. One of the most brilliant ancient solutions appeared during the Mauryan and Gupta eras in India, through the governance of the <strong>Shrenis</strong> — autonomous merchant and artisan guilds.<a href="#fn4" id="fnref4">⁴</a>
       </p>
 
       <p id="paragraph-shreni-guilds-deep">
-        The Shrenis functioned as self-governing administrative units. They operated with their own judicial systems, mints, and rules. As merchants traveled along the vast trade corridors of the <em>Uttarapatha</em> (the Grand Trunk Road network), they crossed numerous borders, provincial boundaries, and royal toll checkpoints (<em>Ghatikadvara</em>). At each checkpoint, a merchant had to prove two claims: first, their identity as a member of a certified guild, and second, their authorization to receive custom tax exemptions and conduct transactions in distant municipal markets.
+        Shrenis operated as self-governing units with their own judicial systems and mints. As merchants traveled the vast trade corridors of the <em>Uttarapatha</em> (Grand Trunk Road network), they crossed borders and royal toll checkpoints (<em>Ghatikadvara</em>). At each checkpoint, a merchant had to prove their guild membership and their authorization to receive tax exemptions.
       </p>
 
       <p id="paragraph-shreni-dilemma-deep">
-        In an era before telecommunications, the royal gatekeepers could not perform a real-time, stateful SQL lookup. They could not send a runner across five hundred miles to query the central registry of the guild-chief (<strong>Jyesthaka</strong>) to verify if a merchant was in good standing. A stateful session lookup was physically impossible due to the latency of animal-based transport.
+        The gatekeepers could not send a runner five hundred miles to query the guild-chief's central registry. Animal-based communication latency made stateful lookups physically impossible.
       </p>
 
       <p id="paragraph-shreni-mudra-deep">
-        To solve this, the Shrenis engineered a <strong>Stateless Cryptographic Token system</strong> using physical, stamped, clay-sealed emblems called <strong>Mudras</strong> or <strong>Lanchhanas</strong>.
-      </p>
-
-      <p id="paragraph-shreni-handshake-deep">
-        When a merchant set out on a trade mission, the <em>Jyesthaka</em> issued a physical emblem. The guild-chief pressed their unique, master bronze or stone signet dye into a wet lump of clay, which was then baked until hard. This clay seal was carved with a unique iconographic combination of symbols representing the guild, the merchant’s rank, and the expiration time (such as the trade season). This was a physical <strong>JSON Web Token</strong>. The clay itself was the payload (claims), and the precise, master-carved symbol imprint was the <strong>Cryptographic Signature</strong>.
+        The Shrenis solved this with a <strong>Stateless Token System</strong> using stamped, clay-sealed emblems called <strong>Mudras</strong>. When a merchant departed, the guild-chief (<em>Jyesthaka</em>) pressed their unique master signet into wet clay, which was then baked hard. The clay carried iconographic symbols representing the guild, the merchant's rank, and the expiration season. This was a physical JWT — the clay was the payload, and the master-carved imprint was the cryptographic signature.
       </p>
 
       <div class="svg-diagram-container" id="diagram-container-shreni-flow">
@@ -954,7 +682,7 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
           <rect x="30" y="40" width="130" height="150" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3" />
           <rect x="30" y="40" width="130" height="25" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" />
           <text x="95" y="56" font-family="'Jost', sans-serif" font-weight="bold" font-size="9" fill="#2C2416" text-anchor="middle">GUILD-CHIEF (JYESTHAKA)</text>
-          
+
           <rect x="40" y="75" width="110" height="40" fill="#FAF6EF" stroke="#2C2416" rx="2" />
           <text x="95" y="90" font-family="'Jost', sans-serif" font-size="8" fill="#2C2416" text-anchor="middle" font-weight="bold">Master Seal (Dye)</text>
           <text x="95" y="103" font-family="'Playfair Display', serif" font-style="italic" font-size="7" fill="#2C2416" text-anchor="middle">Private Cryptographic Key</text>
@@ -962,7 +690,7 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
           <text x="95" y="150" font-family="'Playfair Display', serif" font-size="7" fill="#2C2416" text-anchor="middle" font-weight="bold">1. Stamped baked clay</text>
           <text x="95" y="162" font-family="'Playfair Display', serif" font-style="italic" font-size="7" fill="#2C2416" text-anchor="middle">"Mudra Token" generated</text>
 
-          <!-- Sarthavaha / Traveling Merchant (Middle) -->
+          <!-- Sarthavaha / Merchant (Middle) -->
           <rect x="245" y="40" width="110" height="150" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3" />
           <rect x="245" y="40" width="110" height="25" fill="#D4A5A0" stroke="#2C2416" stroke-width="1.5" />
           <text x="300" y="56" font-family="'Jost', sans-serif" font-weight="bold" font-size="9" fill="#2C2416" text-anchor="middle">EMISSARY (MERCHANT)</text>
@@ -972,7 +700,7 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
           <text x="300" y="150" font-family="'Jost', sans-serif" font-size="7.5" fill="#2C2416" text-anchor="middle" font-weight="bold">Mudra (Clay Token)</text>
           <text x="300" y="162" font-family="'Playfair Display', serif" font-style="italic" font-size="6.5" fill="#2C2416" text-anchor="middle">Carries signed claims</text>
 
-          <!-- Toll House / Checkpoint (Right) -->
+          <!-- Toll House (Right) -->
           <rect x="430" y="40" width="130" height="150" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="3" />
           <rect x="430" y="40" width="130" height="25" fill="#C9A84C" stroke="#2C2416" stroke-width="1.5" />
           <text x="495" y="56" font-family="'Jost', sans-serif" font-weight="bold" font-size="9" fill="#2C2416" text-anchor="middle">TOLL HOUSE (GHATIKA)</text>
@@ -985,62 +713,52 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
           <text x="495" y="157" font-family="'Playfair Display', serif" font-size="7" fill="#2C2416" text-anchor="middle" font-weight="bold">Match seal contours</text>
           <text x="495" y="169" font-family="'Playfair Display', serif" font-style="italic" font-size="7" fill="#2C2416" text-anchor="middle">Decide: 401 / 403 / 200</text>
 
-          <!-- Action Arrows -->
-          <!-- 1. Hand Mudra to Merchant -->
+          <!-- Arrows -->
           <path d="M 160,115 L 245,115" stroke="#2C2416" stroke-width="1.2" fill="none" />
           <polygon points="240,112 245,115 240,118" fill="#C9A84C" />
 
-          <!-- 2. Present Mudra to Gatekeeper -->
           <path d="M 355,115 L 430,115" stroke="#2C2416" stroke-width="1.2" fill="none" />
           <polygon points="425,112 430,115 425,118" fill="#C9A84C" />
         </svg>
       </div>
 
       <p id="paragraph-shreni-validation">
-        When the merchant arrived at the toll house, the gatekeeper did not send a carrier pigeon back to the guild headquarters. Instead, they performed a <strong>Stateless Verification Check</strong>.
-      </p>
-      <p id="paragraph-shreni-verification-steps">
-        The gatekeeper held a local public registration replica (public key) containing drawings or casts of the official guild signet seals. The gatekeeper aligned the contours of the merchant's physical clay seal with the local public registration casts.
-      </p>
-      <p id="paragraph-shreni-attributes">
-        If the signature shape aligned, the gatekeeper verified three structural claims:
+        At the toll house, the gatekeeper performed a <strong>Stateless Verification</strong>. They held a local replica of the official guild signet (the public key). They aligned the merchant's clay seal against it and checked three things:
       </p>
       <ul>
-        <li><strong>Identity</strong>: The emissary was a valid representative of the verified Shreni.</li>
-        <li><strong>Permissions (Authorization)</strong>: The specific iconographic markings indicated that this merchant was entitled to buy and sell silk without paying the municipal entry tax.</li>
-        <li><strong>Liveness</strong>: The stamped date or trade season marking was checked against the current season. If the season had passed, the token was expired, and the gatekeeper rejected it.</li>
+        <li><strong>Identity</strong>: The emissary represented a verified Shreni.</li>
+        <li><strong>Permissions</strong>: The iconographic markings entitled this merchant to specific privileges (e.g., buying silk without municipal tax).</li>
+        <li><strong>Liveness</strong>: The stamped trade season was checked against the current season. An expired token was rejected.</li>
       </ul>
-      <p id="paragraph-shreni-parallels">
-        A map can be constructed to align these ancient administrative components directly with modern software structures:
-      </p>
+
       <div class="table-container" id="table-container-shreni-map">
         <table>
           <thead>
             <tr>
               <th>Ancient Shreni Component</th>
-              <th>Modern Backend System Equivalent</th>
+              <th>Modern Backend Equivalent</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td><strong>Guild-Chief (<em>Jyesthaka</em>)</strong></td>
-              <td>Authentication Server (Issues and signs credentials).</td>
+              <td>Authentication Server (issues and signs credentials).</td>
             </tr>
             <tr>
-              <td><strong>Merchant Emissary (<em>Sarthavaha</em>)</strong></td>
-              <td>User Agent (Browser client holding credentials).</td>
+              <td><strong>Merchant (<em>Sarthavaha</em>)</strong></td>
+              <td>User Agent (browser client holding credentials).</td>
             </tr>
             <tr>
-              <td><strong>Physical clay seal (<em>Mudra</em>)</strong></td>
-              <td>JSON Web Token (Stateless, self-contained signed credential).</td>
+              <td><strong>Clay seal (<em>Mudra</em>)</strong></td>
+              <td>JSON Web Token (stateless, self-contained signed credential).</td>
             </tr>
             <tr>
-              <td><strong>Master bronze/stone signet dye</strong></td>
-              <td>Private Cryptographic Key (Symmetric secret or Private asymmetric key).</td>
+              <td><strong>Master signet dye</strong></td>
+              <td>Private Cryptographic Key.</td>
             </tr>
             <tr>
-              <td><strong>Local replica seal drawing</strong></td>
-              <td>Public Cryptographic Verification Key (Shared with downstream servers).</td>
+              <td><strong>Local replica seal</strong></td>
+              <td>Public Cryptographic Verification Key.</td>
             </tr>
             <tr>
               <td><strong>Border Checkpoint (<em>Ghatika</em>)</strong></td>
@@ -1048,24 +766,20 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
             </tr>
             <tr>
               <td><strong>Tax exemptions / market access</strong></td>
-              <td>Role-Based Access Control / Custom Scopes.</td>
+              <td>Role-Based Access Control / Scopes.</td>
             </tr>
             <tr>
               <td><strong>Stamped trade season date</strong></td>
-              <td>Token Expiration Time Claim (<span class="concept-token">exp</span> timestamp).</td>
+              <td>Token Expiration (<span class="concept-token">exp</span> claim).</td>
             </tr>
           </tbody>
         </table>
       </div>
       <p id="paragraph-shreni-summary-conclusion">
-        This direct structural parallel proves that the engineering trade-offs managed in cloud networks—trading centralization for verification latency—are structural invariants of administrative systems. Whether handling baked clay in 300 CE or parsed base64 strings in the modern cloud, delegation of authority must obey the same immutable laws of information theory.
+        This parallel proves that the engineering trade-offs of cloud networks — centralization versus verification latency — are structural invariants of administrative systems. Whether handling baked clay in 300 CE or parsed base64 strings today, delegation of authority obeys the same immutable laws.
       </p>
 
-      <h2 id="section-comparison-matrix">IX. Symmetrical Architectural Comparison Matrix</h2>
-
-      <p id="paragraph-matrix-intro">
-        To synthesize the architectural decisions analyzed throughout this field guide, the physical, mathematical, and operational properties of the primary authentication paradigms are compared below:
-      </p>
+      <h2 id="section-comparison-matrix">IX. Architectural Comparison Matrix</h2>
 
       <div class="table-container" id="table-container-final-matrix">
         <table>
@@ -1081,64 +795,56 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
           <tbody>
             <tr>
               <td><strong>Identity Registry</strong></td>
-              <td>Central database (Redis/SQL). Checked on every single request.</td>
-              <td>None. Verified cryptographically using secret keys.</td>
-              <td>Stateful Refresh store, Stateless Access Verification.</td>
-              <td>Encrypted storage in database. Checked on every request.</td>
+              <td>Central database (Redis/SQL), checked every request.</td>
+              <td>None. Verified cryptographically.</td>
+              <td>Stateful refresh store, stateless access verification.</td>
+              <td>Encrypted storage, checked every request.</td>
             </tr>
             <tr>
               <td><strong>Revocation Speed</strong></td>
-              <td>Instant. Deleting database row terminates access immediately.</td>
-              <td>Delayed (until access token TTL expires) or via blocklist lookup.</td>
-              <td>Fast (Access token TTL max 15m, Refresh token instantly revoked).</td>
-              <td>Instant. Deactivating or deleting the key blocks access.</td>
+              <td>Instant — delete the database row.</td>
+              <td>Delayed until TTL expires, or via blocklist.</td>
+              <td>Fast — access token TTL is 15 min, refresh token revoked instantly.</td>
+              <td>Instant — deactivate or delete the key.</td>
             </tr>
             <tr>
-              <td><strong>Horizontal Scalability</strong></td>
-              <td>Poor. Requires synchronized shared memory cache.</td>
-              <td>Excellent. Infinite horizontal scaling without database hits.</td>
-              <td>High. Fast stateless reads, stateful cache only hits during refresh.</td>
-              <td>Medium. Requires cache lookups to read key statuses.</td>
+              <td><strong>Scalability</strong></td>
+              <td>Poor — requires shared memory cache.</td>
+              <td>Excellent — no database hits needed.</td>
+              <td>High — stateless reads, stateful only at refresh.</td>
+              <td>Medium — cache lookups for key status.</td>
             </tr>
             <tr>
               <td><strong>Primary Vulnerability</strong></td>
-              <td>CSRF (Session Hijack via third-party cookies).</td>
-              <td>Token Leakage via XSS, Cryptographic algorithm none exploit.</td>
-              <td>Storage theft of Refresh token, cookie theft.</td>
-              <td>Static secret leakage, lack of rotation, loose permissions.</td>
+              <td>CSRF (session hijack via cookies).</td>
+              <td>Token leakage via XSS, algorithm exploits.</td>
+              <td>Refresh token theft, cookie theft.</td>
+              <td>Static secret leakage, weak rotation.</td>
             </tr>
             <tr>
               <td><strong>CPU Overhead</strong></td>
-              <td>Low. Simple string comparisons and database indexing.</td>
-              <td>High. Constant cryptographic hashing and modular calculations.</td>
-              <td>Medium. Cryptographic checks for Access, low database hits for Refresh.</td>
-              <td>Low. Standard hash comparisons (using secure constant-time compares).</td>
+              <td>Low — string comparisons and DB indexing.</td>
+              <td>High — cryptographic hashing and verification.</td>
+              <td>Medium — crypto for access, DB for refresh.</td>
+              <td>Low — hash comparisons.</td>
             </tr>
             <tr>
               <td><strong>Network Bandwidth</strong></td>
-              <td>Low (Minimal session cookie header size \(\approx 50\text{B}\)).</td>
-              <td>High (JWT encapsulates claims data \(\approx 1\text{KB}\)).</td>
-              <td>Medium (Access token size is high, refresh cookie is low).</td>
-              <td>Low (Static api key header \(\approx 100\text{B}\)).</td>
+              <td>Low (~50 B session cookie).</td>
+              <td>High (~1 KB JWT with claims).</td>
+              <td>Medium (large access token, small refresh cookie).</td>
+              <td>Low (~100 B API key header).</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <p id="paragraph-conclusion-1">
-        What is the final lesson of this analysis?
-      </p>
-
       <blockquote class="vintage-quote">
-        "Authentication is not a simple, passive detail. It is the core boundary that keeps a system secure. Secure the keys. Validate the signatures. And protect the sanctuary of your data in absolute peace."
+        "Authentication is not a passive detail. It is the core boundary that keeps a system secure. Secure the keys. Validate the signatures. And protect the sanctuary of your data."
       </blockquote>
 
       <p id="paragraph-conclusion-2">
-        If a system relies entirely on a stateless token without managing expiration windows and revocation blocklists, it behaves like King Dushyanta’s court. A lost signet ring leads to absolute administrative failure.
-      </p>
-
-      <p id="paragraph-conclusion-3">
-        By understanding the cryptographic internals of JWT signatures, securing cookies with strict HttpOnly flags, and deploying multi-token access/refresh architectures, engineers ensure that their servers remain resilient bastions.
+        If a system relies on stateless tokens without managing expiration and revocation, it behaves like Dushyanta's court — a lost ring means total administrative failure. By understanding JWT signatures, securing cookies with strict flags, and deploying multi-token architectures, engineers ensure their servers remain resilient.
       </p>
 
     </main>
@@ -1161,16 +867,10 @@ client_id=app123&amp;code=auth_code_9283&amp;code_verifier=V&amp;grant_type=auth
       <h3 style="margin-top: 0; border-bottom: none; font-size: 1.25rem;">Footnotes</h3>
       <ol style="padding-left: 20px;">
         <li id="fn1" style="margin-bottom: 12px;">
-          Kalidasa's <em>Abhijnanashakuntalam</em> ("The Recognition of Shakuntala") is one of the supreme masterpieces of classical Sanskrit literature. It centers on the narrative theme of a physical "signet ring" acting as a stateless, tamper-proof proof of identity, whose physical loss breaks the validation channel completely, offering the oldest metaphorical description of stateless token vulnerabilities.
-        </li>
-        <li id="fn2" style="margin-bottom: 12px;">
-          The JSON Web Token specification (RFC 7519) was developed by the IETF JSON Web Token Working Group in 2015. It was designed to support stateless, decentralized claims across distributed web clusters, bypassing the database-scaling limitations of traditional session stores.
-        </li>
-        <li id="fn3" style="margin-bottom: 12px;">
-          The Proof Key for Code Exchange (PKCE) extension (RFC 7636) was published in 2015 to secure mobile and single-page applications. It forces clients to dynamically prove ownership of the authorization code by exchanging cryptographic challenge keys, mitigating interception exploits.
+          Kalidasa's <em>Abhijnanashakuntalam</em> ("The Recognition of Shakuntala") is one of the supreme masterpieces of classical Sanskrit literature. It centers on a physical signet ring acting as a stateless, tamper-proof proof of identity, whose loss breaks the validation channel completely — the oldest metaphorical description of stateless token vulnerabilities.
         </li>
         <li id="fn4" style="margin-bottom: 12px;">
-          The <em>Shrenis</em> of ancient India are detailed extensively in epigraphical and literary records from the Mauryan and Gupta periods, including the famous Mandasor Stone Inscription. These guild organizations functioned as autonomous socio-economic corporations, using specialized terracotta and copper seals as tokens of authority and verification across regional municipal boundaries.
+          The <em>Shrenis</em> of ancient India are detailed in epigraphical and literary records from the Mauryan and Gupta periods, including the Mandasor Stone Inscription. These guild organizations functioned as autonomous socio-economic corporations, using terracotta and copper seals as tokens of authority across regional boundaries.
         </li>
       </ol>
     </div>

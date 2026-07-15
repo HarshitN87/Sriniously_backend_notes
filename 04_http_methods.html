@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chapter IV: HTTP Methods & Same-Origin Borders — Sriniously Backend</title>
+  <title>Chapter IV: HTTP Methods & Same-Origin Borders</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="script.js" defer></script>
+<base target="_blank">
 </head>
-
 <body>
 
-  <!-- Side Navigation for Quick Jumps -->
+  <!-- Side Navigation -->
   <div class="archivist-nav">
     <a href="index.html" class="archivist-dot" data-title="The Archives"></a>
     <a href="01_how_requests_travel.html" class="archivist-dot" data-title="Chapter I: Request Travel"></a>
@@ -44,10 +42,8 @@
   <div class="container">
     <header class="chapter-header">
       <div class="chapter-number">Chapter the Fourth</div>
-      <h1>HTTP Methods &amp; The Same-Origin Borders</h1>
-      <div class="chapter-epigraph">"GET, POST, and the delicate art of persuading the browser that your local server is
-        not a compromised state actor trying to steal your bank cookies."</div>
-
+      <h1>HTTP Methods & The Same-Origin Borders</h1>
+      <div class="chapter-epigraph">"GET, POST, and the delicate art of persuading the browser that your local server is not a compromised state actor trying to steal your bank cookies."</div>
       <div class="divider-symmetrical">
         <span class="divider-symbol">♦ ✦ ♦</span>
       </div>
@@ -56,78 +52,51 @@
     <main>
 
     <p class="intro-paragraph">
-      Consider the physical act of signing a document. On a mechanical level, dragging a pen across paper is just friction and ink. But the <strong>semantic verb</strong> attached to that act determines its real-world impact. 
+      Think of HTTP methods as the verbs of the web. Just as "sign" means different things depending on whether you are signing a guest book or a bank check, HTTP methods tell the server what action to perform on a resource. The URL is the noun (what resource), and the HTTP method is the verb (what action).
     </p>
 
     <p>
-      If you sign a wedding guest book, you are making a passive record. This is a <strong>GET</strong>. If you sign a bank check, you are creating a financial instrument that moves money. This is a <strong>POST</strong>. If you sign a new will to replace an old one, you are executing a complete overwrite. This is a <strong>PUT</strong>. If you cross out a single typo in a contract, you are making a partial update. This is a <strong>PATCH</strong>. If you sign a deed of release to cancel a debt, you are executing a deletion. This is a <strong>DELETE</strong>.
+      Two key ideas govern how these methods work: <strong>safety</strong> and <strong>idempotency</strong>. A <strong>safe</strong> method does not change the resource itself. A <strong>idempotent</strong> method produces the same result whether you call it once or many times.
     </p>
 
     <p>
-      To the paper, it is all just ink. But to the systems relying on that paper, the verb is everything. If a bank check is treated like a guest book and signed twenty times, bankruptcy follows. This distinction brings us to two vital concepts in backend engineering: <strong>Semantic Verbs</strong> and <strong>Idempotency</strong>.
+      <strong>Analogy: The Elevator Button vs. The Slot Machine.</strong> Pressing the elevator button for the 5th floor is idempotent: pressing it once or ten times gets you to the same place. Pulling a slot machine lever is not: each pull costs money and produces a different outcome. On the web, <strong>GET</strong> is like the elevator button, while <strong>POST</strong> is like the slot machine lever.
+    </p>
+
+    <aside class="margin-card aside">
+      <span class="card-label">ASIDE</span>
+      <p><strong>Idempotency</strong> means an operation gives the same result no matter how many times you repeat it. This is crucial for reliable networks, where requests may be retried due to timeouts or connection failures.</p>
+    </aside>
+
+    <h2>I. REST vs. RPC: Two Ways to Design APIs</h2>
+
+    <p>
+      When building APIs, you face a fundamental choice: should your URLs describe <strong>actions</strong> or <strong>resources</strong>?
     </p>
 
     <p>
-      Think of an <strong>Elevator Button</strong> vs. a <strong>Slot Machine Lever</strong>. Pressing the "5" button in an elevator is an <strong>idempotent operation</strong>. Pressing it once takes you to the fifth floor. Pressing it ten more times doesn't take you to the fiftieth floor, nor does it charge you ten times. The final state remains exactly the same. 
+      <strong>RPC (Remote Procedure Call)</strong> treats the network like a set of remote functions. URLs look like actions: <code>POST /api/createUser</code>, <code>POST /api/deleteUser</code>. This is intuitive but becomes hard to manage at scale, because every team invents its own action names, and the network infrastructure cannot tell what each endpoint does.
     </p>
 
     <p>
-      Contrast this with a slot machine lever. Each pull is a <strong>non-idempotent operation</strong>. Pull it once, you spend one coin. Pull it three times, you spend three coins. The state changes with every single action. If a network glitch causes your request to be sent multiple times, you need to know whether the system will safely ignore the duplicates or process them all.
+      <strong>REST (Representational State Transfer)</strong>, formalized by Roy Fielding in 2000, flips this model. URLs identify <strong>resources</strong> (nouns), not actions. The HTTP method itself carries the action:
     </p>
 
-    <h2>I. The Nature of State: Permanent Records vs. Daily Logs</h2>
+    <ul>
+      <li><code>GET /api/users/42</code> — read the user</li>
+      <li><code>PUT /api/users/42</code> — replace the user entirely</li>
+      <li><code>PATCH /api/users/42</code> — update part of the user</li>
+      <li><code>DELETE /api/users/42</code> — remove the user</li>
+    </ul>
 
     <p>
-      Ancient empires faced the exact same coordination challenges we do today. They needed to distinguish between permanent, unchangeable records and daily, mutable logs.
+      This separation lets proxies, CDNs, and browsers understand requests without knowing your application logic. GET responses can be cached; DELETE can be retried safely. REST is not always the right choice (gRPC and GraphQL are popular alternatives for internal microservices), but it provides a clean, predictable grammar for public APIs.
     </p>
 
-    <p>
-      For example, royal decrees granting land or tax exemptions were engraved on heavy copper plates. These were permanent, idempotent records. Reading the plate a hundred times didn't change the land ownership. If the grant was revoked, a new decree was issued to wipe the record clean. This mirrors modern idempotent methods like <span class="concept-token">PUT</span> and <span class="concept-token">DELETE</span>.
-    </p>
+    <h2>II. The Seven HTTP Verbs</h2>
 
     <p>
-      In contrast, daily tax collections and market transactions were written on fragile palm leaves. These were non-idempotent, append-only logs. If a scribe accidentally recorded a tax payment twice, the ledger was corrupted, and the state was mutated. This mirrors modern non-idempotent methods like <span class="concept-token">POST</span> and <span class="concept-token">PATCH</span>.
-    </p>
-
-    <p>
-      Understanding this distinction reveals why modern software systems must partition their actions. When a client communicates with a server across the chaotic internet, the server must know whether the request is a permanent, safe command that can be repeated without consequence, or a dynamic transaction that must be guarded against duplicates.
-    </p>
-
-    <h2>II. REST vs. RPC: Nouns vs. Verbs</h2>
-
-    <p>
-      To build reliable distributed architectures, a fundamental decision must be made regarding how client intentions map to network coordinates. This splits the engineering world into two paradigms: <strong>Remote Procedure Call (RPC)</strong> and <strong>Representational State Transfer (REST)</strong>.
-    </p>
-
-    <p>
-      In an RPC architecture, the URL represents an action. The API paths look like verbs: creating a user, deleting a user, or updating a user. The HTTP protocol is treated as a dumb transport pipe, almost exclusively using the <span class="concept-token">POST</span> method to trigger remote execution. While intuitive, this creates massive coordination challenges as systems scale, because caching and routing tools cannot easily understand what the endpoints actually do.
-    </p>
-
-    <p>
-      REST completely reverses this paradigm. Under the REST model, the network interface is structured around <strong>nouns</strong>—stable, unique resources. The URL path identifies the resource, not the action. To perform an action on that resource, the developer changes the <strong>HTTP method verb</strong> at the protocol level. 
-    </p>
-
-    <p>
-      To read a user, a <span class="concept-token">GET</span> request is sent. To completely replace the user, a <span class="concept-token">PUT</span> request is sent. To delete the user, a <span class="concept-token">DELETE</span> request is executed. This clean decoupling separates resource identification from state mutation, allowing the network infrastructure (proxies, gateways, CDNs) to reason about the request's semantics and optimize caching automatically.
-    </p>
-
-    <p>
-      REST is built on six core constraints:
-    </p>
-
-    <ol>
-      <li><strong>Client-Server</strong>: The user interface and data storage are separated, allowing each to scale independently.</li>
-      <li><strong>Statelessness</strong>: Each request contains all the information needed to process it. The server does not store session state in memory.</li>
-      <li><strong>Cacheability</strong>: Responses explicitly define whether they can be cached, improving network efficiency.</li>
-      <li><strong>Uniform Interface</strong>: A globally consistent vocabulary of nouns and verbs, ensuring resources are uniquely identified and messages are self-describing.</li>
-      <li><strong>Layered System</strong>: The architecture is hierarchical. A client cannot tell if it is connected directly to the end server or an intermediate proxy.</li>
-      <li><strong>Code-on-Demand (Optional)</strong>: Servers can temporarily extend client capabilities by transferring executable scripts.</li>
-    </ol>
-
-    <h2>III. The Seven HTTP Verbs</h2>
-
-    <p>
-      The HTTP protocol defines a small, highly specialized vocabulary of verbs. Each verb carries a distinct set of operational guarantees regarding safety, idempotency, and caching.
+      HTTP defines a small vocabulary of methods, each with specific rules about safety, idempotency, and caching. Here is how they compare:
     </p>
 
     <div class="table-container">
@@ -137,408 +106,244 @@
             <th>Method</th>
             <th>Safe?</th>
             <th>Idempotent?</th>
-            <th>Request Body?</th>
-            <th>Response Body?</th>
-            <th>Preflight Trigger?</th>
-            <th>Database Lock Level</th>
+            <th>What It Does</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><strong>GET</strong></td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>None (Shared Read)</td>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Read a resource. The most common method. Responses are cacheable.</td>
           </tr>
           <tr>
             <td><strong>HEAD</strong></td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>❌ No</td>
-            <td>❌ No</td>
-            <td>None (Metadata Only)</td>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Same as GET but returns only headers, no body. Useful for checking metadata without downloading data.</td>
           </tr>
           <tr>
             <td><strong>POST</strong></td>
-            <td>❌ No</td>
-            <td>❌ No</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>Exclusive Row Write / Insert</td>
+            <td>No</td>
+            <td>No</td>
+            <td>Create a new resource or trigger a process. Each call may produce a different result. Not cacheable by default.</td>
           </tr>
           <tr>
             <td><strong>PUT</strong></td>
-            <td>❌ No</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>Exclusive Write / Overwrite</td>
+            <td>No</td>
+            <td>Yes</td>
+            <td>Completely replace a resource. You must send the full resource. Repeating it leaves the resource in the same state.</td>
           </tr>
           <tr>
             <td><strong>PATCH</strong></td>
-            <td>❌ No</td>
-            <td>❌ No (Usually)</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>Exclusive Row Lock (Update)</td>
+            <td>No</td>
+            <td>Usually No</td>
+            <td>Apply partial changes to a resource. You send only the fields you want to change. More efficient than PUT for small updates.</td>
           </tr>
           <tr>
             <td><strong>DELETE</strong></td>
-            <td>❌ No</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>Exclusive Write / Tombstone</td>
+            <td>No</td>
+            <td>Yes</td>
+            <td>Remove a resource. Deleting the same resource twice has the same effect: the resource is gone.</td>
           </tr>
           <tr>
             <td><strong>OPTIONS</strong></td>
-            <td>✅ Yes</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>✅ Yes</td>
-            <td>❌ No</td>
-            <td>None (Capability Query)</td>
+            <td>Yes</td>
+            <td>Yes</td>
+            <td>Discover what methods and headers a server supports. Used in CORS preflight checks.</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <h3>1. GET &amp; HEAD: The Passive Observers</h3>
+    <h3>GET & HEAD: The Passive Observers</h3>
 
     <p>
-      A <span class="concept-token">GET</span> request is designed strictly to read a representation of a resource. It must be "Safe," meaning it does not alter the resource's state on the server. Because it is safe and idempotent, the entire web infrastructure is optimized to cache its responses. Browsers, intermediate proxies, and global CDNs all cache <span class="concept-token">GET</span> requests to save bandwidth and reduce server load.
+      <strong>GET</strong> is for reading only. It must not modify the resource itself (though the server may log the request or update analytics). Because GET is safe and idempotent, the entire web infrastructure optimizes for it: browsers cache it, proxies cache it, and CDNs replicate it globally.
     </p>
 
     <p>
-      The <span class="concept-token">HEAD</span> method is identical to <span class="concept-token">GET</span>, with a single critical optimization: the server compiles the exact same headers but is strictly forbidden from returning the response body. It is the ultimate metadata probe. If a client needs to download a massive dataset, it can first dispatch a <span class="concept-token">HEAD</span> request to check the file size or verify if its local cache is still valid, without wasting bandwidth on the actual payload. Search engines use this extensively to manage their crawling budgets.
+      <strong>HEAD</strong> is identical to GET but returns only headers. If you need to check whether a large file has changed, HEAD lets you inspect the <code>ETag</code> or <code>Last-Modified</code> headers without downloading the file. Search engines like Googlebot use HEAD extensively to avoid re-indexing unchanged pages.
     </p>
 
-    <h3>2. POST: The Generator of State</h3>
+    <h3>POST: The Generator of State</h3>
 
     <p>
-      <span class="concept-token">POST</span> is the ultimate non-idempotent verb. It is designed to submit an entity to a target resource, causing the server to create a new resource or execute a complex process (like a financial transaction). Every time a client sends a <span class="concept-token">POST</span> request, the server is expected to execute a new database insert or deduct funds. Because it is non-idempotent, browsers will aggressively warn users if they attempt to refresh a page generated by a <span class="concept-token">POST</span> request to prevent accidental duplicate transactions.
+      <strong>POST</strong> is the most flexible and dangerous method. It creates resources, submits forms, or triggers processes. Because it is not idempotent, the server may create a new record every time you send it. Browsers warn you with "Confirm Form Resubmission" when you refresh a POST result, precisely to prevent accidental duplicates.
     </p>
 
-    <h3>3. PUT vs. PATCH: The Complete Overwrite and the Surgical Strike</h3>
+    <aside class="margin-card caution">
+      <span class="card-label">CAUTION</span>
+      <p>Because POST is non-idempotent, always protect it against duplicate submissions in payment or order systems. Use idempotency keys (unique tokens attached to each request) so the server can recognize and reject duplicates.</p>
+    </aside>
+
+    <h3>PUT vs. PATCH: The Complete Overwrite and the Surgical Strike</h3>
 
     <p>
-      One of the most common architectural mistakes in API design is the misuse of <span class="concept-token">PUT</span> and <span class="concept-token">PATCH</span>. Both update an existing resource, but their contracts are fundamentally different.
-    </p>
-
-    <p>
-      <span class="concept-token">PUT</span> is defined as a <strong>complete resource replacement</strong>. If a user resource has twenty fields, and the client only wishes to update the phone number, a <span class="concept-token">PUT</span> request must still carry all twenty fields in the request body. If the client omits a field, the server assumes the client wishes to erase it. Because it completely overwrites the target resource with the exact same dataset, it is mathematically idempotent.
-    </p>
-
-    <p>
-      <span class="concept-token">PATCH</span> was introduced to resolve this inefficiency by enabling <strong>partial, differential updates</strong>. With a <span class="concept-token">PATCH</span> request, the client only transmits the specific fields it wishes to mutate. The server dynamically updates only those target columns. However, because a <span class="concept-token">PATCH</span> request modifies existing state based on instructions (like "increment this counter"), it is <strong>not guaranteed to be idempotent</strong>. Sending the same increment instruction three times will increment the counter by three.
+      <strong>PUT</strong> replaces the entire resource. If a user has 20 fields and you only want to update the phone number, PUT still requires you to send all 20 fields. Any field you omit is treated as "delete this." PUT is idempotent because overwriting a record with the same data ten times leaves it in the same state.
     </p>
 
     <p>
-      In dynamic environments, concurrent partial writes present a high risk of the <strong>Lost Update Problem</strong>, where two clients overwrite each other’s data. To resolve this, backends implement Optimistic Concurrency Control using <span class="concept-token">ETags</span> (Entity Tags). When the client reads the resource, the server returns a version tag. When the client sends the update, it includes this tag in the request headers. If the tag doesn't match the current version in the database, the server rejects the update, forcing the client to fetch the latest data and try again.
+      <strong>PATCH</strong> updates only the fields you send. If you only want to change the phone number, you send just that field. This saves bandwidth but introduces a risk: if two clients PATCH the same resource at the same time, one update may overwrite the other (the "lost update" problem). To prevent this, servers use <strong>optimistic concurrency control</strong>: they send an <code>ETag</code> (version fingerprint) with the resource, and the client must include it in an <code>If-Match</code> header. If the resource changed since the client read it, the server rejects the update with <code>412 Precondition Failed</code>, forcing the client to retry with fresh data.
     </p>
 
-    <figure>
-      <div class="svg-diagram-container">
-        <svg class="svg-diagram" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Taxonomy of HTTP Verbs">
-          <rect x="10" y="10" width="580" height="220" fill="none" stroke="#2C2416" stroke-width="1.5" />
-          <rect x="30" y="30" width="160" height="80" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3" />
-          <text x="110" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">GET / HEAD</text>
-          <text x="110" y="75" font-size="8.5" text-anchor="middle" fill="#8FAF8A">SAFE &amp; IDEMPOTENT</text>
-          <text x="110" y="90" font-size="7.5" text-anchor="middle">Read-Only Operations</text>
-          <rect x="220" y="30" width="160" height="80" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3" />
-          <text x="300" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">POST / PATCH</text>
-          <text x="300" y="75" font-size="8.5" text-anchor="middle" fill="#D4A5A0">NON-IDEMPOTENT</text>
-          <text x="300" y="90" font-size="7.5" text-anchor="middle">State Mutations &amp; Appends</text>
-          <rect x="410" y="30" width="160" height="80" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3" />
-          <text x="490" y="55" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">PUT / DELETE</text>
-          <text x="490" y="75" font-size="8.5" text-anchor="middle" fill="#8FAF8A">IDEMPOTENT</text>
-          <text x="490" y="90" font-size="7.5" text-anchor="middle">Overwrites &amp; Purges</text>
-          <rect x="220" y="130" width="160" height="80" fill="#FAF6EF" stroke="#2C2416" stroke-width="2" rx="3" />
-          <text x="300" y="155" font-weight="bold" font-size="12" text-anchor="middle" dominant-baseline="central">OPTIONS</text>
-          <text x="300" y="175" font-size="8.5" text-anchor="middle" fill="#A8BFD0">METADATA PROBE</text>
-          <text x="300" y="190" font-size="7.5" text-anchor="middle">Capabilities &amp; CORS Preflight</text>
-        </svg>
-      </div>
-      <figcaption>Plate I — The Taxonomy of HTTP Verbs and their formal safety invariants.</figcaption>
-    </figure>
-
-    <h2>IV. Idempotency in Unreliable Networks</h2>
+    <h2>III. Idempotency in Practice: Why It Matters</h2>
 
     <p>
-      In a theoretically perfect network, the distinction between idempotent and non-idempotent methods is trivial. But physical networks are fundamentally chaotic. They are subject to hardware failures, routing reconfigurations, and signal dropouts.
+      Networks are unreliable. A client may send a request, the server may process it, but the response may be lost. The client cannot tell whether the server received the request or not, so it retries. If the request was a POST (create a payment), the retry may create a duplicate charge.
     </p>
 
     <p>
-      Suppose a client dispatches a non-idempotent request (like a billing instruction) across a lossy network. The server successfully processes the payment, but the return path drops. The server returns a success response, but the packet is lost in transit. From the client's perspective, the request timed out. The client cannot distinguish between a request that was lost before reaching the server, and a request that succeeded but lost its response.
+      The solution is the <strong>idempotency key</strong>. The client generates a unique token (like a UUID) and sends it with the request. The server stores this token and the response. If the same token arrives again, the server returns the stored response instead of re-executing the action. This turns a non-idempotent operation into a safe, repeatable one.
     </p>
 
     <p>
-      To recover, the client must retry the request. If the system does not enforce idempotency, the server will process the duplicate request, leading to a catastrophic double-billing event.
+      The key must be stored in the same database transaction as the business logic, so that if the transaction rolls back, the key is also rolled back. Otherwise, a failed transaction might leave the key set while the data is unchanged, causing the client to believe the operation succeeded when it did not.
+    </p>
+
+    <h2>IV. The Same-Origin Policy and CORS</h2>
+
+    <p>
+      The <strong>Same-Origin Policy (SOP)</strong> is a browser security rule that prevents a script on one website from reading data from another. An <strong>origin</strong> is defined by three things: the protocol (HTTP or HTTPS), the host (domain), and the port. If any of these differ, the origins are different, and the browser blocks the script from accessing the response.
     </p>
 
     <p>
-      To eliminate this error, the system must project an idempotent interface onto the non-idempotent transition. This is achieved by introducing a <strong>Deduplication State Ledger</strong>, typically implemented using a high-performance distributed key-value store like Redis.
-    </p>
-
-    <figure>
-      <div class="svg-diagram-container">
-        <svg class="svg-diagram" viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Idempotency Key Handshake Sequence">
-          <rect x="5" y="5" width="490" height="230" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="4" />
-          <line x1="80" y1="44" x2="80" y2="204" stroke="#2C2416" stroke-width="2" />
-          <line x1="250" y1="44" x2="250" y2="204" stroke="#2C2416" stroke-width="2" />
-          <line x1="420" y1="44" x2="420" y2="204" stroke="#2C2416" stroke-width="2" />
-          <text x="80" y="32" font-weight="bold" font-size="11" text-anchor="middle" fill="#2C2416">Client</text>
-          <text x="250" y="32" font-weight="bold" font-size="11" text-anchor="middle" fill="#2C2416">API Gateway (Redis)</text>
-          <text x="420" y="32" font-weight="bold" font-size="11" text-anchor="middle" fill="#2C2416">Primary DB</text>
-          <path d="M 80,62 L 248,76" stroke="#2C2416" stroke-width="1.5" fill="none" />
-          <polygon points="241,73 248,76 241,79" fill="#C9A84C" />
-          <rect x="108" y="54" width="114" height="16" fill="#FFFFFF" stroke="#2C2416" stroke-width="1" rx="2" />
-          <text x="165" y="64" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">1. POST /charge [uuid-123]</text>
-          <path d="M 252,88 L 418,102" stroke="#8FAF8A" stroke-width="1.5" fill="none" />
-          <polygon points="411,99 418,102 411,105" fill="#8FAF8A" />
-          <rect x="278" y="78" width="114" height="16" fill="#FFFFFF" stroke="#8FAF8A" stroke-width="1" rx="2" />
-          <text x="335" y="88" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">2. SETNX lock OK</text>
-          <path d="M 418,122 L 252,136" stroke="#2C2416" stroke-width="1.5" fill="none" />
-          <polygon points="260,133 252,136 259,139" fill="#C9A84C" />
-          <rect x="278" y="112" width="114" height="16" fill="#FFFFFF" stroke="#2C2416" stroke-width="1" rx="2" />
-          <text x="335" y="122" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">3. DB commit success</text>
-          <path d="M 252,142 L 82,156" stroke="#D4A5A0" stroke-width="1.5" stroke-dasharray="4,3" fill="none" />
-          <polygon points="90,153 82,156 89,159" fill="#D4A5A0" />
-          <rect x="108" y="134" width="114" height="16" fill="#FFFFFF" stroke="#D4A5A0" stroke-width="1" rx="2" />
-          <text x="165" y="144" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">4. Response lost (TCP drop)</text>
-          <path d="M 80,176 L 248,190" stroke="#2C2416" stroke-width="1.5" fill="none" />
-          <polygon points="241,187 248,190 241,193" fill="#C9A84C" />
-          <rect x="108" y="168" width="114" height="16" fill="#FFFFFF" stroke="#2C2416" stroke-width="1" rx="2" />
-          <text x="165" y="178" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">5. RETRY same key</text>
-          <path d="M 252,198 Q 302,188 252,178" stroke="#8FAF8A" stroke-width="1.5" fill="none" />
-          <polygon points="254,175 252,178 257,181" fill="#8FAF8A" />
-          <rect x="268" y="182" width="120" height="16" fill="#FFFFFF" stroke="#8FAF8A" stroke-width="1" rx="2" />
-          <text x="328" y="192" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">6. Redis hit — skip DB</text>
-          <path d="M 252,208 L 82,222" stroke="#2C2416" stroke-width="1.5" fill="none" />
-          <polygon points="90,219 82,222 89,225" fill="#C9A84C" />
-          <rect x="108" y="204" width="114" height="16" fill="#FFFFFF" stroke="#2C2416" stroke-width="1" rx="2" />
-          <text x="165" y="214" font-size="7.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">7. Cached success</text>
-        </svg>
-      </div>
-      <figcaption>Plate II — The Idempotency Key Sequence Handshake under network partition.</figcaption>
-    </figure>
-
-    <p>
-      The sequence operates as follows:
-    </p>
-
-    <ol>
-      <li>The client generates a unique, single-use identifier (an Idempotency Key) and attaches it as an HTTP header.</li>
-      <li>The server receives the request and immediately attempts an atomic operation in Redis using the key. The cache guarantees that the key will only be set if it does not already exist, and sets a time-to-live to prevent memory exhaustion.</li>
-      <li>If the cache returns a success (a cache miss), the server obtains the lock and proceeds to execute the core database transaction.</li>
-      <li>Upon successful execution, the server updates the cache key with the computed response body and HTTP status code.</li>
-      <li>If the connection drops before the client receives the response, the client retries the identical request carrying the same Idempotency Key header.</li>
-      <li>The server attempts the same cache operation. Because the key already exists, the cache rejects the write. The server blocks any database access, reads the cached payload directly, and returns it instantly to the client.</li>
-    </ol>
-
-    <p>
-      A critical failure mode occurs if the cache successfully writes the lock, but the primary database transaction subsequently rolls back. If the client retries, the server reads the success response from the cache and hands it back, even though the database write failed. To resolve this, the backend must use an Idempotency Key table inside the primary SQL database itself, committing the idempotency key and the database mutations within the exact same database transaction block. This ensures the lock state and the business ledger succeed or fail together.
-    </p>
-
-    <h2>V. The Same-Origin Policy and Browser Isolation</h2>
-
-    <p>
-      While the backend server enforces mathematical state safety through idempotency keys, the browser client must enforce safety through strict spatial isolation boundaries. The primary security boundary of the web is the <strong>Same-Origin Policy (SOP)</strong>.
-    </p>
-
-    <p>
-      SOP dictates that a script executing on one origin is strictly forbidden from accessing, reading, or mutating resources loaded from a different origin. An <strong>Origin</strong> is strictly defined by three components: the <strong>Protocol</strong> (like HTTP or HTTPS), the <strong>Host</strong> (the domain name), and the <strong>Port</strong> number. If any of these three variables differ, the resources are cross-origin.
-    </p>
-
-    <p>
-      Under pure SOP, the browser allows Website A to send a request to Website B, but it strictly blocks the script running on Website A from reading the returned response. Without this policy, a malicious site could run background fetches to pull user session cookies or scrape private balances.
+      Without SOP, a malicious site could load your bank page in the background and read your balance or transfer funds. SOP blocks this by default.
     </p>
 
     <aside class="margin-card security">
       <span class="card-label">SECURITY</span>
-      <p>CORS is strictly a client-side browser enforcement. It does not act as a server firewall. A terminal tool or a backend script bypasses CORS entirely. The backend server will execute the query; it is the browser that intercepts the response and blocks JavaScript from reading it.</p>
+      <p>SOP and CORS are browser-only protections. They do not stop server-to-server requests or command-line tools. A backend server will still process a request from any source; the browser is what blocks the response from reaching the attacker's script.</p>
     </aside>
 
+    <h3>Cross-Origin Resource Sharing (CORS)</h3>
+
     <p>
-      To defend against advanced hardware-level attacks (like speculative execution bugs such as Spectre), modern browsers enforce <strong>Site Isolation</strong>. When a browser navigates to a new origin, it spawns a dedicated OS-level rendering process. If Website A contains an iframe pointing to Website B, the nested frame is rendered in a completely separate process. 
+      Sometimes you need cross-origin access legitimately: your frontend lives on <code>https://my-app.com</code> and your API on <code>https://api.my-app.com</code>. <strong>CORS</strong> lets the server declare which origins are allowed to read its responses.
     </p>
 
     <p>
-      This process-level isolation relies on the Operating System Kernel's virtual memory subsystem. The physical RAM pages allocated to Website A's process are completely unmapped in the page tables of Website B's process. If a compromised renderer process tries to forge a pointer to a physical memory address belonging to another origin, the CPU triggers a hardware page fault instantly, and the OS terminates the rogue process. Thus, the Same-Origin Policy is not merely a high-level JavaScript constraint; it is a legally binding contract enforced by physical transistor states and OS-level virtual memory rings.
-    </p>
-
-    <h2>VI. CORS and Cross-Origin Security</h2>
-
-    <p>
-      While the Same-Origin Policy is crucial for security, it created significant barriers for early developers who needed to split their architectures. If a frontend is hosted on one domain and the API lives on another, they represent different origins. Pure SOP would block the frontend from reading any JSON returned by its own API.
-    </p>
-
-    <p>
-      To resolve this, early developers bypassed the boundary using <strong>JSONP (JSON with Padding)</strong>. JSONP exploited a deliberate loophole in SOP: the browser allowed HTML script tags to load external JavaScript libraries from any origin. The backend would wrap the raw JSON inside a JavaScript function call and return it. However, JSONP is highly insecure, strictly limited to <span class="concept-token">GET</span> requests, and exposes the application to severe Cross-Site Scripting (XSS) takeovers.
-    </p>
-
-    <p>
-      To replace JSONP, the W3C formalized <strong>Cross-Origin Resource Sharing (CORS)</strong>. CORS is a structured negotiation protocol that uses HTTP headers to allow servers to declare which origins are authorized to access their resources.
-    </p>
-
-    <h3>1. The Preflight OPTIONS Handshake</h3>
-
-    <p>
-      If CORS only checked permissions after receiving a response, a catastrophic problem would occur for state-mutating requests. Suppose a script on a malicious site executed a request to delete a bank account. Under raw SOP, the browser would dispatch the request, the bank server would delete the account, and only then would the browser block the script from reading the success response. The damage is already done.
-    </p>
-
-    <p>
-      To prevent this, the browser executes a <strong>Preflight Request</strong> before launching any "non-simple" requests (which includes <span class="concept-token">PUT</span>, <span class="concept-token">DELETE</span>, <span class="concept-token">PATCH</span>, or any request with custom headers).
+      For "simple" requests (GET, POST with standard headers), the browser sends the request and checks the <code>Access-Control-Allow-Origin</code> header in the response. For "non-simple" requests (PUT, DELETE, PATCH, or requests with custom headers like <code>Authorization</code>), the browser first sends a <strong>preflight</strong> OPTIONS request to ask permission. Only if the server approves does the browser send the actual request.
     </p>
 
     <figure>
       <div class="svg-diagram-container">
-        <svg class="svg-diagram" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="CORS OPTIONS Preflight Handshake">
+        <svg class="svg-diagram" viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="CORS Preflight OPTIONS Handshake">
           <line x1="80" y1="40" x2="80" y2="190" stroke="#2C2416" stroke-width="2" />
           <line x1="420" y1="40" x2="420" y2="190" stroke="#2C2416" stroke-width="2" />
           <text x="80" y="30" font-weight="bold" font-size="11" text-anchor="middle">Browser</text>
           <text x="420" y="30" font-weight="bold" font-size="11" text-anchor="middle">Backend Server</text>
-
-          <!-- Preflight Check -->
           <path d="M 80,60 L 420,80" stroke="#D4A5A0" stroke-width="1.5" fill="none" />
           <polygon points="413,77 420,80 412,83" fill="#D4A5A0" />
           <text x="250" y="55" font-size="7.5" text-anchor="middle" fill="#D4A5A0">1. OPTIONS /api/data [Preflight]</text>
-
-          <!-- Preflight Allow -->
           <path d="M 420,100 L 80,120" stroke="#8FAF8A" stroke-width="1.5" fill="none" />
           <polygon points="88,117 80,120 87,123" fill="#8FAF8A" />
-          <text x="250" y="95" font-size="7.5" text-anchor="middle" fill="#8FAF8A">2. 204 No Content (Access-Control-Allow-Origin: https://my-app.com)</text>
-
-          <!-- Actual Request -->
+          <text x="250" y="95" font-size="7.5" text-anchor="middle" fill="#8FAF8A">2. 204 No Content (Access-Control-Allow-Origin)</text>
           <path d="M 80,140 L 420,160" stroke="#2C2416" stroke-width="2" fill="none" />
           <polygon points="413,157 420,160 412,163" fill="#C9A84C" />
           <text x="250" y="135" font-size="7.5" text-anchor="middle">3. PUT /api/data [Actual Payload]</text>
-
-          <!-- Response -->
           <path d="M 420,170 L 80,190" stroke="#2C2416" stroke-width="1.5" fill="none" />
           <polygon points="88,187 80,190 87,193" fill="#C9A84C" />
           <text x="250" y="165" font-size="7.5" text-anchor="middle">4. 200 OK Response</text>
         </svg>
       </div>
-      <figcaption>Plate III — The CORS Preflight OPTIONS Handshake protocol flow.</figcaption>
+      <figcaption>Plate I — The CORS Preflight OPTIONS Handshake protocol flow.</figcaption>
     </figure>
 
-    <p>
-      The preflight interaction is executed as follows:
-    </p>
+    <aside class="margin-card caution">
+      <span class="card-label">CAUTION</span>
+      <p>Preflight checks add an extra round-trip. On slow mobile networks, this can hurt performance. Set <code>Access-Control-Max-Age</code> to cache preflight results and avoid repeating them.</p>
+    </aside>
 
-    <ol>
-      <li>Before sending the actual request, the browser automatically dispatches a silent preflight check using the <span class="concept-token">OPTIONS</span> verb. It carries metadata headers asking for permission to send the specific method and content type.</li>
-      <li>The server receives the <span class="concept-token">OPTIONS</span> request. It checks its origin permissions without executing any core transaction logic. It returns a response containing the CORS allowances.</li>
-      <li>The browser reads the preflight response. If the origin and method are permitted, the browser immediately dispatches the actual request carrying the data payload. If the preflight check fails, the browser blocks the actual request from ever hitting the wire, keeping the server safe.</li>
-    </ol>
-
-    <h3>2. Verb Tunneling and CORS Security Risks</h3>
+    <h3>Common CORS Security Mistakes</h3>
 
     <p>
-      While CORS and SOP provide a robust boundary, developers frequently bypass these mechanisms through structural misconfigurations, introducing critical security flaws.
+      <strong>Dynamic Origin Reflection</strong> is a dangerous shortcut. Some developers echo the incoming <code>Origin</code> header back in the response, effectively allowing any website to access their API. This completely breaks SOP protection. Always use a strict allow-list of trusted domains instead.
     </p>
 
     <p>
-      <strong>HTTP Verb Tunneling</strong> is a technique designed to bypass restrictive firewalls that block non-standard HTTP methods. If a corporate proxy only permits <span class="concept-token">GET</span> and <span class="concept-token">POST</span> traffic, clients wrap their state-mutating requests inside a standard <span class="concept-token">POST</span> request and use an override header. On the server side, middleware intercepts the incoming request, reads the override header, and rewrites the request method internally before routing it.
+      <strong>Verb Tunneling</strong> is another risk. Some firewalls block PUT and DELETE, so developers tunnel them inside POST requests using an <code>X-HTTP-Method-Override</code> header. This bypasses firewall rules and can let attackers execute destructive actions through a seemingly harmless POST request.
     </p>
 
     <aside class="margin-card security">
       <span class="card-label">SECURITY</span>
-      <p>Verb Tunneling completely nullifies method-based firewall rules. If a security team configures a Web Application Firewall to block all incoming <span class="concept-token">DELETE</span> methods, an attacker can bypass the block by tunneling the deletion within a benign <span class="concept-token">POST</span> envelope carrying the override header.</p>
+      <p>CORS does not prevent CSRF (Cross-Site Request Forgery). A malicious site can still send a state-changing request to your server; CORS only blocks the response from being read. To stop CSRF, use anti-CSRF tokens or SameSite cookies.</p>
     </aside>
 
-    <p>
-      A second, even more pervasive exploit occurs due to <strong>Dynamic Origin Reflection in CORS</strong>. When an API needs to support credentials across origins, the CORS specification enforces a strict rule: if a request carries credentials, the server must not return a wildcard in the origin header. It must explicitly name the allowed domain.
-    </p>
+    <h2>V. Synthesis and Key Takeaways</h2>
 
     <p>
-      To bypass this restriction, developers frequently implement an insecure shortcut. The backend reads the incoming <span class="concept-token">Origin</span> header directly from the client request and echoes it back in the response. This completely neutralizes the protection of the Same-Origin Policy, creating a global CORS bypass that allows any malicious domain to execute authenticated cross-origin requests and read private user payloads.
-    </p>
-
-    <aside class="margin-card security">
-      <span class="card-label">SECURITY</span>
-      <p>CORS headers do not prevent Cross-Site Request Forgery (CSRF) attacks. A state-mutating request sent from a malicious origin is still processed and executed by the backend server. The browser's CORS engine only intercepts the response, blocking the script from reading the returned JSON. To defend against CSRF, backends must implement anti-CSRF tokens or use the SameSite cookie attribute.</p>
-    </aside>
-
-    <p>
-      To defend against dynamic reflection vulnerabilities, backends must never echo incoming origin headers automatically. Instead, they must enforce a strict, static Allow-List of trusted domains. If the incoming <span class="concept-token">Origin</span> is in the list, the server returns that origin; otherwise, it rejects the request entirely.
-    </p>
-
-    <h2>VII. Summary and Key Takeaways</h2>
-
-    <p>
-      The grammar of HTTP methods and the security borders of CORS constitute the legal framework of the web. By mapping intentions onto stable, uniform nouns and enforcing rigorous isolation boundaries, developers build systems that are resilient to network latency, transport failures, and malicious interventions.
-    </p>
-
-    <p>
-      Let us review the core technical parameters of the protocol layers:
+      HTTP methods are the grammar of the web. Choosing the right method makes your API predictable, cacheable, and safe to retry. Here is a quick reference:
     </p>
 
     <div class="table-container">
       <table>
         <thead>
           <tr>
-            <th>Layer / Model</th>
-            <th>Transport Protocol</th>
-            <th>Latency Profile</th>
-            <th>Core Benefit</th>
-            <th>The Bottleneck</th>
+            <th>Method</th>
+            <th>Use For</th>
+            <th>Can Retry?</th>
+            <th>Cacheable?</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>HTTP/1.1 (GET Caching)</strong></td>
-            <td>TCP</td>
-            <td>~50 - 150ms</td>
-            <td>Keep-Alive persistent connection recycling</td>
-            <td>Head-of-Line Blocking at application layer</td>
+            <td><strong>GET</strong></td>
+            <td>Reading data</td>
+            <td>Yes</td>
+            <td>Yes</td>
           </tr>
           <tr>
-            <td><strong>HTTP/2 (Multiplexed)</strong></td>
-            <td>TCP</td>
-            <td>~30 - 80ms</td>
-            <td>Frame Multiplexing on a single socket</td>
-            <td>Head-of-Line Blocking at transport layer</td>
+            <td><strong>HEAD</strong></td>
+            <td>Checking metadata</td>
+            <td>Yes</td>
+            <td>Yes</td>
           </tr>
           <tr>
-            <td><strong>HTTP/3 (QUIC Engine)</strong></td>
-            <td>QUIC over UDP</td>
-            <td>~10 - 50ms</td>
-            <td>Stream Independence and integrated TLS 1.3</td>
-            <td>High CPU packet validation overhead</td>
+            <td><strong>POST</strong></td>
+            <td>Creating resources</td>
+            <td>No (use idempotency keys)</td>
+            <td>No</td>
           </tr>
           <tr>
-            <td><strong>Serverless APIs</strong></td>
-            <td>On-Demand Routing</td>
-            <td>~100 - 600ms</td>
-            <td>Automatic, infinite scaling with zero idle cost</td>
-            <td>Cold Starts and Stateless connection pool limits</td>
+            <td><strong>PUT</strong></td>
+            <td>Full replacements</td>
+            <td>Yes</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>PATCH</strong></td>
+            <td>Partial updates</td>
+            <td>Usually no</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>DELETE</strong></td>
+            <td>Removing resources</td>
+            <td>Yes</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>OPTIONS</strong></td>
+            <td>Capability discovery</td>
+            <td>Yes</td>
+            <td>Yes</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <p>
-      Understanding these boundaries is not merely a tool for loading web pages; it is the fundamental framework of global distributed systems. In the next chapter, the focus shifts to the royal decrees of this digital realm—the HTTP Responses—tracing the status codes and response headers that communicate state transitions back across the network.
+      Understanding these boundaries is the foundation of building reliable distributed systems. In the next chapter, we turn to the server's replies: the HTTP response codes that communicate success, failure, and everything in between.
     </p>
 
     <hr class="footnotes-divider">
     <section class="footnotes">
-      <h3>Footnotes &amp; References</h3>
+      <h3>Footnotes & References</h3>
       <ol>
         <li id="fn1">Fielding, R. T. (2000). <em>Architectural Styles and the Design of Network-based Software Architectures</em> (Doctoral dissertation, University of California, Irvine). <a href="#ref1">↩</a></li>
-        <li id="fn2">RFC 7231: <em>Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</em>. Internet Engineering Task Force (IETF). Section 4 defines safe and idempotent methods. <a href="#ref2">↩</a></li>
-        <li id="fn3">RFC 5789: <em>PATCH Method for HTTP</em>. Internet Engineering Task Force (IETF). This document introduces partial updates to resolve the complete overwrite constraints of standard PUT requests. <a href="#ref3">↩</a></li>
-        <li id="fn4">Chromium Site Isolation Architecture. (2018). Google Developers. site-isolation documentation details process allocation and out-of-process iframe rendering contexts. <a href="#ref4">↩</a></li>
+        <li id="fn2">RFC 7231: <em>Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</em>. Internet Engineering Task Force (IETF). <a href="#ref4">↩</a></li>
+        <li id="fn3">RFC 5789: <em>PATCH Method for HTTP</em>. Internet Engineering Task Force (IETF). <a href="#ref5">↩</a></li>
       </ol>
     </section>
 
@@ -552,13 +357,9 @@
       <div class="divider-symmetrical">
         <span class="divider-symbol">♦ ✦ ♦</span>
       </div>
-      <div class="curator-credits">Curated &amp; Written by Harshit in the Year of 2026</div>
+      <div class="curator-credits">Curated & Written by Harshit in the Year of 2026</div>
     </footer>
   </div>
 
-  <script>
-    document.documentElement.classList.add('ready');
-  </script>
 </body>
-
 </html>
