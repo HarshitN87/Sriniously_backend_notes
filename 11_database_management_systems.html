@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chapter XI: The Great Ledger: DBMS &amp; The Persistence Layer — Sriniously Backend</title>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
@@ -22,19 +21,15 @@
     <a href="05_http_responses.html" class="archivist-dot" data-title="Chapter V: The Royal Decrees"></a>
     <a href="06_routing.html" class="archivist-dot" data-title="Chapter VI: The Grand Switchboard"></a>
     <a href="07_serialization.html" class="archivist-dot" data-title="Chapter VII: The Babel Fish"></a>
-    <a href="08_architecture_and_middleware.html" class="archivist-dot"
-      data-title="Chapter VIII: Server Architecture"></a>
-    <a href="09_authentication_and_authorization.html" class="archivist-dot"
-      data-title="Chapter IX: The Identity Ledger"></a>
+    <a href="08_architecture_and_middleware.html" class="archivist-dot" data-title="Chapter VIII: Server Architecture"></a>
+    <a href="09_authentication_and_authorization.html" class="archivist-dot" data-title="Chapter IX: The Identity Ledger"></a>
     <a href="10_rest_apis.html" class="archivist-dot" data-title="Chapter X: The REST Covenant"></a>
-    <a href="11_database_management_systems.html" class="archivist-dot active"
-      data-title="Chapter XI: The Great Ledger"></a>
-    <a href="12_caching_and_in_memory_databases.html" class="archivist-dot"
-      data-title="Chapter XII: The Echo Chamber"></a>
+    <a href="11_database_management_systems.html" class="archivist-dot active" data-title="Chapter XI: The Great Ledger"></a>
+    <a href="12_caching_and_in_memory_databases.html" class="archivist-dot" data-title="Chapter XII: The Echo Chamber"></a>
     <a href="13_background_jobs.html" class="archivist-dot" data-title="Chapter XIII: Asynchronous Task Queues"></a>
     <a href="14_full_text_search.html" class="archivist-dot" data-title="Chapter XIV: The Inverted Library"></a>
     <a href="15_error_handling.html" class="archivist-dot" data-title="Chapter XV: The Resilient Bastion"></a>
-  <a href="16_configuration_management.html" class="archivist-dot" data-title="Chapter XVI: The Genetic Code"></a>
+    <a href="16_configuration_management.html" class="archivist-dot" data-title="Chapter XVI: The Genetic Code"></a>
     <a href="17_logging_observability.html" class="archivist-dot" data-title="Chapter XVII: The Watchtower"></a>
     <a href="18_graceful_shutdown.html" class="archivist-dot" data-title="Chapter XVIII: The Orderly Departure"></a>
     <a href="19_backend_security_injection.html" class="archivist-dot" data-title="Chapter XIX: The Paranoid Sentinel"></a>
@@ -50,8 +45,7 @@
     <header class="chapter-header">
       <div class="chapter-number">Chapter the Eleventh</div>
       <h1>The Great Ledger: DBMS &amp; Persistence</h1>
-      <div class="chapter-epigraph">"A database is not a repository; it is a treaty negotiated between the fragile,
-        volatile light of active memory and the cold, unyielding gravity of physical matter."</div>
+      <div class="chapter-epigraph">"A database is not a repository; it is a treaty negotiated between the fragile, volatile light of active memory and the cold, unyielding gravity of physical matter."</div>
 
       <div class="divider-symmetrical">
         <span class="divider-symbol">♦ ✦ ♦</span>
@@ -60,462 +54,308 @@
 
     <main>
       <p class="intro-paragraph">
-        In the quiet, echoing courts of Yamaloka, where the boundaries of mortal life are measured against the unyielding
-        laws of cosmic justice, sits Chitragupta, the divine scribe of Yama. He is tasked with maintaining the
-        <em>Agrasaadhani</em>&mdash;the supreme cosmic ledger that records every thought, word, and deed of every living being
-        across the three worlds (<em>Triloka</em>). 
+        In the courts of Yamaloka sits Chitragupta, the divine scribe of Yama, tasked with maintaining the
+        <em>Agrasaadhani</em>&mdash;the supreme cosmic ledger that records every thought, word, and deed of every living being.
       </p>
 
       <p>
-        Consider the sheer scale and complexity of this administrative domain. In any single microsecond, a king in
-        Hastinapura might declare a war of righteous conquest, a merchant in Tamralipti might weigh a falsified bag of
-        cardamom, and a silent ascetic in the high caves of the Himalayas might achieve a fleeting state of absolute
-        spiritual liberation. Each of these occurrences is a dynamic update to the cosmic balance of karma&mdash;referred to in
-        sacred texts as <em>Punya</em> (righteous merit) and <em>Paapa</em> (transgressions). 
+        If this ledger were written on ordinary paper, or managed by mortals prone to fatigue and coordination failures,
+        the system of cosmic justice would crumble. If two deeds occurred at the exact same instant and overwrote each
+        other's lines, or if a sudden storm wiped out the records of the last century, thousands of souls would be left
+        in administrative limbo.
       </p>
 
       <p>
-        If Chitragupta's ledger were written on ordinary, physical paper, or if the records were managed by ordinary
-        mortals prone to fatigue and coordination failures, the system of cosmic justice would crumble into absolute
-        moral anarchy. Imagine if two merchants performed their transactions at the exact same instant, and their deeds
-        overwrote each other's lines, or if a sudden cosmic storm dissolved the court of Yama and wiped out the records
-        of the last century, leaving thousands of souls in a state of administrative limbo.
-      </p>
-
-      <p>
-        The <em>Agrasaadhani</em> must, by cosmological necessity, be completely infallible. It must be tightly
-        ACID-compliant: every moral deed must be atomic (either the action is completely registered with all its moral
-        consequences, or it is not recorded at all; there are no half-committed sins); it must be consistent (the law of
-        cause and effect cannot be violated, and total karma must always balance); it must be isolated (the concurrent
-        actions of a billion souls cannot bleed into one another or cause corrupt read-write anomalies); and it must be
-        durable (even if the current cosmic epoch dissolves in the fires of <em>Pralaya</em>, the records must remain
-        hardened in the cosmic bedrock, ready to dictate the spiritual starting conditions of the next creation cycle).
+        The <em>Agrasaadhani</em> must be completely infallible. It must be tightly ACID-compliant: every deed must be
+        atomic (either fully recorded or not at all); consistent (the law of cause and effect cannot be violated);
+        isolated (concurrent actions cannot bleed into one another); and durable (even if the cosmos dissolves, the
+        records must remain hardened in cosmic bedrock).
       </p>
 
       <p>
         In modern software systems, the challenge is equally rigorous. The task is building the digital scriptorium of
         applications&mdash;the <strong>Database Management System (DBMS)</strong>. Like Chitragupta, database engines must act
-        as paranoid, hyper-vigilant guardians of truth, maintaining a state of perfect administrative clarity while operating on
-        physical hardware that is actively attempting to lie, fail, lose power, or combust.
+        as paranoid guardians of truth, maintaining perfect clarity while operating on hardware that is actively
+        attempting to lie, fail, or lose power.
       </p>
 
-      <h2>I. The Evolution of the Digital Scriptorium: From Punched Cards to NewSQL</h2>
+      <h2>I. The Evolution of the Digital Scriptorium</h2>
 
       <p>
-        Before the mechanics of modern transactional databases can be appreciated, the long philosophical struggle that led to
-        their creation must be studied. In the early days of electronic computing&mdash;the mid-twentieth century&mdash;data
-        storage was an ad-hoc, manual craft. Application developers did not have a generalized DBMS. If records needed to be
-        stored, they were written directly to magnetic tapes or early spinning hard disks as raw, sequential files. If a program
-        wanted to search for a record, it literally had to spin the tape reel from the beginning to the end, matching bytes
-        sequentially.
+        In the early days of computing, data storage was an ad-hoc, manual craft. Application developers had no
+        generalized DBMS. Records were written directly to magnetic tapes or spinning disks as raw, sequential files.
+        Searching for a record meant spinning the tape reel from beginning to end, matching bytes sequentially.
       </p>
 
       <p>
-        As data volumes expanded, this sequential scanning became a catastrophic bottleneck. The industry responded by
-        developing early structured storage models, the most prominent of which were the <strong>Hierarchical Model</strong>
-        (exemplified by IBM's Information Management System, or IMS) and the <strong>Network Model</strong> (standardized by the
-        CODASYL consortium).
+        As data volumes expanded, this sequential scanning became a catastrophic bottleneck. The industry responded with
+        the <strong>Hierarchical Model</strong> (IBM's IMS) and the <strong>Network Model</strong> (CODASYL). In the
+        hierarchical model, data was organized as a strict parent-child tree. This worked for simple taxonomies but
+        collapsed when faced with real-world relationships&mdash;modeling many-to-many relationships forced developers to
+        duplicate data across multiple branches, leading to synchronization nightmares.
       </p>
 
       <p>
-        In the hierarchical model, data was organized as a strict parent-child tree. A parent record could own multiple
-        child records, but a child could have exactly one parent. This worked beautifully for simple taxonomies, but collapsed
-        when faced with real-world relationships. For instance, in a cargo manifest, an <span class="concept-token">Order</span> record might have
-        multiple <span class="concept-token">Item</span> children, but an <span class="concept-token">Item</span> also belonged to a <span class="concept-token">Supplier</span>. Modeling this
-        many-to-many relationship in a strict tree forced developers to duplicate data across multiple branches, leading to
-        synchronization nightmares where an item's price might be updated in one branch but remain outdated in another.
+        Both models suffered from a fatal flaw: <strong>physical data dependence</strong>. There was no logical query
+        language. To find a record, developers wrote procedural programs that physically navigated disk sectors by
+        following hardcoded memory pointers. If a system administrator moved record sectors or altered a field's size,
+        every application program broke instantly.
       </p>
 
       <p>
-        The network model solved this by allowing child nodes to have multiple parents, forming a complex graph of physically
-        interlinked records. However, both models suffered from a fatal, systemic flaw: <strong>physical data dependence</strong>.
+        Then, in 1970, IBM researcher Edgar F. Codd published a landmark paper: <em>"A Relational Model of Data for Large
+        Shared Data Banks."</em> Codd's breakthrough was the declaration of <strong>Physical Data Independence</strong>&mdash;the
+        logical structure of data should be decoupled from its physical storage layout. Data should be represented as
+        mathematical relations (tables), and developers should use a declarative language to express <em>what</em> data
+        they wanted, leaving the engine responsible for compiling and executing the search.
       </p>
 
       <p>
-        In these mainframe architectures, there was no logical query language. If a developer wanted to find a specific
-        record, they had to write a procedural program that physically navigated the disk sectors by following hardcoded
-        memory pointers. The code was filled with instructions like "seek to sector 12, read the first four bytes to find
-        the offset pointer, seek to that offset, read the next block." 
+        IBM's commercial division, profiting from hierarchical systems, suppressed Codd's research. But his ideas caught
+        fire in academia. At UC Berkeley, researchers built INGRES, which pioneered concepts now living inside PostgreSQL.
+        Meanwhile, IBM's San Jose lab secretly built a prototype called System R and designed a declarative interface
+        called SEQUEL, later shortened to SQL. When Larry Ellison read the published papers, he built a commercial clone
+        and founded Oracle, establishing the relational model as the dominant standard.
       </p>
 
       <p>
-        If a system administrator decided to optimize disk layout by moving record sectors, or if the size of a field was
-        altered, every single application program written to query that database broke instantly. The software world was
-        trapped in a state of architectural paralysis, where physical modifications to storage forced months of manual
-        code rewrites.
+        For thirty years, relational systems ruled. But in the late 2000s, Web 2.0 companies (Google, Amazon, Facebook)
+        pushed them to a physical wall. Relational systems scale <em>vertically</em> by upgrading to a single, more
+        powerful server&mdash;but there is a hard ceiling to vertical scaling. To scale further, databases had to scale
+        <em>horizontally</em> by partitioning data across hundreds of cheap servers. Relational systems, built on strict
+        transaction safety, choked under the latency of distributed joins. This sparked the <strong>NoSQL Revolution</strong>.
       </p>
 
       <p>
-        Then, in 1970, an English mathematician and IBM researcher named Edgar F. Codd published a landmark paper that
-        permanently changed the trajectory of computer science: <em>"A Relational Model of Data for Large Shared Data Banks."</em><sup>1</sup>
+        NoSQL discarded Codd's relational model and ACID transactions, optimizing instead for high-throughput writes,
+        schema flexibility, and horizontal partitioning. They introduced Document Stores, Key-Value Stores, Column-Family
+        Stores, and Graph Databases. They embraced the <strong>BASE</strong> model: Basically Available, Soft State,
+        Eventual Consistency&mdash;accepting that nodes could be temporarily out-of-sync if it meant the system never went down.
       </p>
 
       <p>
-        Codd's breakthrough was the declaration of <strong>Physical Data Independence</strong>. He argued that the logical structure of
-        data should be completely decoupled from its physical storage layout on disk. Instead of navigating physical pointer
-        graphs, data should be represented as mathematical relations&mdash;what are now called tables. Developers should use a
-        declarative language to express <em>what</em> data they wanted to retrieve, and the database engine itself should be
-        responsible for compiling, optimizing, and physically executing the search plan.
-      </p>
-
-      <p>
-        IBM's commercial division, which was making massive profits selling hierarchical IMS systems, actively suppressed Codd's
-        research. They argued that dynamic relational joins would be prohibitively slow and that no automated compiler could ever
-        outperform a human engineer manually tuning disk pointer seek operations.
-      </p>
-
-      <p>
-        However, Codd's ideas caught fire in the academic world. At UC Berkeley, Michael Stonebraker and Eugene Wong read Codd's
-        paper and began building a relational system called INGRES (Interactive Graphics and Retrieval System), which pioneered
-        many of the concepts that now live inside PostgreSQL. Meanwhile, a team of researchers at IBM's San Jose research lab
-        secretly built a prototype called System R and designed a declarative interface named SEQUEL, later shortened to SQL.
-        When a young entrepreneur named Larry Ellison read the published papers of System R, he saw the future of computing,
-        built a commercial clone of SQL, and founded Oracle, establishing the relational model as the dominant database standard.
-      </p>
-
-      <p>
-        For thirty years, RDBMS systems ruled the industry. But in the late 2000s, the explosive scaling demands of Web 2.0
-        companies (such as Google, Amazon, and Facebook) pushed relational databases to a physical wall. Relational systems are
-        designed to scale <em>vertically</em> by upgrading to a single, more powerful server. However, there is a hard physical ceiling
-        to vertical scaling: the speed of light cannot be exceeded, nor can a single silicon die with infinite cache memory be
-        manufactured.
-      </p>
-
-      <p>
-        To scale further, databases had to scale <em>horizontally</em> by partitioning and distributing data across hundreds of cheap,
-        commodity servers. Relational systems, built on the assumption of instant local memory access and strict transaction safety,
-        choked under the network latency of distributed joins. This bottleneck sparked the <strong>NoSQL Revolution</strong>.
-      </p>
-
-      <p>
-        The NoSQL movement discarded Codd's relational model and the overhead of ACID transactions, optimizing instead for
-        high-throughput write performance, schema flexibility, and horizontal partitioning. They introduced Document Stores
-        (MongoDB), Key-Value Stores (Redis), Column-Family Stores (Cassandra), and Graph Databases (Neo4j). They embraced the
-        <strong>BASE</strong> model (Basically Available, Soft State, Eventual Consistency), arguing that it was acceptable for
-        nodes to be temporarily out-of-sync if it meant the system never went down.
-      </p>
-
-      <p>
-        Yet, as these distributed NoSQL systems were deployed in production, engineers discovered that managing eventual
-        consistency and schema drift inside application code was a nightmare. If a distributed banking transaction failed halfway
-        through, the application developer had to write complex, bug-prone compensation logic to manually reverse the partial
-        changes across multiple shards.
-      </p>
-
-      <p>
-        This pain led to the modern synthesis: <strong>NewSQL</strong> (such as Google Spanner, CockroachDB, and TiDB). NewSQL
-        systems combine the horizontal scalability and fault tolerance of NoSQL databases with the strict ACID guarantees,
-        relational integrity, and declarative SQL interface of traditional relational engines. They achieve this by combining
-        distributed consensus protocols (like Paxos or Raft) with highly synchronized physical hardware clocks (such as GPS and
-        rubidium atomic clocks), proving that Codd's relational algebra remains the ultimate framework for data management.
+        Yet engineers soon discovered that managing eventual consistency inside application code was a nightmare. If a
+        distributed banking transaction failed halfway through, developers had to write complex compensation logic to
+        manually reverse partial changes. This pain led to the modern synthesis: <strong>NewSQL</strong> (Google Spanner,
+        CockroachDB, TiDB). NewSQL combines the horizontal scalability of NoSQL with the strict ACID guarantees and
+        relational interface of traditional engines&mdash;proving that Codd's relational model remains the ultimate framework
+        for data management.
       </p>
 
       <h2>II. The Durability Covenant: WAL and the Physical Platter</h2>
 
       <p>
-        When a line of code like <span class="concept-token">db.save(user)</span> executes, a request is made that feels entirely spiritual.
-        Electrical impulses move from one silicon chip to another. A <span class="concept-token">200 OK</span> response arrives, and
-        the developer sleeps peacefully, believing that the data is safe.
+        When a developer saves a record, a request moves through silicon chips, a success response arrives, and the
+        developer sleeps peacefully, believing the data is safe.
       </p>
 
       <p>
-        This is a dangerous delusion. The physical world is a hostile wilderness of failing power grids, unstable operating
-        system kernels, and hardware wear. If the power cuts out while a storage drive is mid-write, a neat error
-        message does not appear; what appears is a physically mangled piece of iron oxide or flash cells that represents
-        neither the old state nor the new one.
+        This is a dangerous delusion. The physical world is a hostile wilderness of failing power grids, unstable kernels,
+        and hardware wear. If the power cuts out mid-write, what appears is a mangled piece of iron oxide or flash cells
+        that represents neither the old state nor the new one.
       </p>
 
       <p>
-        To make matters worse, the operating system is a pathological liar.
+        Worse, the operating system is a pathological liar. When a program asks the OS to write data to disk, the kernel
+        sees the slow drive, sees the fast empty RAM, and decides: <em>"The write could go to disk now, but that takes
+        milliseconds. Instead, the data stays in the Page Cache, the program is told it was written, and the actual flush
+        happens later."</em> This is write-caching&mdash;brilliant right up until someone trips over the power cord. When that
+        happens, RAM loses its charge, buffered writes vanish, and the database realizes it told the client the data was
+        safe when it was actually sitting in volatile memory.
       </p>
 
       <p>
-        When a program asks the operating system to write data to disk, the kernel looks at the slow, mechanical drive or SSD
-        controller, looks at the fast, empty RAM, and decides: <em>"The write could go to disk now, but that will take
-        milliseconds, which will make benchmarks look terrible. Instead, the data stays in the Page Cache, the program is told
-        it was written, and the actual flush happens later when the CPU is idle."</em>
+        To enforce durability, the database must force the OS to commit bytes to physical, non-volatile storage before
+        reporting success. It does this using a blocking system call that flushes every dirty page down the hardware
+        pipeline and does not return control until the change is permanent.
       </p>
 
       <p>
-        This is write-caching, and it is a brilliant way to make computers feel fast&mdash;right up until the moment someone trips
-        over the power cord. When that happens, the RAM loses its electrical charge, the buffered writes vanish, and the database
-        realizes it has committed a structural lie: it told the client the data was safe when it was actually just sitting in
-        volatile memory waiting for the kernel to get around to it.
-      </p>
-
-      <p>
-        To enforce the durability promise&mdash;the "D" in ACID&mdash;the database must force the operating system to commit the bytes to
-        physical, non-volatile storage before it reports success to the application. It does this using a highly specific,
-        blocking system call: <span class="concept-token">the named runtime action</span>.
-      </p>
-
-      <p>
-        When the database calls <span class="concept-token">the named runtime action</span>, it tells the kernel: <em>"Stop what you are doing. Flush every single dirty
-        page related to this file descriptor down the hardware pipeline, force the drive controller to write it to physical medium,
-        and do not return control until the change is permanent."</em>
-      </p>
-
-      <p>
-        But <span class="concept-token">the named runtime action</span> is incredibly slow. If <span class="concept-token">the named runtime action</span> had to be called on every single row insert, updating
-        indexes, table records, and metadata, the database would grind to a halt, processing perhaps fifty transactions per
-        second. This performance bottleneck is solved by the <strong>Write-Ahead Log (WAL)</strong>.
+        But this forced flush is incredibly slow. If it had to happen on every single row insert&mdash;updating indexes,
+        table records, and metadata&mdash;the database would grind to a halt. This bottleneck is solved by the
+        <strong>Write-Ahead Log (WAL)</strong>.
       </p>
 
       <aside class="margin-card aside">
         <div class="margin-card-label">Arthashastra Treasury Parallel</div>
         <p>
-          Kautilya's <em>Arthashastra</em> (c. 300 BCE) prescribed an extraordinarily detailed system of royal treasury
-          management (<em>Kosha</em>). The <em>Sannidhata</em> (Treasurer) maintained multiple overlapping ledgers with
-          cross-referencing audit trails&mdash;income ledgers, expenditure ledgers, and balance verification rolls. Each entry
-          required the seal of the <em>Samahartr</em> (Revenue Collector) and the <em>Akshapataladhyaksha</em>
-          (Superintendent of Accounts). This multi-ledger cross-verification system mirrors the Write-Ahead Log and
-          transaction journal design of modern RDBMS systems, where no state mutation is accepted without first being
-          durably recorded in an append-only journal. The <em>Arthashastra</em> recognized, twenty-three centuries ago,
-          that the act of recording must precede the act of spending&mdash;exactly the WAL protocol's guarantee that the
-          log record must be flushed before the data page is modified.
+          Kautilya's <em>Arthashastra</em> (c. 300 BCE) prescribed a detailed system of royal treasury management. The
+          Treasurer maintained multiple overlapping ledgers with cross-referencing audit trails&mdash;income ledgers,
+          expenditure ledgers, and balance verification rolls. Each entry required multiple seals. This multi-ledger
+          cross-verification mirrors the WAL design of modern databases, where no state mutation is accepted without
+          first being durably recorded in an append-only journal. Twenty-three centuries ago, the
+          <em>Arthashastra</em> recognized that the act of recording must precede the act of spending&mdash;exactly the
+          WAL protocol's guarantee that the log record must be flushed before the data page is modified.
         </p>
       </aside>
 
       <p>
-        Instead of writing the structured row directly to the primary tables&mdash;which would require updating multiple scattered
-        disk pages, reorganizing index branches, and calling <span class="concept-token">the named runtime action</span> dozens of times&mdash;the database engine does something
-        much simpler. It writes the raw, binary change description to a single, continuous, append-only file on disk: the WAL.
+        Instead of writing the structured row directly to the primary tables&mdash;which would require updating multiple
+        scattered disk pages and reorganizing index branches&mdash;the database does something simpler. It writes the raw,
+        binary change description to a single, continuous, append-only file on disk: the WAL.
       </p>
 
       <p>
-        Because the WAL is append-only, the disk head doesn't need to hop around the platter or trigger expensive block-erasure
-        cycles in SSDs. It stays in one place, writing a continuous stream of sequential sectors. This is incredibly fast&mdash;almost
-        as fast as writing to raw memory. The database writes the change to the WAL, calls <span class="concept-token">the named runtime action</span> on the WAL file
-        once, and then immediately tells the client that the transaction is committed.
+        Because the WAL is append-only, the disk head doesn't need to hop around the platter or trigger expensive
+        block-erasure cycles. It writes a continuous stream of sequential sectors&mdash;almost as fast as writing to raw
+        memory. The database writes the change to the WAL, forces a flush once, and immediately tells the client the
+        transaction is committed.
       </p>
 
       <p>
-        Only later, in a quiet background process called <strong>checkpointing</strong>, does the database engine go back and apply these
-        changes to the actual structured table pages. If the power cuts out mid-checkpoint, it doesn't matter. When the database
-        boots back up, it looks at the WAL, sees which transactions were marked as committed but hadn't been flushed to the primary
-        tables yet, and simply replays them. It "rolls forward" the state to match the physical truth written in the log.
+        Only later, in a quiet background process called <strong>checkpointing</strong>, does the database apply these
+        changes to the actual structured table pages. If the power cuts out mid-checkpoint, it doesn't matter. When the
+        database boots back up, it looks at the WAL, sees which committed transactions hadn't yet been flushed to the
+        primary tables, and simply replays them. It "rolls forward" the state to match the truth written in the log.
       </p>
 
       <!-- Symmetrical SVG WAL Platter -->
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate XXIII: The Durability Covenant: WAL vs Primary Storage</div>
         <svg class="svg-diagram" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Backend concept diagram">
-          <!-- Symmetrical Outer Frame -->
           <rect x="5" y="5" width="590" height="210" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" />
-
-          <!-- RAM Buffer Pool (Top Center) -->
           <rect x="200" y="25" width="200" height="50" fill="#D4A5A0" stroke="#2C2416" stroke-width="2" rx="4" />
           <text x="300" y="45" font-weight="bold" font-size="11" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Volatile RAM Buffer Pool</text>
           <text x="300" y="62" font-size="8.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Holds Dirty Pages &amp; Indexes</text>
-
-          <!-- WAL Disk File (Left Bottom) -->
           <rect x="40" y="125" width="220" height="65" fill="#8FAF8A" stroke="#2C2416" stroke-width="2" rx="4" />
           <text x="150" y="145" font-weight="bold" font-size="11.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">1. Write-Ahead Log (WAL)</text>
           <text x="150" y="162" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Sequential Append-Only (Fast)</text>
           <text x="150" y="176" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Synchronized via fsync()</text>
-
-          <!-- Primary Structured Storage (Right Bottom) -->
           <rect x="340" y="125" width="220" height="65" fill="#F5F0E8" stroke="#2C2416" stroke-width="2" rx="4" />
           <text x="450" y="145" font-weight="bold" font-size="11.5" text-anchor="middle" dominant-baseline="central" fill="#2C2416">2. Primary Tables &amp; Indexes</text>
           <text x="450" y="162" font-size="9" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Random Access B-Tree (Slow)</text>
           <text x="450" y="176" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">Updated via Checkpoint Batches</text>
-
-          <!-- Flow Arrows -->
           <path d="M 270,75 L 270,100 L 150,100 L 150,125" stroke="#2C2416" stroke-width="1.5" fill="none" />
           <polygon points="146,118 150,125 154,118" fill="#C9A84C" />
           <text x="210" y="94" font-size="8.5" font-weight="bold" fill="#2C2416" text-anchor="middle">Sequential Log Sync</text>
-
           <path d="M 330,75 L 330,100 L 450,100 L 450,125" stroke="#2C2416" stroke-dasharray="4,4" stroke-width="1.5" fill="none" />
           <polygon points="446,118 450,125 454,118" fill="#C9A84C" />
           <text x="390" y="94" font-size="8.5" font-weight="bold" fill="#2C2416" text-anchor="middle">Checkpoint Flush</text>
         </svg>
       </div>
 
-      <h3>The WAL Physical Protocol: LSN Ordering and Checkpoint Mechanics</h3>
+      <h3>The WAL Protocol and Crash Recovery</h3>
 
       <p>
-        The physical WAL protocol operates on a strict ordering invariant enforced by the <strong>Log Sequence Number (LSN)</strong>.
-        Every log record written to the WAL is assigned a monotonically increasing LSN&mdash;essentially a byte offset into the log
-        stream. When the database modifies a data page in the buffer pool, it stamps that page with the LSN of the log record
-        describing the modification. This stamp is called the <strong>pageLSN</strong>.
+        The WAL protocol operates on a strict ordering invariant. Every log record written to the WAL is assigned a
+        monotonically increasing sequence number&mdash;essentially a byte offset into the log stream. When the database
+        modifies a data page in the buffer pool, it stamps that page with the sequence number of the log record describing
+        the modification.
       </p>
 
       <p>
-        The critical WAL protocol rule is: <em>A dirty page may not be flushed to disk unless all WAL records up to and including
-        the page's pageLSN have already been flushed to stable storage.</em> Formally, for any data page \(P\) being written to
-        disk:
-      </p>
-
-      <div class="math-block">\[
-        \text{flushedLSN} \geq \text{pageLSN}(P)
-      \]</div>
-
-      <p>
-        This invariant guarantees that if the system crashes after a data page write, the corresponding log record already exists
-        on disk and can be used during recovery to verify or redo the modification.
+        The critical WAL rule is: <em>a dirty page may not be flushed to disk unless all WAL records describing its
+        modifications have already been flushed to stable storage.</em> This guarantees that if the system crashes after a
+        data page write, the corresponding log record already exists on disk and can be used during recovery.
       </p>
 
       <p>
-        <strong>Checkpointing</strong> is the background process that periodically flushes dirty pages from the buffer pool to
-        the primary data files and advances the recovery start point. During a checkpoint, the database engine:
+        <strong>Checkpointing</strong> periodically flushes dirty pages from the buffer pool to the primary data files and
+        advances the recovery start point. After a crash, recovery begins from the last successful checkpoint rather than
+        from the very beginning of the WAL&mdash;dramatically reducing recovery time from hours to seconds.
+      </p>
+
+      <p>
+        The crash recovery process follows a standard protocol called <strong>ARIES</strong> (Algorithms for Recovery and
+        Isolation Exploiting Semantics), operating in three phases when booted after an abrupt shutdown:
       </p>
 
       <ol>
-        <li>Records a <span class="concept-token">BEGINCHECKPOINT</span> log entry in the WAL.</li>
-        <li>Captures a snapshot of the current Dirty Page Table (DPT) and the Active Transaction Table (ATT).</li>
-        <li>Writes all dirty pages to their respective data files on disk, respecting the LSN ordering constraint.</li>
-        <li>Records an <span class="concept-token">ENDCHECKPOINT</span> log entry with the DPT and ATT snapshots.</li>
-        <li>Updates the master record (a small, well-known location on disk) to point to this checkpoint's LSN.</li>
-      </ol>
-
-      <p>
-        After a crash, recovery begins from the last successful checkpoint's LSN rather than from the very beginning of the
-        WAL, dramatically reducing recovery time. In a production PostgreSQL instance processing thousands of transactions per
-        second, this can reduce recovery from hours to seconds.
-      </p>
-
-      <p>
-        The crash recovery process relies on a systematic, mathematical standard: the <strong>ARIES</strong> (Algorithms for Recovery
-        and Isolation Exploiting Semantics) protocol. ARIES operates in three distinct phases when booted after an abrupt shutdown:
-      </p>
-
-      <ol>
-        <li><strong>The Analysis Phase</strong>: The engine scans the WAL forward from the last known checkpoint record.
-          It compiles two critical in-memory tables: the <strong>Transaction Table</strong> (listing all transactions active at the moment
-          of failure) and the <strong>Dirty Page Table</strong> (identifying all database pages in memory that were modified but not yet flushed to disk).</li>
-        <li><strong>The Redo Phase (Roll-Forward)</strong>: The engine reads the WAL forward from the oldest Log Sequence Number (LSN)
-          identified in the Dirty Page Table. It replays every logged modification, modifying the table pages to restore the database
-          to the exact state it was in at the millisecond of the crash. Crucially, this step reproduces all actions, including those of
-          transactions that were eventually aborted or uncommitted. Redo is idempotent: applying the same log record to a page that
-          already reflects the change produces no additional modification, because the engine compares the page's current LSN against
-          the log record's LSN before applying.</li>
-        <li><strong>The Undo Phase (Rollback)</strong>: The engine reads the WAL backward from the end. For every transaction that was
-          active but uncommitted at the time of the crash, it executes compensating log records (CLRs) to reverse their changes, restoring
-          absolute relational consistency. Each CLR is itself logged to the WAL, ensuring that even a crash during recovery can be
-          recovered from&mdash;a property known as <strong>nested recovery</strong>.</li>
+        <li><strong>Analysis Phase</strong>: The engine scans the WAL forward from the last checkpoint. It compiles two
+          tables: the <strong>Transaction Table</strong> (transactions active at failure) and the <strong>Dirty Page
+          Table</strong> (pages modified but not yet flushed to disk).</li>
+        <li><strong>Redo Phase (Roll-Forward)</strong>: The engine replays every logged modification from the oldest
+          relevant point, restoring the database to the exact state it was in at the millisecond of the crash. This step
+          reproduces all actions, including those of transactions that were eventually aborted. Redo is idempotent:
+          applying the same log record to a page that already reflects the change produces no additional modification.</li>
+        <li><strong>Undo Phase (Rollback)</strong>: The engine reads the WAL backward. For every transaction that was
+          active but uncommitted at the time of the crash, it writes compensating log records to reverse their changes.
+          Each compensating record is itself logged, ensuring that even a crash during recovery can be recovered
+          from&mdash;a property known as <strong>nested recovery</strong>.</li>
       </ol>
 
       <h2>III. B-Trees and LSM-Trees: Indexing the Search Space</h2>
 
       <p>
-        If reading a transaction log were the only retrieval mechanism, database lookups would be an \(O(N)\) linear scanning nightmare.
-        To find a single user's profile in a database of 100 million records, the engine would have to read through every single
-        committed byte on disk.
+        If reading a transaction log were the only retrieval mechanism, database lookups would be a linear scanning
+        nightmare. To find a single user's profile among 100 million records, the engine would have to read through
+        every committed byte on disk.
       </p>
 
       <p>
-        To achieve sub-millisecond lookups, indexing structures are essential. In relational databases, the dominant index structure is the
-        <strong>B-Tree</strong> (specifically the \(B^+\)Tree variant).
+        To achieve sub-millisecond lookups, indexing structures are essential. In relational databases, the dominant
+        index structure is the <strong>B-Tree</strong> (specifically the B+ Tree variant).
       </p>
 
-      <h3>The B+ Tree Structure and Height Equation</h3>
+      <h3>The B+ Tree Structure</h3>
 
       <p>
-        A B-Tree is a balanced, multi-way search tree. Unlike a binary tree where each node has at most two children, a B-Tree node
-        has a high branching factor (or fan-out), often containing hundreds of child pointers. 
+        A B-Tree is a balanced, multi-way search tree. Unlike a binary tree where each node has at most two children, a
+        B-Tree node has a high branching factor, often containing hundreds of child pointers. Because the branching
+        factor is so high, a B-Tree is extremely flat&mdash;a tree indexing ten million rows typically has only three levels.
       </p>
 
       <p>
-        In a \(B^+\)Tree of order \(b\) (where each internal node can hold up to \(b-1\) keys and \(b\) child pointers), the height
-        \(h\) for a tree indexing \(N\) keys is given by:
-      </p>
-
-      <div class="math-block">\[
-        h = \lceil \log_b(N) \rceil
-      \]</div>
-
-      <p>
-        This logarithmic height is the fundamental reason B-Trees are the workhorse of database indexing. Each level of the tree
-        corresponds to exactly one disk page read. Therefore, the number of disk I/O operations required to locate any single key
-        is exactly \(h\)&mdash;the height of the tree.
+        Each level of the tree corresponds to exactly one disk page read. Therefore, locating any single key requires
+        only a handful of disk I/O operations&mdash;the height of the tree. For a table of ten million rows, an indexed
+        lookup might require only three page reads where a full table scan would require reading all ten million entries.
       </p>
 
       <aside class="margin-card aside">
-        <div class="margin-card-label">Concrete B+ Tree Calculation</div>
+        <div class="margin-card-label">Why B-Trees Are So Fast</div>
         <p>
-          Consider a PostgreSQL table containing \(N = 10{,}000{,}000\) rows (ten million). Each B-Tree node occupies one
-          8 KB disk page. If each key is 8 bytes and each pointer is 6 bytes, then the branching factor is approximately
-          \(b \approx \lfloor 8192 / (8 + 6) \rfloor \approx 585\). Rounding conservatively to \(b = 500\):
-        </p>
-        <p style="text-align: center; font-weight: bold;">
-          \(h = \lceil \log_{500}(10^7) \rceil = \lceil 7 / \log_{10}(500) \rceil = \lceil 7 / 2.699 \rceil = \lceil 2.59 \rceil = 3\)
-        </p>
-        <p>
-          Only <strong>three disk page reads</strong> are needed to locate any record among ten million rows. A full table scan
-          would require reading all ten million entries; an indexed lookup reduces this to three page fetches, completing in
-          under a millisecond.
+          Each B-Tree node occupies one disk page (usually 8 KB). When the engine reads a node, it pulls the entire page
+          into RAM in one continuous sweep. Once in RAM, binary search within the page is blindingly fast&mdash;roughly nine
+          comparisons for a branching factor of 500, consuming nanoseconds. The bottleneck is never the comparison&mdash;it
+          is the disk read, which the B-Tree minimizes by staying flat.
         </p>
       </aside>
 
       <p>
-        Because the branching factor is so high, a B-Tree is extremely flat. A B-Tree indexing ten million rows will typically
-        have a height of only three levels. Each node in the B-Tree corresponds to a single, fixed-size page on disk (usually
-        8 KB in PostgreSQL). When the database engine reads a node, it reads the entire 8 KB page into RAM in one continuous sweep.
-        Once the page is in RAM, binary search within the page is blindingly fast&mdash;\(O(\log_2 b)\) comparisons, which for
-        \(b = 500\) means roughly 9 comparisons, consuming nanoseconds.
-      </p>
-
-      <p>
-        In a \(B^+\)Tree specifically, all actual data pointers (or row heap pointers in PostgreSQL terminology) reside exclusively
-        in the <strong>leaf nodes</strong>. Internal nodes contain only separator keys and child page pointers, maximizing the
-        branching factor at every level. Furthermore, all leaf nodes at the bottom level are linked together via a doubly-linked
-        list of sibling pointers. This linked-list structure enables <strong>range scans</strong>&mdash;queries like
-        <span class="concept-token">the formal instruction</span>&mdash;to locate the starting leaf
-        via a root-to-leaf traversal in \(O(\log_b N)\) time, then simply walk the linked list sequentially, reading contiguous
-        leaf pages without ever returning to the root.
+        In a B+ Tree, all actual data pointers reside exclusively in the <strong>leaf nodes</strong>. Internal nodes
+        contain only separator keys and child page pointers, maximizing the branching factor at every level. Furthermore,
+        all leaf nodes are linked together via a doubly-linked list of sibling pointers. This linked-list structure
+        enables <strong>range scans</strong>&mdash;queries that find all records within a range can locate the starting leaf via
+        a root-to-leaf traversal, then simply walk the linked list sequentially, reading contiguous leaf pages without
+        ever returning to the root.
       </p>
 
       <h3>Clustered vs. Non-Clustered Indexes</h3>
 
-      <p>
-        A critical distinction exists between <strong>clustered</strong> and <strong>non-clustered</strong> indexes:
-      </p>
-
       <ul>
-        <li><strong>Clustered Index</strong>: The leaf nodes of the B-Tree contain the actual table row data, and the physical
-        order of rows on disk matches the index order. A table can have at most one clustered index (since rows can only be
-        physically sorted one way). In MySQL's InnoDB engine, the primary key automatically serves as the clustered index&mdash;the
-        table data is stored inside the primary key's B-Tree leaf pages, a structure called an <strong>index-organized table</strong>.
-        Range scans on the clustered key are extremely fast because the data is physically contiguous on disk.</li>
-        <li><strong>Non-Clustered Index (Secondary Index)</strong>: The leaf nodes contain the indexed key value plus a pointer
-        (heap tuple ID or primary key value) to the actual row location. A lookup via a non-clustered index requires two steps:
-        first, traverse the secondary B-Tree to find the pointer, then follow the pointer to fetch the actual row from the heap
-        or the clustered index. This second step is called a <strong>bookmark lookup</strong> or <strong>index scan followed by
-        heap fetch</strong>. For queries returning many rows, this random I/O pattern can be slower than a sequential full table
-        scan, which is why the query optimizer sometimes chooses a full scan over an index scan for low-selectivity queries.</li>
+        <li><strong>Clustered Index</strong>: The leaf nodes of the B-Tree contain the actual table row data, and the
+          physical order of rows on disk matches the index order. A table can have at most one clustered index (since
+          rows can only be physically sorted one way). Range scans on the clustered key are extremely fast because the
+          data is physically contiguous on disk.</li>
+        <li><strong>Non-Clustered Index (Secondary Index)</strong>: The leaf nodes contain the indexed key value plus a
+          pointer to the actual row location. A lookup requires two steps: traverse the secondary B-Tree to find the
+          pointer, then follow the pointer to fetch the actual row. For queries returning many rows, this random I/O
+          pattern can be slower than a sequential full table scan&mdash;which is why the query optimizer sometimes chooses a
+          full scan over an index scan for low-selectivity queries.</li>
       </ul>
 
       <h3>Page Splits and Index Maintenance</h3>
 
       <p>
-        If a row with a key that belongs on page 14 is inserted, and page 14 is already completely full, the data cannot simply
-        overflow onto the next page. Doing that would break the physical mapping and destroy the logarithmic search guarantees.
-        Instead, the database performs a <strong>Page Split</strong>:
+        If a row is inserted into a page that is already full, the data cannot simply overflow onto the next page&mdash;that
+        would break the search guarantees. Instead, the database performs a <strong>Page Split</strong>: a new empty page
+        is allocated, approximately half of the sorted keys from the full page are moved to the new page, and a new
+        separator key is inserted into the parent node. If the parent is also full, the split cascades upward,
+        potentially splitting all the way to the root and increasing the tree height by one.
       </p>
 
-      <ol>
-        <li>A new, empty page is allocated from the disk free space map.</li>
-        <li>Approximately half of the sorted keys from the full page are moved to the new page.</li>
-        <li>A new separator key and pointer to the new page are inserted into the parent internal node.</li>
-        <li>If the parent node is also full, the split cascades upward, potentially splitting all the way to the root and
-        increasing the tree height by one level.</li>
-      </ol>
-
       <p>
-        Page splits are expensive operations involving multiple disk writes and WAL records. Furthermore, after many insertions
-        and deletions, B-Tree pages can become partially empty&mdash;a phenomenon called <strong>internal fragmentation</strong>
-        or <strong>index bloat</strong>. PostgreSQL's <span class="concept-token">REINDEX</span> command or <span class="concept-token">pgrepack</span> extension can
-        rebuild a bloated index to reclaim wasted space.
+        After many insertions and deletions, B-Tree pages can become partially empty&mdash;a phenomenon called
+        <strong>index bloat</strong>. Database maintenance commands can rebuild a bloated index to reclaim wasted space.
       </p>
 
       <aside class="margin-card caution">
         <div class="margin-card-label">Caution: Index Bloat</div>
         <p>
-          In PostgreSQL, MVCC means that <span class="concept-token">the formal instruction</span> operations create new row versions while leaving old versions
-          in the index until <span class="concept-token">VACUUM</span> removes them. Under heavy update workloads, indexes can grow to many times
-          their optimal size. A table with 1 million live rows might have an index containing 5 million entries if dead tuples
-          accumulate. Monitor index size with <span class="concept-token">pgrelationsize()</span> and schedule regular
-          <span class="concept-token">VACUUM</span> or <span class="concept-token">REINDEX CONCURRENTLY</span> operations.
+          In PostgreSQL, the MVCC model means that update operations create new row versions while leaving old versions
+          in the index until a cleanup process removes them. Under heavy update workloads, indexes can grow to many
+          times their optimal size. A table with 1 million live rows might have an index containing 5 million entries if
+          dead tuples accumulate. Monitor index size regularly and schedule cleanup operations.
         </p>
       </aside>
 
@@ -523,89 +363,59 @@
       <div class="svg-diagram-container">
         <div class="svg-diagram-title">Plate XXIV: The B+ Tree Index Architecture</div>
         <svg class="svg-diagram" viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="B+ Tree index structure diagram">
-          <!-- Outer Frame -->
           <rect x="5" y="5" width="690" height="330" fill="#FAF6EF" stroke="#2C2416" stroke-width="1.5" rx="4" />
-
-          <!-- Title -->
           <text x="350" y="28" font-size="11" font-weight="bold" fill="#2C2416" text-anchor="middle" font-family="serif">B+ Tree with Branching Factor b=4, indexing keys 1..24</text>
-
-          <!-- Root Node (Level 0) -->
           <rect x="260" y="42" width="180" height="38" fill="#D4A5A0" stroke="#2C2416" stroke-width="2" rx="4" />
           <text x="350" y="57" font-size="10" font-weight="bold" fill="#2C2416" text-anchor="middle">ROOT (Level 0)</text>
           <text x="350" y="72" font-size="10" fill="#2C2416" text-anchor="middle" font-family="monospace">[ 9 | 17 ]</text>
-
-          <!-- Level 1: Internal Nodes -->
           <rect x="50" y="115" width="160" height="38" fill="#C9A84C" stroke="#2C2416" stroke-width="1.8" rx="3" />
           <text x="130" y="130" font-size="9" font-weight="bold" fill="#2C2416" text-anchor="middle">Internal Node</text>
           <text x="130" y="144" font-size="9" fill="#2C2416" text-anchor="middle" font-family="monospace">[ 3 | 6 ]</text>
-
           <rect x="270" y="115" width="160" height="38" fill="#C9A84C" stroke="#2C2416" stroke-width="1.8" rx="3" />
           <text x="350" y="130" font-size="9" font-weight="bold" fill="#2C2416" text-anchor="middle">Internal Node</text>
           <text x="350" y="144" font-size="9" fill="#2C2416" text-anchor="middle" font-family="monospace">[ 12 | 15 ]</text>
-
           <rect x="490" y="115" width="160" height="38" fill="#C9A84C" stroke="#2C2416" stroke-width="1.8" rx="3" />
           <text x="570" y="130" font-size="9" font-weight="bold" fill="#2C2416" text-anchor="middle">Internal Node</text>
           <text x="570" y="144" font-size="9" fill="#2C2416" text-anchor="middle" font-family="monospace">[ 20 | 23 ]</text>
-
-          <!-- Arrows from Root to Internal -->
           <line x1="300" y1="80" x2="130" y2="115" stroke="#2C2416" stroke-width="1.3" />
           <line x1="350" y1="80" x2="350" y2="115" stroke="#2C2416" stroke-width="1.3" />
           <line x1="400" y1="80" x2="570" y2="115" stroke="#2C2416" stroke-width="1.3" />
-
-          <!-- Level 2: Leaf Nodes -->
-          <!-- Left group -->
           <rect x="8" y="190" width="70" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="43" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">1, 2</text>
           <text x="43" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
           <rect x="88" y="190" width="70" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="123" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">3, 4, 5</text>
           <text x="123" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
           <rect x="168" y="190" width="70" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="203" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">6, 7, 8</text>
           <text x="203" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
-          <!-- Middle group -->
           <rect x="252" y="190" width="62" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="283" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">9-11</text>
           <text x="283" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
           <rect x="322" y="190" width="62" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="353" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">12-14</text>
           <text x="353" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
           <rect x="392" y="190" width="62" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="423" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">15-16</text>
           <text x="423" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
-          <!-- Right group -->
           <rect x="472" y="190" width="70" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="507" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">17-19</text>
           <text x="507" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
           <rect x="550" y="190" width="70" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="585" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">20-22</text>
           <text x="585" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
           <rect x="628" y="190" width="62" height="42" fill="#8FAF8A" stroke="#2C2416" stroke-width="1.5" rx="2" />
           <text x="659" y="207" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#2C2416">23-24</text>
           <text x="659" y="222" font-size="7" text-anchor="middle" dominant-baseline="central" fill="#2C2416">→ rows</text>
-
-          <!-- Arrows from Internal to Leaf -->
           <line x1="90" y1="153" x2="43" y2="190" stroke="#2C2416" stroke-width="1" />
           <line x1="130" y1="153" x2="123" y2="190" stroke="#2C2416" stroke-width="1" />
           <line x1="170" y1="153" x2="203" y2="190" stroke="#2C2416" stroke-width="1" />
-
           <line x1="310" y1="153" x2="283" y2="190" stroke="#2C2416" stroke-width="1" />
           <line x1="350" y1="153" x2="353" y2="190" stroke="#2C2416" stroke-width="1" />
           <line x1="390" y1="153" x2="423" y2="190" stroke="#2C2416" stroke-width="1" />
-
           <line x1="530" y1="153" x2="507" y2="190" stroke="#2C2416" stroke-width="1" />
           <line x1="570" y1="153" x2="585" y2="190" stroke="#2C2416" stroke-width="1" />
           <line x1="610" y1="153" x2="659" y2="190" stroke="#2C2416" stroke-width="1" />
-
-          <!-- Leaf Linked List Arrows -->
           <line x1="78" y1="211" x2="88" y2="211" stroke="#A8BFD0" stroke-width="2" stroke-dasharray="3,2" />
           <line x1="158" y1="211" x2="168" y2="211" stroke="#A8BFD0" stroke-width="2" stroke-dasharray="3,2" />
           <line x1="238" y1="211" x2="252" y2="211" stroke="#A8BFD0" stroke-width="2" stroke-dasharray="3,2" />
@@ -613,232 +423,144 @@
           <line x1="454" y1="211" x2="472" y2="211" stroke="#A8BFD0" stroke-width="2" stroke-dasharray="3,2" />
           <line x1="620" y1="211" x2="628" y2="211" stroke="#A8BFD0" stroke-width="2" stroke-dasharray="3,2" />
           <line x1="542" y1="211" x2="550" y2="211" stroke="#A8BFD0" stroke-width="2" stroke-dasharray="3,2" />
-
-          <!-- Labels -->
           <text x="350" y="256" font-size="9" fill="#A8BFD0" text-anchor="middle" font-style="italic">— Leaf nodes linked via sibling pointers for sequential range scans —</text>
-
-          <!-- Legend -->
           <rect x="120" y="272" width="12" height="12" fill="#D4A5A0" stroke="#2C2416" stroke-width="1" rx="1" />
           <text x="138" y="282" font-size="8" fill="#2C2416">Root</text>
           <rect x="220" y="272" width="12" height="12" fill="#C9A84C" stroke="#2C2416" stroke-width="1" rx="1" />
           <text x="238" y="282" font-size="8" fill="#2C2416">Internal Nodes (keys + child ptrs)</text>
           <rect x="420" y="272" width="12" height="12" fill="#8FAF8A" stroke="#2C2416" stroke-width="1" rx="1" />
           <text x="438" y="282" font-size="8" fill="#2C2416">Leaf Nodes (keys + row heap ptrs)</text>
-
-          <text x="350" y="308" font-size="9" fill="#2C2416" text-anchor="middle" font-family="serif" font-style="italic">Height h = ⌈log₄(24)⌉ = ⌈2.29⌉ = 3 levels → 3 disk page reads for any key lookup</text>
-          <text x="350" y="323" font-size="8" fill="#2C2416" text-anchor="middle" font-family="serif">For 10M rows with b=500: h = ⌈log₅₀₀(10⁷)⌉ = 3 page reads</text>
+          <text x="350" y="308" font-size="9" fill="#2C2416" text-anchor="middle" font-family="serif" font-style="italic">Height h = 3 levels → only 3 disk page reads for any key lookup</text>
+          <text x="350" y="323" font-size="8" fill="#2C2416" text-anchor="middle" font-family="serif">For 10M rows with b=500: still only 3 page reads</text>
         </svg>
       </div>
 
       <h3>LSM-Trees: Optimizing for Write-Heavy Workloads</h3>
 
       <p>
-        While B-Trees optimize read operations down to \(O(\log_b N)\), they demand a heavy write cost: <strong>The Write
-        Amplification Penalty</strong>. Every index defined on a table slows down writes. If a table has six indexes, an
-        <span class="concept-token">the formal instruction</span> must navigate and modify six B-Trees, potentially triggering cascading page splits across all of them,
-        converting fast sequential disk access into highly fragmented random I/O.
+        While B-Trees optimize read operations, they demand a heavy write cost. Every index defined on a table slows
+        writes. If a table has six indexes, a single insert must navigate and modify six B-Trees, potentially triggering
+        cascading page splits across all of them, converting fast sequential disk access into fragmented random I/O.
       </p>
 
       <p>
-        For high-throughput write systems, backend engineers deploy <strong>Log-Structured Merge (LSM) Trees</strong> (used in NoSQL engines
-        like Cassandra and Key-Value stores like RocksDB). 
+        For high-throughput write systems, engineers deploy <strong>Log-Structured Merge (LSM) Trees</strong> (used in
+        Cassandra, RocksDB). An LSM-Tree bypasses in-place page splits entirely. When a write occurs, it is recorded
+        sequentially in the WAL and added to a sorted in-memory buffer called the <strong>MemTable</strong>. Because
+        writing to memory is fast, the transaction commits in microseconds.
       </p>
 
       <p>
-        An LSM-Tree completely bypasses in-place page splits on disk. When a write occurs, it is recorded sequentially in the WAL
-        and added to a sorted in-memory buffer called the <strong>MemTable</strong> (often implemented as a skip list or a red-black tree).
-        Because writing to memory is incredibly fast, the transaction commits in microseconds.
+        When the MemTable fills up, its sorted contents are flushed to disk as a single, immutable <strong>Sorted String
+        Table (SSTable)</strong> file. Because SSTables are immutable, there is no random write fragmentation or page
+        splitting&mdash;the engine writes the file sequentially.
       </p>
 
       <p>
-        When the MemTable fills up, its sorted contents are flushed to disk as a single, immutable <strong>Sorted String Table (SSTable)</strong>
-        file. Because SSTables are immutable, there is no random write fragmentation or page splitting; the engine writes the file
-        sequentially.
-      </p>
-
-      <p>
-        However, immutability introduces a new challenge: <strong>Read Amplification</strong>. If a record has been modified multiple times, different
-        versions of that key will exist across multiple SSTables on disk. To resolve a query, the engine might have to read multiple
-        files to find the latest version.
-      </p>
-
-      <p>
-        To keep reads efficient, LSM-Trees rely on two critical mechanisms:
+        However, immutability introduces a new challenge: <strong>read amplification</strong>. If a record has been
+        modified multiple times, different versions exist across multiple SSTables on disk. To resolve a query, the
+        engine might have to read multiple files to find the latest version. To keep reads efficient, LSM-Trees rely on
+        two critical mechanisms:
       </p>
 
       <ul>
-        <li><strong>Bloom Filters</strong>: A Bloom filter is a highly memory-efficient, probabilistic data structure associated
-          with each SSTable. By hashing the query key across a bit array, the Bloom filter can determine with absolute certainty if
-          a key is <em>not</em> present in the file, preventing the engine from wasting disk I/O searching irrelevant files.
-          The mathematical formula for the false positive probability of a Bloom filter is:
-          <div class="math-block">\[P \approx \left(1 - e^{-kn/m}\right)^k\]</div>
-          where \(m\) is the bit array size, \(n\) is the number of keys, and \(k\) is the number of hash functions.</li>
-        <li><strong>Compaction</strong>: A background thread periodically merges multiple SSTables, reading them sequentially,
-          discarding outdated key versions, and writing a consolidated, sorted SSTable, reclaiming disk space.</li>
+        <li><strong>Bloom Filters</strong>: A highly memory-efficient probabilistic data structure associated with each
+          SSTable. By hashing the query key across a bit array, the Bloom filter can determine with certainty if a key
+          is <em>not</em> present in the file, preventing the engine from wasting disk I/O searching irrelevant files.</li>
+        <li><strong>Compaction</strong>: A background thread periodically merges multiple SSTables, reading them
+          sequentially, discarding outdated key versions, and writing a consolidated, sorted SSTable, reclaiming disk
+          space.</li>
       </ul>
 
       <h2>IV. Transactions and the Sacred ACID Covenant</h2>
 
       <p>
-        To preserve state sanity across highly concurrent connections and catastrophic physical crashes, a DBMS relies on the
-        concept of a <strong>Transaction</strong>. A transaction is a logical unit of work that bundles multiple database statements together.
-        The transaction lifecycle is governed by three simple, yet absolute commands:
+        To preserve state sanity across highly concurrent connections and catastrophic crashes, a DBMS relies on the
+        concept of a <strong>Transaction</strong>&mdash;a logical unit of work that bundles multiple database statements
+        together. The transaction lifecycle is governed by three absolute commands: begin (start the boundary), commit
+        (persist all modifications, making them visible), and rollback (discard all changes as if they never occurred).
       </p>
 
-      <ul>
-        <li><span class="concept-token">BEGIN TRANSACTION</span>: Starts the logical boundary.</li>
-        <li><span class="concept-token">COMMIT</span>: Persists all modifications inside the boundary, making them visible to the outside world.</li>
-        <li><span class="concept-token">ROLLBACK</span>: Systematically discards all changes inside the boundary as if they never occurred.</li>
-      </ul>
-
       <p>
-        To guarantee execution reliability, every transaction is bound by the sacred <strong>ACID</strong> covenant. Each property
-        can be stated with mathematical precision:
+        To guarantee execution reliability, every transaction is bound by the sacred <strong>ACID</strong> covenant:
       </p>
 
       <h3>1. Atomicity: The All-or-Nothing Oracle</h3>
       <p>
-        Atomicity ensures that a transaction is treated as a single, indivisible unit of work. Formally, for a transaction
-        \(T\) consisting of operations \(\{o_1, o_2, \ldots, o_n\}\):
-      </p>
-      <div class="math-block">\[
-        \text{outcome}(T) \in \{\text{COMMIT}(\{o_1, o_2, \ldots, o_n\}),\ \text{ABORT}(\emptyset)\}
-      \]</div>
-      <p>
-        There is no intermediate state where only a subset of operations persists. If a transaction attempts to transfer
-        \(\text{₹}500\) from merchant A's account to merchant B's account, it requires two SQL updates:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-      <p>
-        If the server loses power after the first update but before the second, the system cannot be left in a state where
-        \(\text{₹}500\) has vanished into the void. Atomicity guarantees that if the second write fails, the database uses its
-        <strong>Undo Log</strong> to systematically reverse the first write during crash recovery, rolling back the system to its initial state.
-        The implementation relies on ARIES: during the Undo Phase, the recovery engine reads the uncommitted transaction's log
-        records backward and writes CLRs (Compensation Log Records) to physically reverse each modification.
+        Atomicity ensures that a transaction is treated as a single, indivisible unit. Either all operations within the
+        transaction commit, or none do&mdash;there is no intermediate state. If a transaction attempts to transfer funds
+        from merchant A to merchant B, it requires two updates: deduct from A, add to B. If the server loses power after
+        the first update but before the second, the system cannot be left in a state where the funds have vanished into
+        the void. Atomicity guarantees that if the second write fails, the database uses its <strong>Undo Log</strong> to
+        systematically reverse the first write during crash recovery.
       </p>
 
       <h3>2. Consistency: The Law of Invariants</h3>
       <p>
-        Consistency ensures that a transaction can only transition the database from one valid state to another, maintaining
-        all schema invariants, constraints, and relational rules. Formally, if \(I\) denotes the set of database invariants
-        (CHECK constraints, UNIQUE constraints, foreign key constraints, trigger assertions) and \(S\) represents a database
-        state:
-      </p>
-      <div class="math-block">\[
-        I(S) \Rightarrow I(T(S))
-      \]</div>
-      <p>
-        That is, if the invariants hold before transaction \(T\) executes, they must hold after \(T\) completes. If a database schema defines
-        a check constraint that <span class="concept-token">the formal instruction</span>, and a transaction attempts to withdraw \(\text{₹}1000\) from an account with
-        only \(\text{₹}500\), the engine must reject the transaction, roll back all intermediate states, and prevent the system from
-        violating this integrity constraint. The Mauryan administration understood this principle intuitively: the <em>Dharmasthiya</em>
-        (Chief Justice) could not render a verdict that contradicted existing royal decrees and established legal precedent. Every
-        judgment had to be consistent with the accumulated body of <em>Dharma</em>&mdash;just as every database transaction must be
-        consistent with the accumulated body of schema constraints.
+        Consistency ensures that a transaction can only transition the database from one valid state to another,
+        maintaining all schema constraints, foreign keys, and business rules. If a schema enforces a rule that account
+        balances cannot go negative, and a transaction attempts to withdraw more than the account holds, the engine must
+        reject the transaction and prevent the integrity constraint from being violated. The Mauryan administration
+        understood this intuitively: the Chief Justice could not render a verdict that contradicted existing royal
+        decrees&mdash;every judgment had to be consistent with the accumulated body of law, just as every transaction must
+        be consistent with the accumulated body of schema constraints.
       </p>
 
       <h3>3. Isolation: The Illusion of Solitude</h3>
       <p>
-        Isolation guarantees that concurrent transactions executing simultaneously do not interfere with one another. Formally,
-        the execution of a set of concurrent transactions \(\{T_1, T_2, \ldots, T_k\}\) must produce a result equivalent to
-        <em>some</em> serial execution order \(\langle T_{\sigma(1)}, T_{\sigma(2)}, \ldots, T_{\sigma(k)} \rangle\) where
-        \(\sigma\) is a permutation. This property is called <strong>serializability</strong>:
-      </p>
-      <div class="math-block">\[
-        \text{result}(T_1 \parallel T_2 \parallel \ldots \parallel T_k) = \text{result}(T_{\sigma(1)} \circ T_{\sigma(2)} \circ \ldots \circ T_{\sigma(k)})
-      \]</div>
-      <p>
-        Even if thousands of transactions are running concurrently, the database engine must coordinate their execution to ensure that
-        each transaction produces results as though it were the only program running in the entire universe.
+        Isolation guarantees that concurrent transactions do not interfere with one another. Even if thousands of
+        transactions run simultaneously, the engine must coordinate their execution to ensure that each produces results
+        as though it were the only program running in the entire universe. This property is called
+        <strong>serializability</strong>&mdash;the concurrent execution must produce a result equivalent to some serial
+        execution order.
       </p>
 
       <h3>4. Durability: The Cosmic Bedrock</h3>
       <p>
         Durability guarantees that once a transaction commits, its modifications are permanently recorded in non-volatile
-        storage. Formally, for any committed transaction \(T_c\):
-      </p>
-      <div class="math-block">\[
-        \forall\ \text{crash events}\ e : \text{state}(\text{recover}(e)) \supseteq \text{effects}(T_c)
-      \]</div>
-      <p>
-        No subsequent system crash, power outage, or OS failure can undo the committed state. This is achieved,
-        as studied in Section II, by forcing a synchronous flush of the WAL via <span class="concept-token">the named runtime action</span> before returning commit success.
+        storage. No subsequent crash, power outage, or OS failure can undo the committed state. This is achieved by
+        forcing a synchronous flush of the WAL before returning commit success to the application.
       </p>
 
-      <h2>V. Relational Algebra: The Mathematical Foundation of SQL</h2>
+      <h2>V. Relational Algebra: The Foundation of SQL</h2>
 
       <p>
-        Every SQL query that a developer writes is, beneath its declarative syntax, an expression in <strong>relational algebra</strong>&mdash;the
-        formal mathematical language defined by Edgar Codd. The database query optimizer's job is to translate SQL into an equivalent
-        relational algebra expression tree, then apply algebraic transformation rules to find the most efficient physical execution plan.
-        Understanding relational algebra provides insight into <em>why</em> the optimizer makes certain choices.
+        Every SQL query is, beneath its declarative syntax, an expression in <strong>relational algebra</strong>&mdash;the
+        formal mathematical language defined by Edgar Codd. The database query optimizer's job is to translate SQL into
+        an equivalent algebra expression tree, then apply transformation rules to find the most efficient physical
+        execution plan.
       </p>
 
       <p>
-        The five fundamental operations of relational algebra are:
+        The fundamental operations of relational algebra are:
       </p>
 
       <ol>
-        <li><strong>Selection (\(\sigma\))</strong>: Filters rows based on a predicate.
-          <br/>
-          \(\sigma_{\text{age} > 25}(\text{Users})\) corresponds to <span class="concept-token">the formal instruction</span>.
-          Selection produces a horizontal subset of the relation&mdash;same columns, fewer rows.
-        </li>
-        <li><strong>Projection (\(\pi\))</strong>: Selects specific columns, discarding the rest.
-          <br/>
-          \(\pi_{\text{name, email}}(\text{Users})\) corresponds to <span class="concept-token">the formal instruction</span>.
-          Projection produces a vertical subset of the relation&mdash;same rows, fewer columns. Duplicate elimination
-          occurs in the formal algebraic sense (since relations are sets), though SQL's <span class="concept-token">the formal instruction</span> does not eliminate
-          duplicates unless <span class="concept-token">DISTINCT</span> is specified.
-        </li>
-        <li><strong>Join (\(\bowtie\))</strong>: Combines rows from two relations based on a matching condition.
-          <br/>
-          \(\text{Posts} \bowtie_{\text{Posts.user\_id} = \text{Users.id}} \text{Users}\) corresponds to
-          <span class="concept-token">the formal instruction</span>.
-          The natural join (\(\bowtie\)) can be decomposed into a Cartesian product followed by a selection:
-          \(\bowtie = \sigma_\theta(\times)\), but the optimizer never executes this decomposition literally&mdash;it uses
-          index nested loop joins, hash joins, or merge joins depending on table sizes and available indexes.
-        </li>
-        <li><strong>Union (\(\cup\))</strong>: Combines the rows of two union-compatible relations (same column structure).
-          <br/>
-          \(\text{ActiveUsers} \cup \text{ArchivedUsers}\) corresponds to <span class="concept-token">the formal instruction</span>.
-        </li>
-        <li><strong>Difference (\(-\))</strong>: Returns rows in the first relation that do not appear in the second.
-          <br/>
-          \(\text{AllUsers} - \text{BannedUsers}\) corresponds to <span class="concept-token">the formal instruction</span>.
-        </li>
+        <li><strong>Selection</strong>: Filters rows based on a predicate&mdash;a horizontal subset of the relation (same
+          columns, fewer rows).</li>
+        <li><strong>Projection</strong>: Selects specific columns, discarding the rest&mdash;a vertical subset (same rows,
+          fewer columns).</li>
+        <li><strong>Join</strong>: Combines rows from two relations based on a matching condition.</li>
+        <li><strong>Union</strong>: Combines the rows of two union-compatible relations (same column structure).</li>
+        <li><strong>Difference</strong>: Returns rows in the first relation that do not appear in the second.</li>
       </ol>
 
       <p>
         The query optimizer applies algebraic equivalence rules to rearrange these operations for efficiency. A critical
-        optimization is <strong>predicate pushdown</strong>: if a query joins two tables and then filters the result, the
-        optimizer can push the selection below the join, dramatically reducing the number of rows processed:
-      </p>
-
-      <div class="math-block">\[
-        \sigma_{\text{age} > 25}(\text{Posts} \bowtie \text{Users}) \equiv \text{Posts} \bowtie \sigma_{\text{age} > 25}(\text{Users})
-      \]</div>
-
-      <p>
-        This transformation is valid because the predicate references only columns from the <span class="concept-token">Users</span> relation. By filtering
-        Users first, the join processes far fewer rows. The ancient Indian grammarian Panini, composing the <em>Ashtadhyayi</em>
-        (c. 4th century BCE), applied precisely this type of formal rule-based transformation system to natural language: a small
-        set of algebraic rewrite rules that could be composed and applied in any valid order to transform linguistic structures.
-        The Paninian grammar is, in a deep structural sense, the world's first optimizer&mdash;a system that identifies equivalent
-        derivation paths and selects the shortest one. SQL query optimizers operate under the same mathematical principle: given
-        a set of algebraic equivalence rules over relational operators, find the plan with the lowest estimated cost.
+        optimization is <strong>predicate pushdown</strong>: if a query joins two tables and then filters the result,
+        the optimizer can push the selection below the join, dramatically reducing the number of rows processed. By
+        filtering one table first, the join processes far fewer rows.
       </p>
 
       <aside class="margin-card aside">
         <div class="margin-card-label">Panini's Grammar and Query Optimization</div>
         <p>
-          Panini's <em>Ashtadhyayi</em> contains approximately 3,959 rules (sutras) for deriving Sanskrit word forms.
-          These rules have a strict ordering and priority system, and they operate on abstract symbolic inputs to produce
-          correct outputs&mdash;exactly analogous to how a query optimizer applies transformation rules to relational algebra
-          expressions. Just as Panini's system guarantees that every valid derivation produces a grammatically correct word,
-          the optimizer's algebraic transformations guarantee that every rewritten query produces the same logical result set.
+          The ancient Indian grammarian Panini, composing the <em>Ashtadhyayi</em> (c. 4th century BCE), applied precisely
+          this type of formal rule-based transformation system to natural language: a small set of algebraic rewrite rules
+          that could be composed and applied in any valid order to transform linguistic structures. The Paninian grammar
+          is, in a deep structural sense, the world's first optimizer&mdash;a system that identifies equivalent derivation
+          paths and selects the shortest one. SQL query optimizers operate under the same mathematical principle: given a
+          set of algebraic equivalence rules, find the plan with the lowest estimated cost.
         </p>
       </aside>
 
@@ -846,153 +568,67 @@
 
       <p>
         If every transaction had to be executed in absolute, single-threaded isolation, database performance would be
-        crippled. To scale throughput, database engines run transactions concurrently. However, concurrent access to shared
-        records without strict coordination leads to classic, destructive race conditions&mdash;referred to as <strong>Concurrency Anomalies</strong>.
+        crippled. To scale throughput, engines run transactions concurrently. However, concurrent access to shared
+        records without strict coordination leads to destructive race conditions&mdash;called <strong>Concurrency
+        Anomalies</strong>.
       </p>
 
+      <h3>1. Dirty Reads (Read Uncommitted)</h3>
       <p>
-        The following analysis dissects these anomalies using step-by-step transaction traces:
+        A dirty read occurs when Transaction A reads a row that has been modified by Transaction B, but Transaction B
+        has not yet committed. If Transaction B rolls back, Transaction A has made a business decision based on data
+        that technically never existed. This is the most dangerous anomaly&mdash;the reading transaction acts on phantom
+        data. The <strong>Read Uncommitted</strong> isolation level permits this.
       </p>
 
-      <h3>1. Dirty Reads (ANSI Isolation: Read Uncommitted)</h3>
+      <h3>2. Non-Repeatable Reads (Read Committed)</h3>
       <p>
-        A dirty read occurs when Transaction A reads a row that has been modified by Transaction B, but has not yet been
-        committed.
-      </p>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Transaction A (Chitragupta Scribe 1)</th>
-              <th>Transaction B (Chitragupta Scribe 2)</th>
-              <th>State on Disk</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>\(t_1\)</td>
-              <td>-</td>
-              <td><span class="concept-token">the formal instruction</span></td>
-              <td>balance = 1000 (RAM shows 1500)</td>
-            </tr>
-            <tr>
-              <td>\(t_2\)</td>
-              <td><span class="concept-token">the formal instruction</span> (Sees 1500)</td>
-              <td>-</td>
-              <td>balance = 1000</td>
-            </tr>
-            <tr>
-              <td>\(t_3\)</td>
-              <td>-</td>
-              <td><span class="concept-token">the formal instruction</span> (Transaction B fails)</td>
-              <td>balance = 1000</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Here, Transaction A made a business decision based on a balance of 1500, which technically never existed on disk,
-        as Transaction B rolled back. This is the most dangerous anomaly: the reading transaction acts on phantom data that
-        was never committed. The <strong>Read Uncommitted</strong> isolation level permits this anomaly.
+        A non-repeatable read occurs when Transaction A reads a row, another transaction modifies that row and commits,
+        and Transaction A reads the same row again only to find a different value. Within a single transaction, the same
+        query returns different values at different times. The <strong>Read Committed</strong> isolation level prevents
+        dirty reads but permits non-repeatable reads. This is PostgreSQL's default isolation level and is sufficient for
+        most web application workloads.
       </p>
 
-      <h3>2. Non-Repeatable Reads (ANSI Isolation: Read Committed)</h3>
+      <h3>3. Phantom Reads (Repeatable Read)</h3>
       <p>
-        A non-repeatable read occurs when Transaction A reads a row, another transaction modifies or deletes that row and
-        commits, and Transaction A reads the same row again only to find a different value.
-      </p>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Transaction A</th>
-              <th>Transaction B</th>
-              <th>State on Disk</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>\(t_1\)</td>
-              <td><span class="concept-token">the formal instruction</span> (Sees 1000)</td>
-              <td>-</td>
-              <td>balance = 1000</td>
-            </tr>
-            <tr>
-              <td>\(t_2\)</td>
-              <td>-</td>
-              <td><span class="concept-token">the formal instruction</span></td>
-              <td>balance = 1200</td>
-            </tr>
-            <tr>
-              <td>\(t_3\)</td>
-              <td><span class="concept-token">the formal instruction</span> (Sees 1200)</td>
-              <td>-</td>
-              <td>balance = 1200</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Within a single transaction, the same <span class="concept-token">the formal instruction</span> query returns different values at \(t_1\) and \(t_3\). The
-        <strong>Read Committed</strong> isolation level prevents dirty reads (only committed data is visible) but permits
-        non-repeatable reads. This is PostgreSQL's default isolation level, and it is sufficient for most web application
-        workloads where absolute snapshot consistency is not required.
-      </p>
-
-      <h3>3. Phantom Reads (ANSI Isolation: Repeatable Read)</h3>
-      <p>
-        A phantom read occurs when Transaction A executes a range query (e.g., finding all accounts with a balance greater than
-        1000), Transaction B inserts a new row in that range and commits, and Transaction A runs the range query again, finding a
-        "phantom" record that was not present in the first read. The <strong>Repeatable Read</strong> isolation level prevents
-        dirty reads and non-repeatable reads by reading from a consistent snapshot taken at the start of the transaction. In
-        PostgreSQL, this snapshot-based approach also prevents phantom reads (since the snapshot does not include rows inserted
-        after the snapshot timestamp). However, the SQL standard permits phantom reads at this level; not all engines prevent them.
+        A phantom read occurs when Transaction A executes a range query, Transaction B inserts a new row in that range
+        and commits, and Transaction A runs the range query again, finding a "phantom" record that was not present in
+        the first read. The <strong>Repeatable Read</strong> isolation level prevents dirty reads and non-repeatable
+        reads by reading from a consistent snapshot taken at the start of the transaction. In PostgreSQL, this
+        snapshot-based approach also prevents phantom reads.
       </p>
 
       <h3>4. Write Skew and Lost Updates</h3>
       <p>
-        At the <strong>Repeatable Read</strong> isolation level, the engine protects against dirty reads, non-repeatable reads, and phantom
-        reads. However, it remains vulnerable to <strong>Write Skew</strong>. 
-      </p>
-      <p>
-        Consider a medical application with a rule: "At least one doctor must be on active call at all times." 
-        Suppose there are two doctors, Harshit and Amit, currently on call. Both independently decide they want to take the night off
-        and submit their requests concurrently:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-      <p>
-        Because the transactions read overlapping datasets but modified disjoint records, the repeatable read snapshot allowed
-        both to commit. The system state is now broken: zero doctors are on call, violating the core business invariant.
+        At Repeatable Read, the engine protects against dirty reads, non-repeatable reads, and phantom reads. However,
+        it remains vulnerable to <strong>Write Skew</strong>. Consider a medical application with a rule: "At least one
+        doctor must be on active call at all times." Suppose two doctors are on call. Both independently decide to take
+        the night off and submit their requests concurrently. Each transaction checks the current count of doctors on
+        call, sees two, and&mdash;reasoning that one can safely leave&mdash;removes itself. Both commit. The system state is
+        now broken: zero doctors are on call, violating the core business invariant.
       </p>
 
       <p>
-        Only the <strong>Serializable</strong> isolation level prevents write skew. In PostgreSQL, Serializable Snapshot Isolation (SSI) detects
-        dangerous read-write dependency cycles between concurrent transactions and aborts one of them, forcing a retry. The
-        implementation tracks read dependencies using predicate locks (also called SIRead locks) and constructs a serialization
-        graph. If a cycle is detected in this graph, the youngest transaction in the cycle is aborted.
+        Only the <strong>Serializable</strong> isolation level prevents write skew. In PostgreSQL, Serializable Snapshot
+        Isolation (SSI) detects dangerous read-write dependency cycles between concurrent transactions and aborts one of
+        them, forcing a retry.
       </p>
 
       <aside class="margin-card security">
         <div class="margin-card-label">Security: Transaction Deadlocks</div>
         <p>
-          Under Two-Phase Locking (2PL), a <strong>deadlock</strong> occurs when Transaction A holds Lock 1 and waits for
-          Lock 2, while Transaction B holds Lock 2 and waits for Lock 1. Neither can proceed. PostgreSQL detects deadlocks
-          using a wait-for graph: if a cycle is found, the engine aborts the transaction with the least work done. To minimize
-          deadlocks: (1) always acquire locks in a consistent, deterministic order across all application code paths;
-          (2) keep transactions as short as possible; (3) avoid holding locks while performing external API calls or user
-          input waits.
+          A <strong>deadlock</strong> occurs when Transaction A holds Lock 1 and waits for Lock 2, while Transaction B
+          holds Lock 2 and waits for Lock 1. Neither can proceed. PostgreSQL detects deadlocks using a wait-for graph:
+          if a cycle is found, the engine aborts the transaction with the least work done. To minimize deadlocks: (1)
+          always acquire locks in a consistent, deterministic order across all application code paths; (2) keep
+          transactions as short as possible; (3) avoid holding locks while performing external API calls or user input
+          waits.
         </p>
       </aside>
 
       <p>
-        The four standard ANSI SQL isolation levels, trading concurrency performance for absolute correctness:
+        The four standard ANSI SQL isolation levels, trading concurrency performance for correctness:
       </p>
 
       <div class="table-container">
@@ -1040,79 +676,58 @@
       </div>
 
       <p>
-        How do database engines enforce these isolation levels under the hood? They rely on two main paradigms:
+        Database engines enforce these isolation levels using two main paradigms:
       </p>
 
       <ol>
-        <li><strong>Locking Protocols (Shared vs Exclusive Locks)</strong>: Under <strong>Two-Phase Locking (2PL)</strong>, a transaction
-          must acquire a shared lock to read a record and an exclusive lock to write a record. Shared locks allow concurrent
-          reads, but block writes. Exclusive locks block both reads and writes. The "two phases" refer to the growing phase (acquiring
-          locks) and the shrinking phase (releasing locks). A transaction in the growing phase may acquire new locks but may not
-          release any; once any lock is released, no new locks may be acquired. This provides absolute serializability, but
-          leads to frequent deadlocks and severe performance bottlenecks.</li>
-        <li><strong>Multi-Version Concurrency Control (MVCC)</strong>: Modern engines (like PostgreSQL) use MVCC to achieve lock-free
-          concurrency. In MVCC, the database does not overwrite existing records during updates. Instead, it creates a new physical
-          version of the row, complete with hidden metadata columns: <span class="concept-token">xmin</span> (the transaction ID that created the version)
-          and <span class="concept-token">xmax</span> (the transaction ID that deleted/superseded it). When a transaction executes, it reads an immutable
-          snapshot of the database reflecting only transactions committed <em>before</em> its own start timestamp. Reads never block writes,
-          and writes never block reads. The old versions are systematically swept away later by a background process called <strong>VACUUM</strong>.</li>
+        <li><strong>Locking Protocols (Two-Phase Locking)</strong>: A transaction must acquire a shared lock to read a
+          record and an exclusive lock to write. Shared locks allow concurrent reads but block writes; exclusive locks
+          block both. The "two phases" refer to a growing phase (acquiring locks) and a shrinking phase (releasing
+          them). This provides absolute serializability but leads to frequent deadlocks and performance bottlenecks.</li>
+        <li><strong>Multi-Version Concurrency Control (MVCC)</strong>: Modern engines like PostgreSQL use MVCC to achieve
+          lock-free concurrency. The database does not overwrite existing records during updates&mdash;instead, it creates a
+          new physical version of the row with hidden metadata tracking which transaction created and superseded it.
+          When a transaction executes, it reads an immutable snapshot of the database reflecting only transactions
+          committed before its own start timestamp. Reads never block writes, and writes never block reads. Old versions
+          are swept away later by a background process called <strong>VACUUM</strong>.</li>
       </ol>
 
-      <h2>VII. Bobby Tables and the Category Error of Language</h2>
+      <h2>VII. SQL Injection: The Category Error of Language</h2>
 
       <p>
-        A highly secure database index and a beautifully tuned WAL mean nothing if the gate to the persistence layer allows
-        arbitrary commands to bypass validation checks. This is the structural origin of <strong>SQL Injection (SQLi)</strong>.
+        A highly secure database index and a beautifully tuned WAL mean nothing if the gate to the persistence layer
+        allows arbitrary commands to bypass validation checks. This is the structural origin of <strong>SQL Injection
+        (SQLi)</strong>.
       </p>
 
       <p>
-        Consider a naive backend route that handles user authentication:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
-
-
-      <p>
-        This code is highly vulnerable. If an attacker inputs the following string into the email field:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-
-      <p>
-        The resulting concatenated string sent to the database engine parser becomes:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-
-      <p>
-        The database query parser looks at this string and experiences a <strong>Category Error</strong>. It cannot distinguish between
-        the developer's system control commands (like <span class="concept-token">the formal instruction</span> and <span class="concept-token">WHERE</span>) and the external client's raw data input.
-        Because both are represented as ASCII/Unicode text within the same query channel, the parser interprets the attacker's
-        apostrophe as a structural string terminator and compiles the <span class="concept-token">the formal instruction</span> clause as a logic statement. Since
-        <span class="concept-token">the formal instruction</span> is always true, the entire query resolves to true, bypassing the password check and logging the attacker into the
-        administrator account.
+        Consider a naive backend route that handles user authentication. The developer concatenates user input directly
+        into a SQL query string. If an attacker submits a carefully crafted email string containing SQL syntax&mdash;such as
+        an apostrophe to terminate the intended string, followed by a tautology like "OR 1=1"&mdash;the resulting string
+        sent to the database parser becomes a structurally different command.
       </p>
 
       <p>
-        More destructive payloads exist. An attacker could submit:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
-
-      <p>
-        This would terminate the original query, execute a catastrophic <span class="concept-token">DROP TABLE</span> command destroying the entire users
-        table, and comment out the remainder of the query with <span class="concept-token">--</span>. The Vijayanagara Empire's administrative auditing
-        system (c. 14th&ndash;16th century) faced an analogous challenge: royal edicts inscribed on copper plates used specific
-        formatting conventions (invocations, seals, witness names) to distinguish legitimate decrees from forgeries. If the
-        format boundary was breached&mdash;if a forger could replicate the seal convention&mdash;the entire chain of command could
-        be hijacked. SQL injection is the digital equivalent of forging the royal seal.
+        The database query parser experiences a <strong>Category Error</strong>. It cannot distinguish between the
+        developer's system control commands and the external client's raw data input. Because both are represented as
+        text within the same query channel, the parser interprets the attacker's apostrophe as a structural string
+        terminator and compiles the injected clause as a logic statement. Since the injected condition is always true,
+        the entire query resolves to true, bypassing the password check and logging the attacker into the administrator
+        account.
       </p>
 
       <p>
-        To prevent SQL Injection, a physical, structural boundary between control instructions and data inputs must be
-        established. This is done using <strong>Prepared Statements and Parameterized Queries</strong>.
+        More destructive payloads exist. An attacker could terminate the original query, execute a catastrophic command
+        that drops an entire table, and comment out the remainder of the query. The Vijayanagara Empire's administrative
+        auditing system (c. 14th&ndash;16th century) faced an analogous challenge: royal edicts inscribed on copper
+        plates used specific formatting conventions&mdash;invocations, seals, witness names&mdash;to distinguish legitimate
+        decrees from forgeries. If the format boundary was breached, the entire chain of command could be hijacked. SQL
+        injection is the digital equivalent of forging the royal seal.
+      </p>
+
+      <p>
+        To prevent SQL Injection, a structural boundary between control instructions and data inputs must be established.
+        This is done using <strong>Prepared Statements and Parameterized Queries</strong>.
       </p>
 
       <div class="telegram-box">
@@ -1123,169 +738,139 @@
         </div>
         <p style="margin: 0; font-size: 0.95rem; font-style: italic;">
           "Never construct database queries by concatenating raw user input strings. Attackers can inject SQL operators
-          (like ' OR '1'='1) to read or drop tables. Always use Parameterized Queries (12 placeholders). This
-          compiles the query logic before injecting values, treating parameters strictly as literals, making SQL
-          injection impossible."
+          to read or drop tables. Always use parameterized queries with placeholders. This compiles the query logic
+          before injecting values, treating parameters strictly as literals, making SQL injection impossible."
         </p>
       </div>
 
-      <ol>
-        <li><strong>The Compilation Phase</strong>: The application sends a template query containing placeholder parameters
-          to the database:
-                <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-          The database query parser compiles this template. It parses the SQL grammar, constructs an <strong>Abstract Syntax Tree (AST)</strong>,
-          optimizes the search execution plan, and prepares the physical index traversal pathways. Once this compilation is done,
-          the logical structure of the query is locked in stone.</li>
-        <li><strong>The Execution Phase</strong>: The application sends the raw user inputs (the literal values for <span class="concept-token">\(1</span> and <span class="concept-token">\)2</span>)
-          as a separate, binary data stream. The engine binds these binary bytes directly into the compiled AST slots.</li>
-      </ol>
+      <p>
+        The process works in two phases. First, the <strong>Compilation Phase</strong>: the application sends a template
+        query containing placeholder parameters to the database. The parser compiles this template&mdash;parsing the SQL
+        grammar, constructing an Abstract Syntax Tree, optimizing the execution plan, and preparing the physical index
+        traversal pathways. Once compiled, the logical structure of the query is locked in stone. Second, the
+        <strong>Execution Phase</strong>: the application sends the raw user inputs as a separate, binary data stream.
+        The engine binds these binary bytes directly into the compiled AST slots.
+      </p>
 
       <p>
-        Even if the input contains <span class="concept-token">the formal instruction</span>, the database engine does not attempt to parse it. It treats the
-        malicious payload strictly as a single, literal string of bytes, searching for a user whose email physically matches
-        that exact sequence of characters. The boundary holds, making SQL injection mathematically impossible.
+        Even if the input contains malicious SQL syntax, the database engine does not attempt to parse it. It treats the
+        payload strictly as a single, literal string of bytes, searching for a user whose email physically matches that
+        exact sequence of characters. The boundary holds, making SQL injection impossible.
       </p>
 
       <aside class="margin-card caution">
         <div class="margin-card-label">Caution: The N+1 Query Problem</div>
         <p>
           A pervasive performance anti-pattern in ORM-heavy applications is the <strong>N+1 query problem</strong>. When
-          fetching a list of 100 blog posts and their authors, a naive ORM issues 1 query for the posts, then 100 individual
-          queries to fetch each author separately. This generates 101 database round-trips instead of 1. The solution is
-          <strong>eager loading</strong> via SQL <span class="concept-token">JOIN</span> or the ORM's <span class="concept-token">include</span>/<span class="concept-token">prefetchrelated</span>
-          directive, which fetches all related records in a single query. Monitor query counts per request using tools like
-          <span class="concept-token">pgstatstatements</span> or Django Debug Toolbar. Any endpoint issuing more than 10 queries deserves immediate
-          investigation.
+          fetching a list of 100 blog posts and their authors, a naive ORM issues 1 query for the posts, then 100
+          individual queries to fetch each author separately&mdash;generating 101 database round-trips instead of 1. The
+          solution is <strong>eager loading</strong> via SQL joins or the ORM's prefetch directive, which fetches all
+          related records in a single query. Any endpoint issuing more than 10 queries deserves immediate investigation.
         </p>
       </aside>
 
       <h2>VIII. Database Migrations and Production Hazards</h2>
 
       <p>
-        One of the most persistent illusions in software engineering is the belief that a database schema is static. In production
-        systems, business requirements are constantly mutating. A project may start with a simple <span class="concept-token">users</span> table, but six
-        months later the <span class="concept-token">name</span> column must be split into <span class="concept-token">firstname</span> and <span class="concept-token">lastname</span>, or a
-        <span class="concept-token">stripecustomerid</span> column must be added to the billing records.
+        One of the most persistent illusions in software engineering is the belief that a database schema is static. In
+        production systems, business requirements constantly mutate. Columns must be split or added; relationships must
+        be restructured.
       </p>
 
       <p>
-        Modifying a live database schema containing millions of rows without causing an outage or corrupting existing transactions
-        is a highly complex operation. This evolutionary drift is managed using <strong>Database Migrations</strong>.
+        Modifying a live database schema containing millions of rows without causing an outage or corrupting existing
+        transactions is a highly complex operation. This evolutionary drift is managed using <strong>Database
+        Migrations</strong>&mdash;version-controlled, scripted schema transactions representing single steps in the
+        database's historical evolution. Every migration consists of two symmetrical scripts: the "Up" phase (apply
+        modifications) and the "Down" phase (the exact structural inverse, serving as a safety rollback).
       </p>
 
       <p>
-        A migration is a version-controlled, scripted schema transaction. It represents a single step in the historical evolution of
-        the database's physical structure. Every migration consists of two symmetrical scripts:
-      </p>
-      <ul>
-        <li><strong>The "Up" Phase</strong>: The modifications to apply (e.g., adding a table or adding a column).</li>
-        <li><strong>The "Down" Phase</strong>: The exact structural inverse of the changes, serving as a safety rollback
-          (e.g., dropping the table or column).</li>
-      </ul>
-
-      <p>
-        However, there is a fundamental physical asymmetry here: <strong>The thermodynamic arrow of data destruction</strong>.
+        However, there is a fundamental physical asymmetry here: <strong>the thermodynamic arrow of data
+        destruction</strong>. Running an "Up" migration creates a column. Running a "Down" migration drops the column&mdash;the
+        engine physically sweeps through disk blocks and purges all data stored within. Once the bytes are zeroed, the
+        data is gone forever. Data cannot be "rolled back" unless a restore from a physical backup is performed, a
+        process that might take hours and result in severe data gaps.
       </p>
 
       <p>
-        Running an "Up" migration creates a column. Running a "Down" migration drops the column. If a developer mistakenly executes
-        a "Down" migration in production, the engine does not just update metadata&mdash;it physically sweeps through the disk blocks and
-        purges all the data stored within that column. Once the bytes are zeroed, the data is gone forever. Data cannot be "rolled back"
-        unless a restore from a physical backup is performed&mdash;a process that might take hours and result in severe data gaps for any
-        transactions that occurred after the backup was taken.
+        Furthermore, large-scale migrations introduce the terror of the <strong>Table Lock</strong>. In older database
+        engines, certain schema changes force the database to rewrite every single physical row on disk. To prevent
+        concurrent writes from corrupting the table during this massive operation, the database acquires an exclusive
+        lock on the entire table. While this lock is active, every incoming transaction attempting to read from or write
+        to that table is blocked. Application threads pile up, connection pools saturate, load balancer timeouts trigger,
+        and the entire backend crashes in a cascade of server timeouts.
       </p>
 
       <p>
-        Furthermore, large-scale migrations introduce the terror of the <strong>Table Lock</strong>.
-      </p>
-
-      <p>
-        Consider a migration executed on a table containing 50 million orders:
-      </p>
-            <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is not the symbol itself but the pressure it describes: how quickly cost grows, how long a queue waits, or how sharply one crowded moment can turn into many delayed moments.</p>
-
-      <p>
-        In older database engines, this command forces the database to rewrite every single physical row on disk to append the
-        default value <span class="concept-token">'pending'</span>. To prevent concurrent writes from corrupting the table during this massive write operation, the
-        database acquires an <span class="concept-token">ACCESS EXCLUSIVE</span> lock on the entire table.
-      </p>
-
-      <p>
-        While this lock is active, every incoming transaction attempting to read from or write to the <span class="concept-token">orders</span> table
-        is blocked. The application threads pile up, connection pools saturate, load balancer timeouts are triggered, and the
-        entire backend platform crashes in a cascade of server timeouts.
-      </p>
-
-      <p>
-        To perform schema changes in production safely, database administrators employ <strong>Zero-Downtime Migration Patterns</strong>:
+        To perform schema changes in production safely, database administrators employ <strong>Zero-Downtime Migration
+        Patterns</strong>:
       </p>
 
       <ol>
-        <li><strong>Metadata-Only Additions</strong>: Modern engines (like PostgreSQL 11+) allow adding a column with a default value
-          instantly as a metadata-only change, completely avoiding page-rewriting and table locks. The default value is only populated in memory when the row is read.</li>
-        <li><strong>Concurrent Indexing</strong>: Building a standard index locks writes on the target table. In production, developers
-          use the <span class="concept-token">CONCURRENTLY</span> keyword:
-                <p>The syntax can be set aside without losing the point. In databases, the same idea is easier to see through Todar Mal's revenue survey preserving land, crop, obligation, and revision: state becomes useful only when it can be found, trusted, and corrected without destroying the ledger.</p>
-      <p>The useful beginner version is the role being played: which actor asks, which actor verifies, which actor stores memory, and which actor answers.</p>
-
-          This builds the index in the background using two sequential, non-blocking sweeps, avoiding table locks at the cost of a longer execution duration.</li>
-        <li><strong>The Expand-Contract Pattern</strong>: Instead of renaming a column in-place (which breaks running code), schema changes
-          are executed in three distinct deployments:
+        <li><strong>Metadata-Only Additions</strong>: Modern engines (PostgreSQL 11+) allow adding a column with a
+          default value instantly as a metadata-only change, completely avoiding page-rewriting and table locks. The
+          default value is only populated in memory when the row is read.</li>
+        <li><strong>Concurrent Indexing</strong>: Building a standard index locks writes on the target table. In
+          production, developers use the <strong>CONCURRENTLY</strong> keyword, which builds the index in the background
+          using two sequential, non-blocking sweeps, avoiding table locks at the cost of a longer execution duration.</li>
+        <li><strong>The Expand-Contract Pattern</strong>: Instead of renaming a column in-place (which breaks running
+          code), schema changes are executed in three distinct deployments:
           <ul>
-            <li><strong>Expand</strong>: Create the new column alongside the old one. Configure the application to write to both columns, but read from the old one.</li>
-            <li><strong>Migrate</strong>: Run a background batch script to backfill data from the old column to the new column slowly in small batches.</li>
-            <li><strong>Contract</strong>: Update the application to read and write exclusively from the new column. Once verified, deploy a migration to drop the old column.</li>
+            <li><strong>Expand</strong>: Create the new column alongside the old one. Configure the application to write
+              to both columns, but read from the old one.</li>
+            <li><strong>Migrate</strong>: Run a background batch script to backfill data from the old column to the new
+              column slowly in small batches.</li>
+            <li><strong>Contract</strong>: Update the application to read and write exclusively from the new column. Once
+              verified, deploy a migration to drop the old column.</li>
           </ul>
         </li>
       </ol>
 
       <p>
-        The Chola dynasty's land grant system (<em>Tirumukham</em> copper-plate inscriptions, c. 10th&ndash;12th century CE) provides
-        a historical analogue. When land boundaries changed due to river course alterations or new settlements, the existing
-        copper-plate grant was never erased. Instead, a new supplementary inscription was issued, referencing the original by
-        its unique registration number, describing the boundary modification, and bearing the seals of both the original
-        witnesses and the new ones. The old plate remained in the temple archive as the canonical record. This is structurally
-        identical to the expand-contract pattern: the old schema (copper plate) coexists with the new schema until all
-        dependent parties (villages, tax collectors) have been updated, at which point the old reference is formally retired.
+        The Chola dynasty's land grant system (<em>Tirumukham</em> copper-plate inscriptions, c. 10th&ndash;12th century
+        CE) provides a historical analogue. When land boundaries changed due to river course alterations or new
+        settlements, the existing copper-plate grant was never erased. Instead, a new supplementary inscription was
+        issued, referencing the original by its unique registration number, describing the boundary modification, and
+        bearing the seals of both original and new witnesses. The old plate remained in the temple archive as the
+        canonical record. This is structurally identical to the expand-contract pattern: the old schema coexists with
+        the new schema until all dependent parties have been updated, at which point the old reference is formally
+        retired.
       </p>
 
-      <h2>IX. The Mughal Administrative Ledger: A Historical Topology of State Management</h2>
+      <h2>IX. The Mughal Administrative Ledger</h2>
 
       <p>
-        The Mughal Empire (1526&ndash;1857 CE) developed one of history's most sophisticated administrative data management
-        systems under Emperor Akbar and his finance minister Todar Mal. The <em>Ain-i-Akbari</em>, compiled by Abu'l-Fazl,
-        documents a treasury system that bears remarkable structural resemblance to modern RDBMS architecture.
-      </p>
-
-      <p>
-        Todar Mal's revenue system (<em>Zabt</em>) operated on a principle of <strong>measurement-based taxation</strong>: every
-        cultivated plot of land in the empire was physically surveyed, classified by soil quality, and assigned a standardized
-        tax rate. This is analogous to schema definition with constraints&mdash;the "shape" of each data record (land plot) was
-        strictly defined before any transaction (tax collection) could be processed against it.
+        The Mughal Empire (1526&ndash;1857 CE) developed one of history's most sophisticated administrative data
+        management systems under Emperor Akbar and his finance minister Todar Mal. The <em>Ain-i-Akbari</em>, compiled
+        by Abu'l-Fazl, documents a treasury system bearing remarkable structural resemblance to modern RDBMS architecture.
       </p>
 
       <p>
-        The revenue records were maintained at three hierarchical levels: the <em>Pargana</em> (district) office, the
-        <em>Subah</em> (province) office, and the imperial treasury (<em>Khalisa</em>) in Delhi. Each level maintained its own
-        ledger, and periodic reconciliation audits compared the figures across all three tiers. If discrepancies were found,
-        the <em>Waqia-Navis</em> (intelligence reporters) and <em>Sawanih-Nigar</em> (secret correspondents) were dispatched
-        to investigate. This multi-tier ledger reconciliation mirrors the replication and consistency verification protocols
+        Todar Mal's revenue system (<em>Zabt</em>) operated on a principle of <strong>measurement-based taxation</strong>:
+        every cultivated plot was physically surveyed, classified by soil quality, and assigned a standardized tax rate.
+        This is analogous to schema definition with constraints&mdash;the "shape" of each data record was strictly defined
+        before any transaction could be processed against it.
+      </p>
+
+      <p>
+        The revenue records were maintained at three hierarchical levels: the district office, the province office, and
+        the imperial treasury in Delhi. Each level maintained its own ledger, and periodic reconciliation audits compared
+        figures across all three tiers. If discrepancies were found, intelligence reporters were dispatched to
+        investigate. This multi-tier ledger reconciliation mirrors the replication and consistency verification protocols
         in distributed database systems: primary-replica synchronization, read-replica lag monitoring, and cross-region
         consistency checks.
       </p>
 
       <p>
-        Most remarkably, the <em>Arthashastra</em> of Kautilya (c. 300 BCE)&mdash;predating the Mughal system by over eighteen
-        centuries&mdash;had already prescribed an append-only audit journal for all treasury operations. The <em>Akshapataladhyaksha</em>
-        (Superintendent of Accounts) was required to record every income and expenditure entry in chronological order in the
-        <em>Nivi</em> (balance register), the <em>Sthaniya</em> (revenue register), and the <em>Prayoga</em> (disbursement register).
-        No entry could be modified after recording; corrections were made by appending a new compensating entry, exactly like
-        the CLR (Compensating Log Record) mechanism in the ARIES protocol. Kautilya explicitly warned that any official who
-        altered a prior entry rather than appending a correction should be punished with the first level of fine&mdash;a recognition
-        that append-only journaling is not merely an engineering convenience but a foundational requirement for audit integrity.
+        Most remarkably, the <em>Arthashastra</em> of Kautilya (c. 300 BCE)&mdash;predating the Mughal system by eighteen
+        centuries&mdash;had already prescribed an append-only audit journal for all treasury operations. The Superintendent
+        of Accounts was required to record every income and expenditure entry in chronological order across multiple
+        registers. No entry could be modified after recording; corrections were made by appending a new compensating
+        entry, exactly like the compensating log record mechanism in the ARIES protocol. Kautilya explicitly warned that
+        any official who altered a prior entry rather than appending a correction should be punished&mdash;a recognition
+        that append-only journaling is not merely an engineering convenience but a foundational requirement for audit
+        integrity.
       </p>
 
       <h2>X. Comparative Epistemology of Storage</h2>
@@ -1332,7 +917,7 @@
             </tr>
             <tr>
               <td><strong>Scale Vector</strong></td>
-              <td>Vertical scaling (Scale-Up hardware partitions)</td>
+              <td>Vertical scaling (Scale-Up hardware)</td>
               <td>Horizontal scaling (Scale-Out shard partitions)</td>
               <td>Horizontal scale-out with native ACID integrity</td>
             </tr>
@@ -1344,7 +929,7 @@
             </tr>
             <tr>
               <td><strong>Index Structure</strong></td>
-              <td>B+ Tree (read-optimized, \(O(\log_b N)\) lookups)</td>
+              <td>B+ Tree (read-optimized)</td>
               <td>B-Tree + optional LSM for WiredTiger engine</td>
               <td>LSM-Tree via RocksDB (write-optimized, compaction-based)</td>
             </tr>
@@ -1361,40 +946,30 @@
       <h2>XI. Connection Pooling and the Resource Ceiling</h2>
 
       <p>
-        Every database connection consumes real operating system resources: a dedicated backend process (in PostgreSQL, each connection
-        spawns a separate OS process), memory for query parsing and execution state, file descriptors, and kernel scheduling overhead.
-        PostgreSQL's default <span class="concept-token">maxconnections</span> is typically set to 100. If an application server spawns 50 worker processes,
-        each opening 3 connections, the pool is saturated at 150 connections&mdash;exceeding the limit. Additional connection requests
-        are rejected with a <span class="concept-token">FATAL: too many connections</span> error, causing cascading application failures.
+        Every database connection consumes real operating system resources: a dedicated backend process (in PostgreSQL,
+        each connection spawns a separate OS process), memory for query parsing and execution state, file descriptors,
+        and kernel scheduling overhead. PostgreSQL's default connection limit is typically 100. If an application server
+        spawns 50 worker processes, each opening 3 connections, the pool is saturated at 150&mdash;exceeding the limit.
+        Additional connection requests are rejected, causing cascading application failures.
       </p>
 
       <p>
-        The solution is a <strong>connection pooler</strong> such as <strong>PgBouncer</strong> or <strong>pgpool-II</strong>. The
-        pooler sits between the application servers and the database, maintaining a fixed pool of persistent connections.
-        When an application worker needs a database connection, it borrows one from the pool, executes the query, and returns
-        it. PgBouncer in <em>transaction mode</em> multiplexes thousands of application-level connections onto a much smaller
-        number of real database connections (e.g., mapping 500 application connections to 20 real PostgreSQL connections).
+        The solution is a <strong>connection pooler</strong> such as <strong>PgBouncer</strong> or
+        <strong>pgpool-II</strong>. The pooler sits between application servers and the database, maintaining a fixed
+        pool of persistent connections. When an application worker needs a database connection, it borrows one from the
+        pool, executes the query, and returns it. PgBouncer in <em>transaction mode</em> multiplexes thousands of
+        application-level connections onto a much smaller number of real database connections (e.g., mapping 500
+        application connections to 20 real PostgreSQL connections).
       </p>
 
       <p>
-        The mathematical relationship governing pool sizing follows Little's Law from queueing theory:
-      </p>
-      <div class="math-block">\[
-        L = \lambda \cdot W
-      \]</div>
-      <p>
-        Where \(L\) is the average number of connections in use (pool utilization), \(\lambda\) is the average query arrival
-        rate (queries per second), and \(W\) is the average query execution time (seconds). If the application sends 200
-        queries per second with an average execution time of 50 milliseconds:
-      </p>
-      <div class="math-block">\[
-        L = 200 \times 0.05 = 10
-      \]</div>
-      <p>
-        A pool of 10 connections suffices for steady-state operation. Adding a safety margin of 2&times; to 3&times; for
-        burst traffic, a pool of 20&ndash;30 connections handles this workload comfortably. Over-provisioning the pool
-        (e.g., 200 connections) is counterproductive: the database engine wastes CPU cycles context-switching between too
-        many concurrent processes, a phenomenon known as <strong>connection thrashing</strong>.
+        Pool sizing follows a simple principle from queueing theory: the average number of connections in use equals
+        the average query arrival rate multiplied by the average query execution time. If an application sends 200
+        queries per second with an average execution time of 50 milliseconds, the average pool utilization is 10
+        connections. Adding a safety margin of 2&times; to 3&times; for burst traffic, a pool of 20&ndash;30 connections
+        handles this workload comfortably. Over-provisioning the pool (e.g., 200 connections) is counterproductive: the
+        database engine wastes CPU cycles context-switching between too many concurrent processes, a phenomenon known as
+        <strong>connection thrashing</strong>.
       </p>
 
       <h2>XII. Key Takeaways</h2>
@@ -1409,13 +984,13 @@
           &bull; <strong>ACID is a Covenant</strong>: For financial ledgers, transactional user registrations, or any system with rigid constraints,
               never compromise on ACID guarantees. Rely on relational PostgreSQL or NewSQL systems.<br/>
           &bull; <strong>WAL is the Foundation</strong>: Durability is achieved through append-only sequential writing, minimizing disk seek times.
-              The LSN ordering invariant ensures crash recovery correctness.<br/>
-          &bull; <strong>Know the Index</strong>: B+ Trees excel at balanced range searches and point lookups (\(O(\log_b N)\)). LSM-Trees maximize
-              write throughput by trading read amplification. Neither is universally superior; the choice depends on the read/write ratio.<br/>
+              The ordering invariant ensures crash recovery correctness.<br/>
+          &bull; <strong>Know the Index</strong>: B+ Trees excel at balanced range searches and point lookups. LSM-Trees maximize write throughput
+              by trading read amplification. Neither is universally superior; the choice depends on the read/write ratio.<br/>
           &bull; <strong>Parameterize Every Query</strong>: Never concatenate raw strings in SQL. Establish a structural boundary between code and data.<br/>
-          &bull; <strong>Relational Algebra is the Optimizer's Language</strong>: Understanding \(\sigma\), \(\pi\), and \(\bowtie\) reveals why the
+          &bull; <strong>Relational Algebra is the Optimizer's Language</strong>: Understanding selection, projection, and join reveals why the
               query planner makes certain access path decisions.<br/>
-          &bull; <strong>Pool Connections Wisely</strong>: Use Little's Law to right-size connection pools. Over-provisioning causes context-switch
+          &bull; <strong>Pool Connections Wisely</strong>: Right-size connection pools based on query arrival rate and execution time. Over-provisioning causes context-switch
               overhead; under-provisioning causes request starvation.
         </p>
       </div>
@@ -1423,13 +998,12 @@
       <hr style="border: none; border-top: 1px dashed var(--color-navy); margin: 60px 0 40px 0;">
 
       <!-- Footnotes Section -->
-      <div class="footnotes"
-        style="font-size: 0.9rem; opacity: 0.85; line-height: 1.6; font-family: var(--font-serif-body);">
+      <div class="footnotes" style="font-size: 0.9rem; opacity: 0.85; line-height: 1.6; font-family: var(--font-serif-body);">
         <h3 style="margin-top: 0; border-bottom: none; font-size: 1.25rem;">Footnotes</h3>
         <ol style="padding-left: 20px;">
           <li id="fn1" style="margin-bottom: 12px;">
             Codd, E. F. (1970). "A Relational Model of Data for Large Shared Data Banks." <em>Communications of the ACM</em>, 13(6), 377-387.
-            This paper laid the foundation for the entirety of modern database theory, establishing the concept of physical data independence.
+            This paper laid the foundation for modern database theory, establishing the concept of physical data independence.
           </li>
           <li id="fn2" style="margin-bottom: 12px;">
             Bayer, R., &amp; McCreight, E. (1972). "Organization and Maintenance of Large Ordered Indexes." <em>Acta Informatica</em>, 1(3), 173-189.
@@ -1439,7 +1013,7 @@
             The ARIES Recovery Protocol was designed by C. Mohan and his team at IBM Almaden Research Center in 1992. It remains the gold standard recovery architecture for modern transactional databases, optimizing dirty page tracking and write-ahead log replay.
           </li>
           <li id="fn4" style="margin-bottom: 12px;">
-            Kautilya. <em>Arthashastra</em> (c. 300 BCE). Book II, Chapter 6&ndash;7, describes the duties of the Sannidhata (Treasurer) and the Akshapataladhyaksha (Superintendent of Accounts), including append-only journaling requirements for treasury records.
+            Kautilya. <em>Arthashastra</em> (c. 300 BCE). Book II, Chapter 6&ndash;7, describes the duties of the Treasurer and the Superintendent of Accounts, including append-only journaling requirements for treasury records.
           </li>
           <li id="fn5" style="margin-bottom: 12px;">
             Abu'l-Fazl. <em>Ain-i-Akbari</em> (c. 1595 CE). Volume II documents Todar Mal's Zabt revenue measurement system and the hierarchical reconciliation protocols used across the Mughal Empire's administrative tiers.
